@@ -42,3 +42,11 @@ Fichas dinâmicas, fog of war, camadas, biblioteca de recursos, arquitetura isol
 **Limite atual:** o fog of war ainda é uma implementação preliminar de retângulos. O mapa de fundo continua sendo um recurso acessível via URL sem autorização por sala; portanto a névoa é uma ferramenta de apresentação, **não uma proteção segura de segredos do mapa**. Não publique campanhas com conteúdo confidencial. Ainda faltam camadas e isolamento completo de assets.
 
 Testes: execute `npm test` (inclui `tests/scenes.test.js`).
+
+## Acesso aos mapas (atualização de segurança)
+
+Arquivos em `/uploads/` agora exigem os parâmetros de sala e credencial de participante. O servidor confirma que o arquivo pertence a alguma cena daquela campanha; requisições anônimas e de outras salas são recusadas. Não compartilhe URLs contendo chaves de sessão.
+
+**Limitação:** qualquer participante autorizado ainda pode obter a imagem original do mapa, inclusive áreas cobertas pela névoa. A névoa atual **não serve como proteção contra jogadores que inspecionem as requisições**. Para ocultação real dos mapas, precisamos renderizar o recorte seguro no servidor ou servir tiles autorizados e mascarados.
+
+A suíte inclui `tests/assets.test.js` com testes de acesso anônimo, credencial inválida, isolamento entre salas e acesso permitido.
