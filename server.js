@@ -24,6 +24,21 @@ case 'roll':r.log.push({type:'roll',name:p.name,...roll(q.expr),at:Date.now(),se
 case 'token:add':master(p);if(r.tokens.length>=150)throw err(400,'Limite de tokens');r.tokens.push({id:id(8),x:number(q.x,200),y:number(q.y,200),name:clean(q.name,30)||'Token',color:/^#[a-f0-9]{6}$/i.test(q.color)?q.color:'#dd8b60'});break;
 case 'token:move': {const t=r.tokens.find(t=>t.id===q.id);if(!t)throw err(404,'Token não encontrado');if(!p.gm&&!r.settings.playersMove)throw err(403,'Movimento bloqueado');t.x=number(q.x);t.y=number(q.y);break;}
 case 'token:remove':master(p);r.tokens=r.tokens.filter(t=>t.id!==q.id);break;
+case 'token:move-many':{
+ if(!p.gm&&!r.settings.playersMove)throw err(403,'Movimento bloqueado');
+ if(!Array.isArray(q.moves)||q.moves.length<1||q.moves.length>150)throw err(400,'Movimentação inválida');
+ const seen=new Set(),updates=[];
+ for(const m of q.moves){if(typeof m.id!=='string'||seen.has(m.id))throw err(400,'Token duplicado');seen.add(m.id);
+ const token=r.tokens.find(t=>t.id===m.id);if(!token)throw err(404,'Token não encontrado');
+ if(!Number.isFinite(m.x)||!Number.isFinite(m.y))throw err(400,'Coordenadas inválidas');
+ updates.push({token,x:number(m.x),y:number(m.y)});}
+ for(const u of updates){u.token.x=u.x;u.token.y=u.y;}break;}
+case 'drawing:add':{
+ master(p);r.drawings??=[];if(r.drawings.length>=300)throw err(400,'Limite de desenhos');
+ if(!Array.isArray(q.points)||q.points.length<2||q.points.length>300)throw err(400,'Traçado inválido');
+ if(!q.points.every(pt=>Array.isArray(pt)&&pt.length===2&&pt.every(n=>typeof n==='number'&&Number.isFinite(n)&&Math.abs(n)<=100000)))throw err(400,'Coordenadas inválidas');
+ r.drawings.push({id:id(8),points:q.points,color:/^#[a-f0-9]{6}$/i.test(q.color)?q.color:'#eedb9b',width:Math.max(1,Math.min(16,number(q.width,4)))});break;}
+case 'drawing:clear':master(p);r.drawings=[];break;
 case 'scene':master(p);r.scene.title=clean(q.title,80);r.scene.grid=!!q.grid;r.scene.gridSize=Math.max(25,Math.min(150,number(q.gridSize,64)));r.settings.playersMove=!!q.playersMove;break;
 case 'notes':master(p);r.notes=clean(q.text,12000);break;
 case 'fog':master(p);r.scene.fog=!!q.enabled;break;
@@ -31,7 +46,7 @@ default:throw err(400,'Ação desconhecida');
 }r.log=r.log.slice(-250);save(r);sync(r);}
 const server=http.createServer(async(req,res)=>{
 try{const url=new URL(req.url,'http://localhost'),p=url.pathname,method=req.method;
-if(method==='POST'&&p==='/api/rooms'){const b=await body(req,10000),code=id(3).toUpperCase(),key=id(24),r={code,title:clean(b.title,80)||'Campanha sem nome',scene:{title:'Primeira cena',grid:true,gridSize:64,background:'',fog:false},settings:{playersMove:true},notes:'',tokens:[],log:[],players:[{id:id(7),key,name:clean(b.name,40)||'Mestre',gm:true}]};memory.set(code,r);save(r);return send(res,201,{room:view(r,r.players[0]),key});}
+if(method==='POST'&&p==='/api/rooms'){const b=await body(req,10000),code=id(3).toUpperCase(),key=id(24),r={code,title:clean(b.title,80)||'Campanha sem nome',scene:{title:'Primeira cena',grid:true,gridSize:64,background:'',fog:false},settings:{playersMove:true},notes:'',tokens:[],drawings:[],log:[],players:[{id:id(7),key,name:clean(b.name,40)||'Mestre',gm:true}]};memory.set(code,r);save(r);return send(res,201,{room:view(r,r.players[0]),key});}
 const m=/^\/api\/rooms\/([A-F0-9]{6})(?:\/(join|action|events|upload))?$/.exec(p);
 if(m){const r=get(m[1]),op=m[2]||'';
 if(method==='POST'&&op==='join'){const b=await body(req,1000);if(r.players.length>=12)throw err(400,'Sala cheia');const person={id:id(7),key:id(24),name:clean(b.name,40)||'Jogador',gm:false};r.players.push(person);save(r);sync(r);return send(res,200,{room:view(r,person),key:person.key});}
