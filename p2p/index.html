@@ -9,20 +9,76 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
 const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
 const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1};
-const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb;
+const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1;
 function announce(t){$('notice').textContent=t;$('status').textContent=t}
 function identity(){let id=localStorage.getItem('hl-identity');if(!id){id=uid();localStorage.setItem('hl-identity',id)}return id}
 function isValidState(s){return s&&s.schema===1&&Array.isArray(s.tokens)&&Array.isArray(s.characters)&&Array.isArray(s.chat)&&typeof s.map==='string'&&s.map.length<9000000}
 async function openDb(){return new Promise((resolve,reject)=>{let r=indexedDB.open('highlords-p2p',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-async function saveLocal(){if(!hostMode)return;try{saveDb ||= await openDb();await new Promise((resolve,reject)=>{const tx=saveDb.transaction('saves','readwrite');tx.objectStore('saves').put(JSON.parse(JSON.stringify(state)),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});$('saveStatus').textContent='✓ Autosave local confirmado · '+new Date().toLocaleTimeString()}catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}}
+async function saveLocal(){if(!hostMode||lastSavedRevision===revision)return;const savingRevision=revision;try{saveDb ||= await openDb();await new Promise((resolve,reject)=>{const tx=saveDb.transaction('saves','readwrite');tx.objectStore('saves').put(JSON.parse(JSON.stringify(state)),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});lastSavedRevision=savingRevision;$('saveStatus').textContent='✓ Autosave local confirmado · '+new Date().toLocaleTimeString()}catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}}
 function scheduleSave(){if(!hostMode)return;$('saveStatus').textContent='Alterações pendentes de salvamento';clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1500)}
 function changed(){state.updated=now();revision++;scheduleSave();render();for(const c of contacts.values())if(c.open)c.send({kind:'state',state,revision})}
 function update(fn){if(!hostMode)return;fn();changed()}
 function saveFile(){if(!hostMode)return;const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='campanha-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
 async function restore(file){if(!file)return;try{if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Formato inválido');Object.assign(state,obj);$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
-async function startHost(){if(!window.Peer)return announce('PeerJS indisponível, verifique conexão');hostMode=true;nickname=$('hostName').value.trim()||'Mestre';myId=identity();roomId='hl-'+uid();peer=new Peer(roomId);peer.on('open',()=>{showGame();announce('Mesa pronta · aguardando jogadores');changed()});peer.on('connection',c=>{if(contacts.size>=8){c.close();return}attach(c)});peer.on('error',e=>announce('Falha P2P: '+e.message));}
-function startGuest(){if(!window.Peer)return announce('PeerJS indisponível');roomId=$('roomCode').value.trim();nickname=$('guestName').value.trim()||'Jogador';if(!/^hl-[a-f0-9-]{36}$/.test(roomId))return announce('Código inválido');myId=identity();peer=new Peer();peer.on('open',()=>{hostLink=peer.connect(roomId,{reliable:true});attach(hostLink,true)});peer.on('error',e=>announce('Conexão falhou: '+e.message))}
-function attach(c,guest=false){c.on('open',()=>{if(guest){c.send({kind:'hello',identity:myId,name:nickname});showGame();announce('Conectado ao mestre')}else announce('Jogador conectado')});c.on('data',m=>{if(!m||typeof m!=='object')return;if(hostMode){if(m.kind==='hello'){c.playerId=String(m.identity||'').slice(0,64);c.playerName=String(m.name||'Jogador').slice(0,36);contacts.set(c.peer,c);c.send({kind:'state',state,revision});render()}else if(m.kind==='action'&&c.playerId)apply(m.action,m.payload,c.playerId,c.playerName)}else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&m.revision>=revision){revision=m.revision;Object.assign(state,m.state);render()}});c.on('close',()=>{contacts.delete(c.peer);announce('Jogador desconectado');render()});c.on('error',e=>announce('Erro de conexão: '+e.message))}
+async function configurePeer(){
+ peer.on('disconnected',()=>{announce('Sinalização offline · reconectando…');if(!peer.destroyed)try{peer.reconnect()}catch{}});
+ peer.on('error',e=>{announce('Erro de conexão: '+e.message);if(!hostMode)scheduleReconnect()});
+}
+function startHost(){
+ if(!window.Peer)return announce('PeerJS indisponível, verifique conexão');
+ if(peer&&!peer.destroyed)return;
+ hostMode=true;nickname=$('hostName').value.trim()||'Mestre';myId=identity();roomId='hl-'+uid();
+ peer=new Peer(roomId);configurePeer();
+ peer.on('open',()=>{showGame();announce('Mesa pronta · aguardando jogadores');changed()});
+ peer.on('connection',c=>{if(contacts.size>=8){c.close();return}attach(c)});
+}
+function connectGuest(){
+ if(!peer||peer.destroyed||peer.disconnected||!peer.open)return scheduleReconnect();
+ if(hostLink?.open)return;
+ hostLink=peer.connect(roomId,{reliable:true});
+ attach(hostLink,true);
+}
+function scheduleReconnect(){
+ if(hostMode||manualClose||retryTimer||hostLink?.open)return;
+ const delay=Math.min(15000,750*Math.pow(1.7,Math.min(retryCount++,6)));
+ announce('Conexão perdida · tentando novamente…');
+ retryTimer=setTimeout(()=>{retryTimer=null;if(peer?.disconnected&&!peer.destroyed){try{peer.reconnect()}catch{}}
+ if(peer?.open)connectGuest();else scheduleReconnect()},delay);
+}
+function startGuest(){
+ if(!window.Peer)return announce('PeerJS indisponível');
+ roomId=$('roomCode').value.trim();nickname=$('guestName').value.trim()||'Jogador';
+ if(!/^hl-[a-f0-9-]{36}$/.test(roomId))return announce('Código inválido');
+ if(peer&&!peer.destroyed)return;
+ myId=identity();hostMode=false;manualClose=false;retryCount=0;
+ peer=new Peer();configurePeer();
+ peer.on('open',()=>{connectGuest()});
+}
+function attach(c,guest=false){
+ c.on('open',()=>{
+  if(guest){retryCount=0;clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});showGame();announce('Conectado ao mestre')}
+  else announce('Jogador conectado');
+ });
+ c.on('data',m=>{
+  if(!m||typeof m!=='object'||Array.isArray(m))return;
+  if(hostMode){
+   if(m.kind==='hello'){
+    if(!/^[0-9a-f-]{36}$/.test(String(m.identity||'')))return c.close();
+    c.playerId=m.identity;c.playerName=String(m.name||'Jogador').slice(0,36);
+    for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
+    contacts.set(c.peer,c);c.send({kind:'state',state,revision});render();
+   }else if(m.kind==='action'&&c.playerId)apply(m.action,m.payload,c.playerId,c.playerName);
+  }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&m.revision>=revision){
+   revision=m.revision;Object.assign(state,m.state);render();
+  }
+ });
+ c.on('close',()=>{
+  if(contacts.get(c.peer)===c)contacts.delete(c.peer);
+  if(guest&&hostLink===c){hostLink=null;scheduleReconnect()}
+  else {announce('Jogador desconectado');render()}
+ });
+ c.on('error',e=>{announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;scheduleReconnect()}});
+}
 function dispatch(action,payload){if(hostMode)apply(action,payload,myId,nickname);else if(hostLink?.open)hostLink.send({kind:'action',action,payload});else announce('Sem conexão com o mestre')}
 function apply(action,p,id,name){if(!p||typeof p!=='object')return;const owner=state.characters.find(x=>x.id===p.id);switch(action){
 case 'chat':{const text=String(p.text||'').slice(0,600).trim();if(!text)return;return update(()=>{state.chat.push({name,text});state.chat=state.chat.slice(-100)})}
@@ -37,7 +93,7 @@ case 'map':{if(id!==myId||typeof p.data!=='string'||p.data.length>8500000||!/^da
 function showGame(){$('home').style.display='none';$('game').style.display='block';$('masterTools').style.display=hostMode?'block':'none';$('export').style.display=hostMode?'block':'none';$('roomLabel').textContent='Sala '+roomId;render()}
 function render(){if($('game').style.display==='none')return;$('map').src=state.map||'';const pieces=$('pieces');pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.onpointerdown=e=>{e.stopPropagation();drag={token:t.id,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
 const h=$('history');h.replaceChildren();for(let line of state.chat){const p=document.createElement('p');p.textContent=line.name+': '+line.text;h.append(p)}h.scrollTop=h.scrollHeight;
-const players=[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))];$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
+const players=hostMode?[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))]:[{id:myId,name:nickname}];$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
 const ch=$('characters');ch.replaceChildren();for(const c of state.characters){let section=document.createElement('div');section.className='char',strong=document.createElement('strong');strong.textContent=c.name;section.append(strong);if(hostMode){let selector=document.createElement('select');let empty=document.createElement('option');empty.value='';empty.textContent='Sem dono';selector.append(empty);for(let x of players){let op=document.createElement('option');op.value=x.id;op.textContent=x.name;selector.append(op)}selector.value=c.owner;selector.onchange=()=>dispatch('character:assign',{id:c.id,playerId:selector.value});section.append(selector)}
 let field=document.createElement('textarea');field.value=c.text;field.disabled=!hostMode&&c.owner!==myId;section.append(field);if(!field.disabled){let b=document.createElement('button');b.textContent='Salvar ficha';b.onclick=()=>dispatch('character:update',{id:c.id,text:field.value});section.append(b)}ch.append(section)}
 }
@@ -46,6 +102,6 @@ $('upload').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>600000
 const board=$('board');function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}board.onpointerdown=e=>{drag={pan:true,start:[e.clientX,e.clientY],x:offset.x,y:offset.y}};document.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.start[0],dy=e.clientY-drag.start[1];if(drag.pan){offset.x=drag.x+dx;offset.y=drag.y+dy;transform()}else{const piece=Array.from($('pieces').children).find(x=>state.tokens.find(t=>t.id===drag.token)?.name===x.textContent);if(piece){piece.style.left=drag.x+dx/zoom+'px';piece.style.top=drag.y+dy/zoom+'px'}}};document.onpointerup=e=>{if(drag&&!drag.pan)dispatch('move',{id:drag.token,x:drag.x+(e.clientX-drag.start[0])/zoom,y:drag.y+(e.clientY-drag.start[1])/zoom});drag=null};board.onwheel=e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY<0?1.1:.9)));transform()};transform();
 $('roomCode').value=new URLSearchParams(location.search).get('room')||'';
 openDb().then(db=>{saveDb=db;const tx=db.transaction('saves');const req=tx.objectStore('saves').get('latest');req.onsuccess=()=>{if(req.result&&confirm('Há um autosave local. Carregar esta campanha?')){Object.assign(state,req.result);$('notice').textContent='Autosave restaurado. Crie a mesa.'}}}).catch(()=>{});
-setInterval(()=>{if(hostMode&&state.updated)saveLocal()},30000);
-window.addEventListener('beforeunload',e=>{if(hostMode){e.preventDefault();e.returnValue=''}});
+setInterval(()=>{if(hostMode&&revision!==lastSavedRevision)saveLocal()},30000);
+window.addEventListener('beforeunload',e=>{if(hostMode&&revision!==lastSavedRevision){e.preventDefault();e.returnValue=''}});
 </script></body></html>
