@@ -50,3 +50,15 @@ Arquivos em `/uploads/` agora exigem os parâmetros de sala e credencial de part
 **Limitação:** qualquer participante autorizado ainda pode obter a imagem original do mapa, inclusive áreas cobertas pela névoa. A névoa atual **não serve como proteção contra jogadores que inspecionem as requisições**. Para ocultação real dos mapas, precisamos renderizar o recorte seguro no servidor ou servir tiles autorizados e mascarados.
 
 A suíte inclui `tests/assets.test.js` com testes de acesso anônimo, credencial inválida, isolamento entre salas e acesso permitido.
+
+## Fichas vinculadas sem contas
+
+- O jogador gera uma identidade aleatória de 256 bits no próprio navegador, guardada localmente. A identidade não é seu apelido.
+- Ao entrar na mesa, o servidor registra somente o SHA-256 da identidade na campanha; o mestre atribui uma ficha à pessoa conectada.
+- Ao reencontrar a mesma sala usando o mesmo navegador, o jogador pode recuperar sua ficha automaticamente (nova credencial de sessão).
+- O mestre pode desvincular ou transferir fichas no painel de personagens.
+- Os campos da ficha são livres e editáveis pelo mestre ou pelo jogador vinculado; o servidor valida as permissões.
+- **Sem login não significa recuperação garantida:** modo anônimo, limpeza do armazenamento ou outro navegador geram outra identidade. Nesse caso, o mestre precisa reatribuir a ficha.
+- **Importante:** a recuperação entre sessões importadas no futuro dependerá do formato de arquivo `.highlords` incluir os vínculos (somente hashes, nunca os segredos locais).
+
+Ainda usamos o backend Node.js e persistência JSON: o modelo P2P/WebRTC, backup portátil e códigos de recuperação entre dispositivos **não estão implementados**.
