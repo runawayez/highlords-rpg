@@ -64,7 +64,17 @@ if(method==='GET'&&op==='events'){const person=session(r,url.searchParams.get('k
 if(method==='POST'&&op==='action'){const b=await body(req,50000),person=session(r,b.key);action(r,person,b);return send(res,200,{ok:true});}
 if(method==='POST'&&op==='upload'){const b=await body(req),person=session(r,b.key);master(person);const match=/^data:image\/(png|jpeg|webp);base64,([a-zA-Z0-9+/=]+)$/.exec(b.data||'');if(!match)throw err(400,'Imagem inválida');const buf=Buffer.from(match[2],'base64');if(buf.length>4000000)throw err(413,'Máximo 4MB');const png=buf.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')),jpg=buf[0]===255&&buf[1]===216&&buf[2]===255,webp=buf.toString('ascii',0,4)==='RIFF'&&buf.toString('ascii',8,12)==='WEBP';if(!(png||jpg||webp))throw err(400,'Imagem inválida');const filename=id(12)+'.'+(png?'png':jpg?'jpg':'webp');fs.writeFileSync(path.join(UPLOADS,filename),buf);r.scene.background='/uploads/'+filename;storeCurrent(r);save(r);sync(r);return send(res,200,{ok:true});}
 }
-if(method==='GET'&&/^\/uploads\/[a-f0-9]{24}\.(png|jpg|webp)$/.test(p)){const f=path.join(UPLOADS,path.basename(p));if(!fs.existsSync(f))throw err(404,'Imagem não encontrada');res.writeHead(200,{'Content-Type':f.endsWith('.png')?'image/png':f.endsWith('.jpg')?'image/jpeg':'image/webp','X-Content-Type-Options':'nosniff'});return fs.createReadStream(f).pipe(res);}
+if(method==='GET'&&/^\/uploads\/[a-f0-9]{24}\.(png|jpg|webp)$/.test(p)){
+ const roomCode=url.searchParams.get('room'),room=get(roomCode),person=session(room,url.searchParams.get('key'));
+ const asset=path.basename(p),location='/uploads/'+asset;
+ ensureScenes(room);
+ const available=room.scenes.some(scene=>scene.scene.background===location);
+ if(!available)throw err(404,'Imagem não pertence à campanha');
+ const f=path.join(UPLOADS,asset);
+ if(!fs.existsSync(f))throw err(404,'Imagem não encontrada');
+ res.writeHead(200,{'Content-Type':f.endsWith('.png')?'image/png':f.endsWith('.jpg')?'image/jpeg':'image/webp','X-Content-Type-Options':'nosniff','Cache-Control':'private, no-store','Referrer-Policy':'no-referrer'});
+ return fs.createReadStream(f).pipe(res);
+}
 if(method==='GET'&&(p==='/'||p==='/index.html')){res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-cache'});return fs.createReadStream(path.join(__dirname,'public','index.html')).pipe(res);}
 throw err(404,'Rota não encontrada');
 }catch(e){if(!res.headersSent)send(res,e.status||500,{error:e.status?e.message:'Erro interno'});else res.end();}
