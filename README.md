@@ -21,5 +21,13 @@ Abra http://localhost:3000. Crie a sala, compartilhe seu código e jogue. Em red
 ## Limitações importantes
 **Protótipo para ambiente confiável, não para implantação pública.** Não há login seguro, rate limiting, gerenciamento avançado de uploads, nem proteção de acesso suficiente para expor o servidor à Internet. O mestre deve manter o servidor ligado. Armazene backups da pasta `data/`.
 
+## Testes
+
+Execute `npm test`. A suíte inclui verificações de dados e cenários HTTP com mestre/jogador, garantindo autorização do diário, isolamento de rolagens secretas, atualização de cena e identificação pelo servidor.
+
+## Segurança
+
+A interface não determina mais quem é mestre: o servidor inclui `self.gm` na visualização autenticada. Anotações do mestre não são enviadas a jogadores. A ocultação de cena nesta versão é global (não é fog of war com áreas reveláveis).
+
 ## Roadmap
 Fichas dinâmicas, fog of war, camadas, biblioteca de recursos, arquitetura isolada de extensões e autenticação adequada.
