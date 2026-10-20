@@ -31,3 +31,14 @@ A interface não determina mais quem é mestre: o servidor inclui `self.gm` na v
 
 ## Roadmap
 Fichas dinâmicas, fog of war, camadas, biblioteca de recursos, arquitetura isolada de extensões e autenticação adequada.
+
+## Cenas e revelação de névoa
+
+- O mestre cria, alterna e exclui cenas pela barra lateral. Cada cena guarda mapa, grade, tokens, desenhos e áreas reveladas separadamente.
+- Marque **Escurecer cena** e aplique; depois selecione **Revelar área** e arraste um retângulo sobre o mapa.
+- **Repor névoa** remove todas as áreas reveladas da cena ativa.
+- Tokens fora das regiões reveladas não são enviados ao jogador na resposta de estado.
+
+**Limite atual:** o fog of war ainda é uma implementação preliminar de retângulos. O mapa de fundo continua sendo um recurso acessível via URL sem autorização por sala; portanto a névoa é uma ferramenta de apresentação, **não uma proteção segura de segredos do mapa**. Não publique campanhas com conteúdo confidencial. Ainda faltam camadas e isolamento completo de assets.
+
+Testes: execute `npm test` (inclui `tests/scenes.test.js`).
