@@ -11,7 +11,7 @@ const file=code=>path.join(ROOMS,code+'.json');
 function get(code){if(!/^[A-F0-9]{6}$/.test(code))throw err(400,'Código inválido');if(memory.has(code))return memory.get(code);if(!fs.existsSync(file(code)))throw err(404,'Sala não encontrada');const r=JSON.parse(fs.readFileSync(file(code)));memory.set(code,r);return r;}
 function save(r){r.updated=Date.now();const temp=file(r.code)+'.tmp';fs.writeFileSync(temp,JSON.stringify(r));fs.renameSync(temp,file(r.code));}
 function session(r,key){const p=r.players.find(p=>p.key===key);if(!p)throw err(403,'Sessão inválida');return p;}
-function view(r,p){return {...r,players:r.players.map(({key,...person})=>person),log:r.log.filter(x=>!x.secret||p.gm)};}
+function view(r,p){const {notes,...publicRoom}=r;return {...publicRoom,notes:p.gm?notes:undefined,self:{id:p.id,name:p.name,gm:p.gm},players:r.players.map(({key,...person})=>person),log:r.log.filter(x=>!x.secret||p.gm)};}
 function sync(r){for(const sub of clients.get(r.code)||[]){try{sub.res.write('event: state\ndata: '+JSON.stringify(view(r,sub.p))+'\n\n');}catch{}}}
 function master(p){if(!p.gm)throw err(403,'Ação exclusiva do mestre');}
 async function body(req,limit=5600000){let size=0,buf=[];for await(const part of req){size+=part.length;if(size>limit)throw err(413,'Arquivo grande demais');buf.push(part);}try{return JSON.parse(Buffer.concat(buf).toString())}catch{throw err(400,'JSON inválido')}}
@@ -26,11 +26,12 @@ case 'token:move': {const t=r.tokens.find(t=>t.id===q.id);if(!t)throw err(404,'T
 case 'token:remove':master(p);r.tokens=r.tokens.filter(t=>t.id!==q.id);break;
 case 'scene':master(p);r.scene.title=clean(q.title,80);r.scene.grid=!!q.grid;r.scene.gridSize=Math.max(25,Math.min(150,number(q.gridSize,64)));r.settings.playersMove=!!q.playersMove;break;
 case 'notes':master(p);r.notes=clean(q.text,12000);break;
+case 'fog':master(p);r.scene.fog=!!q.enabled;break;
 default:throw err(400,'Ação desconhecida');
 }r.log=r.log.slice(-250);save(r);sync(r);}
 const server=http.createServer(async(req,res)=>{
 try{const url=new URL(req.url,'http://localhost'),p=url.pathname,method=req.method;
-if(method==='POST'&&p==='/api/rooms'){const b=await body(req,10000),code=id(3).toUpperCase(),key=id(24),r={code,title:clean(b.title,80)||'Campanha sem nome',scene:{title:'Primeira cena',grid:true,gridSize:64,background:''},settings:{playersMove:true},notes:'',tokens:[],log:[],players:[{id:id(7),key,name:clean(b.name,40)||'Mestre',gm:true}]};memory.set(code,r);save(r);return send(res,201,{room:view(r,r.players[0]),key});}
+if(method==='POST'&&p==='/api/rooms'){const b=await body(req,10000),code=id(3).toUpperCase(),key=id(24),r={code,title:clean(b.title,80)||'Campanha sem nome',scene:{title:'Primeira cena',grid:true,gridSize:64,background:'',fog:false},settings:{playersMove:true},notes:'',tokens:[],log:[],players:[{id:id(7),key,name:clean(b.name,40)||'Mestre',gm:true}]};memory.set(code,r);save(r);return send(res,201,{room:view(r,r.players[0]),key});}
 const m=/^\/api\/rooms\/([A-F0-9]{6})(?:\/(join|action|events|upload))?$/.exec(p);
 if(m){const r=get(m[1]),op=m[2]||'';
 if(method==='POST'&&op==='join'){const b=await body(req,1000);if(r.players.length>=12)throw err(400,'Sala cheia');const person={id:id(7),key:id(24),name:clean(b.name,40)||'Jogador',gm:false};r.players.push(person);save(r);sync(r);return send(res,200,{room:view(r,person),key:person.key});}
