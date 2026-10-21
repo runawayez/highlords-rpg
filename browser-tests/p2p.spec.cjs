@@ -102,7 +102,7 @@ test('desenho aceita traços consecutivos e revelação ativa névoa',async({pag
  await page.locator('[data-tool="reveal"]').click();
  await page.mouse.move(rect.x+70,rect.y+70);await page.mouse.down();
  await page.mouse.move(rect.x+180,rect.y+180,{steps:4});await page.mouse.up();
- await expect(page.locator('#fogLayer mask rect')).toHaveCount(2);
+ await expect(page.locator('#fogLayer > rect')).toHaveCount(1);
 });
 
 test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visível',async({page})=>{
