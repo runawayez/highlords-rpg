@@ -62,3 +62,27 @@ test('nome da campanha aparece no save e no download',async({page})=>{
  await page.locator('#gameCampaignName').dispatchEvent('change');
  await expect(page.locator('#gameCampaignName')).toHaveValue('A Torre Vermelha');
 });
+
+test('mestre transfere token, exclui e volta ao menu',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#game')).toBeVisible();
+ await page.locator('#tokenName').fill('Sentinela');await page.locator('#addToken').click();
+ page.once('dialog',d=>d.accept('Outra cena'));await page.locator('#newScene').click();
+ await page.locator('#sceneSelect').selectOption({index:0});
+ const options=page.locator('#tokenManager select');await expect(options).toHaveCount(1);
+ await options.selectOption({index:1});
+ await expect(page.locator('#tokenManager select')).toHaveCount(0);
+ await page.locator('#sceneSelect').selectOption({index:1});
+ await expect(page.locator('#tokenManager select')).toHaveCount(1);
+ page.once('dialog',d=>d.accept());await page.locator('#tokenManager button.danger').click();
+ await expect(page.locator('#tokenManager .token-control')).toHaveCount(0);
+ await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
+});
+test('ferramentas são botões e podem alternar',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#toolButtons button')).toHaveCount(3);
+ await page.locator('[data-tool="draw"]').click();
+ await expect(page.locator('[data-tool="draw"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('[data-tool="pan"]').click();
+ await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
+});
