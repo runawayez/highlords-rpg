@@ -12,6 +12,7 @@ class Peer {
  emit(event,...args){for(const cb of this.handlers[event]||[])cb(...args)}
  connect(){const c={open:true,peer:'hl-mock-room',handlers:{},on(event,cb){(this.handlers[event]||=[]).push(cb)},send(m){if(m.kind==='hello')setTimeout(()=>{for(const cb of this.handlers.data||[])cb({kind:'state',revision:1,state:{schema:1,title:'Teste',updated:Date.now(),activeSceneId:'scene-1',scenes:[{id:'scene-1',title:'Cena teste'}],map:'',tokens:[],drawings:[],fog:{enabled:false,reveals:[]},characters:[],chat:[]}})},15)},close(){this.open=false;for(const cb of this.handlers.close||[])cb()}};setTimeout(()=>{for(const cb of c.handlers.open||[])cb()},10);return c}
  reconnect(){this.disconnected=false;this.emit('open',this.id)}
+ destroy(){this.destroyed=true;this.open=false;this.emit('close')}
 }
 window.Peer=Peer;`}))}
 test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/ALPHA FECHADA.*v0\.2\.0/)});
@@ -76,7 +77,7 @@ test('mestre transfere token, exclui e volta ao menu',async({page})=>{
  await expect(page.locator('#tokenManager select')).toHaveCount(1);
  page.once('dialog',d=>d.accept());await page.locator('#tokenManager button.danger').click();
  await expect(page.locator('#tokenManager .token-control')).toHaveCount(0);
- await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
+ page.on('dialog',d=>d.accept());await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
 });
 test('ferramentas são botões e podem alternar',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
