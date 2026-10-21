@@ -37,13 +37,34 @@ function renderLayers(){
  if(hostMode){const sel=$('sceneSelect');sel.replaceChildren();for(const scene of state.scenes||[]){const opt=document.createElement('option');opt.value=scene.id;opt.textContent=scene.title;sel.append(opt)}sel.value=state.activeSceneId;$('fogEnabled').checked=!!state.fog.enabled}
 }
 function boardPoint(e){const rect=$('board').getBoundingClientRect();return {x:Math.round((e.clientX-rect.left-offset.x)/zoom),y:Math.round((e.clientY-rect.top-offset.y)/zoom)}}
+function tokenInRevealedArea(token,fog){
+ if(!fog?.enabled)return true;
+ return (fog.reveals||[]).some(a=>Number.isFinite(a.x)&&Number.isFinite(a.y)&&Number.isFinite(a.width)&&Number.isFinite(a.height)&&token.x+28>=a.x&&token.x+28<=a.x+a.width&&token.y+28>=a.y&&token.y+28<=a.y+a.height);
+}
+function playerView(playerId){
+ // The host is authoritative. Guests get only the current scene; future scenes
+ // and unrelated character notes never enter their WebRTC payload.
+ const active=state.scenes.find(x=>x.id===state.activeSceneId);
+ return {
+  schema:1,title:state.title,updated:state.updated,
+  activeSceneId:state.activeSceneId,
+  scenes:active?[{id:active.id,title:active.title}]:[],
+  map:state.map,
+  tokens:(state.tokens||[]).filter(t=>tokenInRevealedArea(t,state.fog)).map(t=>({...t})),
+  drawings:structuredClone(state.drawings||[]),
+  fog:structuredClone(state.fog),
+  chat:structuredClone(state.chat||[]),
+  characters:(state.characters||[]).map(c=>({...c,text:c.owner===playerId?c.text:''}))
+ };
+}
+function sendView(conn){if(conn.open&&conn.playerId)conn.send({kind:'state',state:playerView(conn.playerId),revision})}
 function announce(t){$('notice').textContent=t;$('status').textContent=t}
 function identity(){let id=localStorage.getItem('hl-identity');if(!id){id=uid();localStorage.setItem('hl-identity',id)}return id}
 function isValidState(s){return s&&s.schema===1&&Array.isArray(s.tokens)&&Array.isArray(s.characters)&&Array.isArray(s.chat)&&typeof s.map==='string'&&s.map.length<9000000}
 async function openDb(){return new Promise((resolve,reject)=>{let r=indexedDB.open('highlords-p2p',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function saveLocal(){if(!hostMode||lastSavedRevision===revision)return;const savingRevision=revision;try{saveDb ||= await openDb();await new Promise((resolve,reject)=>{const tx=saveDb.transaction('saves','readwrite');tx.objectStore('saves').put(JSON.parse(JSON.stringify(state)),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});lastSavedRevision=savingRevision;$('saveStatus').textContent='✓ Autosave local confirmado · '+new Date().toLocaleTimeString()}catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}}
 function scheduleSave(){if(!hostMode)return;$('saveStatus').textContent='Alterações pendentes de salvamento';clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1500)}
-function changed(){rememberScene();state.updated=now();revision++;scheduleSave();render();for(const c of contacts.values())if(c.open)c.send({kind:'state',state,revision})}
+function changed(){rememberScene();state.updated=now();revision++;scheduleSave();render();for(const c of contacts.values())sendView(c)}
 function update(fn){if(!hostMode)return;fn();changed()}
 function saveFile(){if(!hostMode)return;const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='campanha-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
 async function restore(file){if(!file)return;try{if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Formato inválido');Object.assign(state,obj);ensureSceneData();$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
@@ -93,7 +114,7 @@ function attach(c,guest=false){
     if(!/^[0-9a-f-]{36}$/.test(String(m.identity||'')))return c.close();
     c.playerId=m.identity;c.playerName=String(m.name||'Jogador').slice(0,36);
     for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
-    contacts.set(c.peer,c);c.send({kind:'state',state,revision});render();
+    contacts.set(c.peer,c);sendView(c);render();
    }else if(m.kind==='action'&&c.playerId)apply(m.action,m.payload,c.playerId,c.playerName);
   }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&m.revision>=revision){
    revision=m.revision;Object.assign(state,m.state);ensureSceneData();render();
@@ -124,7 +145,7 @@ case 'token:add':{if(id!==myId||state.tokens.length>=120)return;return update(()
 case 'map':{if(id!==myId||typeof p.data!=='string'||p.data.length>8500000||!/^data:image\/(png|jpeg|webp);base64,/.test(p.data))return;return update(()=>state.map=p.data)}
 }}
 function showGame(){ensureSceneData();$('home').style.display='none';$('game').style.display='block';$('masterTools').style.display=hostMode?'block':'none';$('export').style.display=hostMode?'block':'none';$('roomLabel').textContent='Sala '+roomId;render()}
-function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();$('map').src=state.map||'';const pieces=$('pieces');pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.onpointerdown=e=>{e.stopPropagation();drag={token:t.id,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
+function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();if($('map').getAttribute('src')!==(state.map||''))$('map').src=state.map||'';const pieces=$('pieces');pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.onpointerdown=e=>{if(!hostMode&&state.fog?.enabled&&!tokenInRevealedArea(t,state.fog))return;e.stopPropagation();drag={token:t.id,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
 const h=$('history');h.replaceChildren();for(let line of state.chat){const p=document.createElement('p');p.textContent=line.name+': '+line.text;h.append(p)}h.scrollTop=h.scrollHeight;
 const players=hostMode?[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))]:[{id:myId,name:nickname}];$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
 const ch=$('characters');ch.replaceChildren();for(const c of state.characters){let section=document.createElement('div');section.className='char',strong=document.createElement('strong');strong.textContent=c.name;section.append(strong);if(hostMode){let selector=document.createElement('select');let empty=document.createElement('option');empty.value='';empty.textContent='Sem dono';selector.append(empty);for(let x of players){let op=document.createElement('option');op.value=x.id;op.textContent=x.name;selector.append(op)}selector.value=c.owner;selector.onchange=()=>dispatch('character:assign',{id:c.id,playerId:selector.value});section.append(selector)}
