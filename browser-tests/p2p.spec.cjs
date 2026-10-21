@@ -48,3 +48,17 @@ test('recuperação local aparece integrada à home sem diálogo nativo',async({
  await expect(page.locator('#recoveryPanel')).toBeHidden();
  await expect(page.locator('#notice')).toContainText('Campanha recuperada');
 });
+
+test('nome da campanha aparece no save e no download',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ await page.locator('#campaignName').fill('Crônicas do Norte');
+ await page.locator('#host').click();
+ await expect(page.locator('#gameCampaignName')).toHaveValue('Crônicas do Norte');
+ const downloadPromise=page.waitForEvent('download');
+ await page.locator('#export').click();
+ const download=await downloadPromise;
+ expect(download.suggestedFilename()).toMatch(/^cronicas-do-norte-.*\.highlords$/);
+ await page.locator('#gameCampaignName').fill('A Torre Vermelha');
+ await page.locator('#gameCampaignName').dispatchEvent('change');
+ await expect(page.locator('#gameCampaignName')).toHaveValue('A Torre Vermelha');
+});
