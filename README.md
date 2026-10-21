@@ -1,64 +1,36 @@
 # Highlords RPG
 
-VTT experimental e independente de sistema, em português, para jogar no navegador. Referências de produto: Owlbear Rodeo e Dark Age. Código original.
+Mesa virtual gratuita de RPG, independente de sistema, acessível pelo navegador. **A campanha pertence ao mestre.**
 
-## Executar
+**Jogar:** https://highlords-rpg.vercel.app
 
-Requer Node.js 20+; nenhuma dependência npm externa.
+## Como usar
 
-```bash
-npm start
-```
+1. O mestre abre o site, nomeia a campanha e cria uma mesa.
+2. Compartilha o convite com os jogadores, que entram sem cadastro.
+3. Todos usam mapa, tokens, fichas, dados e chat; o mestre administra cenas, desenho e névoa.
+4. O mestre pode recuperar autosaves locais ou exportar/importar sua campanha `.highlords`.
 
-Abra http://localhost:3000. Crie a sala, compartilhe seu código e jogue. Em rede local, inicialize com `HOST=0.0.0.0 npm start` e informe aos jogadores o endereço IP da máquina anfitriã.
+## Estado atual
 
-## Primeira versão
-- Salas, mapa por upload, grade, zoom, movimentação de câmera;
-- Tokens criados e controlados pelo mestre (movimento de jogadores opcional);
-- Chat, dados rolados no servidor, diário do mestre;
-- Sincronização via SSE e gravação automática na pasta `data/`.
+**Alpha fechada · v0.2.0-alpha.** Frontend estático em `p2p/`, publicado na Vercel, com WebRTC/PeerJS e navegador do mestre como host. Inclui múltiplas cenas, transferência/exclusão de tokens, ferramentas de desenho e revelação, fichas livres básicas, reconexão tentativa e checkpoints no IndexedDB.
 
-## Limitações importantes
-**Protótipo para ambiente confiável, não para implantação pública.** Não há login seguro, rate limiting, gerenciamento avançado de uploads, nem proteção de acesso suficiente para expor o servidor à Internet. O mestre deve manter o servidor ligado. Armazene backups da pasta `data/`.
+O arquivo `.highlords` ainda é JSON; o formato ZIP versionado está planejado.
 
-## Testes
+## Desenvolvimento e testes
 
-Execute `npm test`. A suíte inclui verificações de dados e cenários HTTP com mestre/jogador, garantindo autorização do diário, isolamento de rolagens secretas, atualização de cena e identificação pelo servidor.
+- `npm test` executa testes do protótipo legado Node.js.
+- `.github/workflows/p2p-browser.yml` executa smoke tests do frontend P2P em Chromium usando Playwright.
+- `p2p/index.html` é a aplicação publicada. `server.js` e `public/` são código legado, não publicado na Vercel.
 
-## Segurança
+## Limitações da Alpha
 
-A interface não determina mais quem é mestre: o servidor inclui `self.gm` na visualização autenticada. Anotações do mestre não são enviadas a jogadores. A ocultação de cena nesta versão é global (não é fog of war com áreas reveláveis).
+- O host deve manter o navegador aberto. TURN dedicado não está configurado; algumas redes podem falhar.
+- Fog of War é **visual**: o mapa original ainda chega aos convidados.
+- Identificadores locais não constituem autenticação forte.
+- Autosaves dependem dos dados do navegador: **exporte backups regularmente**.
+- A versão não deve ser usada com conteúdo sigiloso ou sem cópias da campanha.
 
-## Roadmap
-Fichas dinâmicas, fog of war, camadas, biblioteca de recursos, arquitetura isolada de extensões e autenticação adequada.
+## Licença e contribuição
 
-## Cenas e revelação de névoa
-
-- O mestre cria, alterna e exclui cenas pela barra lateral. Cada cena guarda mapa, grade, tokens, desenhos e áreas reveladas separadamente.
-- Marque **Escurecer cena** e aplique; depois selecione **Revelar área** e arraste um retângulo sobre o mapa.
-- **Repor névoa** remove todas as áreas reveladas da cena ativa.
-- Tokens fora das regiões reveladas não são enviados ao jogador na resposta de estado.
-
-**Limite atual:** o fog of war ainda é uma implementação preliminar de retângulos. O mapa de fundo continua sendo um recurso acessível via URL sem autorização por sala; portanto a névoa é uma ferramenta de apresentação, **não uma proteção segura de segredos do mapa**. Não publique campanhas com conteúdo confidencial. Ainda faltam camadas e isolamento completo de assets.
-
-Testes: execute `npm test` (inclui `tests/scenes.test.js`).
-
-## Acesso aos mapas (atualização de segurança)
-
-Arquivos em `/uploads/` agora exigem os parâmetros de sala e credencial de participante. O servidor confirma que o arquivo pertence a alguma cena daquela campanha; requisições anônimas e de outras salas são recusadas. Não compartilhe URLs contendo chaves de sessão.
-
-**Limitação:** qualquer participante autorizado ainda pode obter a imagem original do mapa, inclusive áreas cobertas pela névoa. A névoa atual **não serve como proteção contra jogadores que inspecionem as requisições**. Para ocultação real dos mapas, precisamos renderizar o recorte seguro no servidor ou servir tiles autorizados e mascarados.
-
-A suíte inclui `tests/assets.test.js` com testes de acesso anônimo, credencial inválida, isolamento entre salas e acesso permitido.
-
-## Fichas vinculadas sem contas
-
-- O jogador gera uma identidade aleatória de 256 bits no próprio navegador, guardada localmente. A identidade não é seu apelido.
-- Ao entrar na mesa, o servidor registra somente o SHA-256 da identidade na campanha; o mestre atribui uma ficha à pessoa conectada.
-- Ao reencontrar a mesma sala usando o mesmo navegador, o jogador pode recuperar sua ficha automaticamente (nova credencial de sessão).
-- O mestre pode desvincular ou transferir fichas no painel de personagens.
-- Os campos da ficha são livres e editáveis pelo mestre ou pelo jogador vinculado; o servidor valida as permissões.
-- **Sem login não significa recuperação garantida:** modo anônimo, limpeza do armazenamento ou outro navegador geram outra identidade. Nesse caso, o mestre precisa reatribuir a ficha.
-- **Importante:** a recuperação entre sessões importadas no futuro dependerá do formato de arquivo `.highlords` incluir os vínculos (somente hashes, nunca os segredos locais).
-
-Ainda usamos o backend Node.js e persistência JSON: o modelo P2P/WebRTC, backup portátil e códigos de recuperação entre dispositivos **não estão implementados**.
+Consulte a licença do repositório. Contribuições e relatos de erros são bem-vindos. O uso do Highlords RPG permanecerá gratuito.
