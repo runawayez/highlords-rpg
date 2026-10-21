@@ -53,7 +53,7 @@ body{background:radial-gradient(circle at 60% -20%,#251015 0%,#08090b 48%);lette
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
 const APP_VERSION='0.2.0-alpha';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
 const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{}};
-const contacts=new Map();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,identityKeys=null,recoveryCandidates=[],activeTool='pan';
+const contacts=new Map(),pendingGuests=new Set();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,identityKeys=null,recoveryCandidates=[],activeTool='pan';
 function ensureSceneData(){
  if(!Array.isArray(state.drawings))state.drawings=[];
  if(!state.fog||typeof state.fog!=='object')state.fog={enabled:false,reveals:[]};
@@ -187,7 +187,7 @@ function startHost(){
  hostMode=true;nickname=$('hostName').value.trim()||'Mestre';myId=identity();roomId='hl-'+uid();
  peer=new Peer(roomId);configurePeer();
  peer.on('open',()=>{showGame();announce('Mesa pronta · aguardando jogadores');changed()});
- peer.on('connection',c=>{if(contacts.size>=8){c.close();return}attach(c)});
+ peer.on('connection',c=>{if(contacts.size+pendingGuests.size>=8){c.close();return}pendingGuests.add(c);attach(c)});
 }
 function connectGuest(){
  if(!peer||peer.destroyed||peer.disconnected||!peer.open)return scheduleReconnect();
@@ -216,6 +216,7 @@ async function startGuest(){
  peer.on('open',()=>{connectGuest()});
 }
 function attach(c,guest=false){
+ if(!guest)c.authTimer=setTimeout(()=>{if(!c.playerId)c.close()},15000);
  c.on('open',()=>{
   if(guest){clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});announce('Conexão estabelecida · validando identidade…')}
   else announce('Jogador conectado');
@@ -242,6 +243,7 @@ function attach(c,guest=false){
        changed();
       }
       c.playerId=pending.identity;c.playerName=pending.name;c.authPending=null;
+      pendingGuests.delete(c);clearTimeout(c.authTimer);
       for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
       contacts.set(c.peer,c);sendView(c);render();
     })().catch(()=>c.close()).finally(()=>{c.authVerifying=false});
@@ -254,15 +256,17 @@ function attach(c,guest=false){
   }else if(guest&&m.kind==='challenge'&&typeof m.nonce==='string'&&/^[0-9a-f-]{36}$/.test(m.nonce)){
     signChallenge(m.nonce,myId).then(proof=>{if(c.open)c.send({kind:'proof',...proof})}).catch(e=>announce('Falha na identidade: '+e.message));
    }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
+   if(c!==hostLink)return;
    guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;Object.assign(state,m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
   }
  });
  c.on('close',()=>{
+  pendingGuests.delete(c);clearTimeout(c.authTimer);
   if(contacts.get(c.peer)===c)contacts.delete(c.peer);
   if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}
   else {announce('Jogador desconectado');render()}
  });
- c.on('error',e=>{announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
+ c.on('error',e=>{pendingGuests.delete(c);clearTimeout(c.authTimer);announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
 }
 function dispatch(action,payload){if(hostMode)apply(action,payload,myId,nickname);else if(hostLink?.open)hostLink.send({kind:'action',action,payload});else announce('Sem conexão com o mestre')}
 function apply(action,p,id,name){if(!p||typeof p!=='object')return;const owner=state.characters.find(x=>x.id===p.id);switch(action){
@@ -308,7 +312,7 @@ $('leaveGame').onclick=async()=>{
   }
  }
  manualClose=true;clearTimeout(retryTimer);clearTimeout(connectionTimer);
- for(const c of contacts.values())c.close();contacts.clear();
+ for(const c of contacts.values())c.close();contacts.clear();for(const c of pendingGuests)c.close();pendingGuests.clear();
  hostLink?.close();peer?.destroy();peer=null;hostLink=null;hostMode=false;guestSynced=false;roomId='';
  $('game').style.display='none';$('home').style.display='block';
  $('status').textContent='Preparando…';$('notice').textContent='Você voltou ao menu. A sessão P2P foi encerrada.';
