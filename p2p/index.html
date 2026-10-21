@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
 const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
 const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]}};
-const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1;
+const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false;
 function ensureSceneData(){
  if(!Array.isArray(state.drawings))state.drawings=[];
  if(!state.fog||typeof state.fog!=='object')state.fog={enabled:false,reveals:[]};
@@ -57,7 +57,7 @@ function playerView(playerId){
   characters:(state.characters||[]).map(c=>({id:c.id,name:c.name,owner:c.owner,text:c.owner===playerId?c.text:''}))
  };
 }
-function sendView(conn){if(conn.open&&conn.playerId)conn.send({kind:'state',state:playerView(conn.playerId),revision})}
+function sendView(conn){if(!conn.open||!conn.playerId)return;try{conn.send({kind:'state',state:playerView(conn.playerId),revision})}catch(e){announce('Falha ao sincronizar jogador: '+e.message)}}
 function announce(t){$('notice').textContent=t;$('status').textContent=t}
 function identity(){let id=localStorage.getItem('hl-identity');if(!id){id=uid();localStorage.setItem('hl-identity',id)}return id}
 function isValidState(s){
@@ -105,7 +105,7 @@ function startHost(){
 function connectGuest(){
  if(!peer||peer.destroyed||peer.disconnected||!peer.open)return scheduleReconnect();
  if(hostLink?.open)return;
- hostLink=peer.connect(roomId,{reliable:true});
+ guestSynced=false;hostLink=peer.connect(roomId,{reliable:true});
  attach(hostLink,true);
 }
 function scheduleReconnect(){
@@ -134,17 +134,22 @@ function attach(c,guest=false){
   if(hostMode){
    if(m.kind==='hello'){
     if(!/^[0-9a-f-]{36}$/.test(String(m.identity||'')))return c.close();
-    c.playerId=m.identity;c.playerName=String(m.name||'Jogador').slice(0,36);
+    if(m.identity===myId)return c.close();c.playerId=m.identity;c.playerName=String(m.name||'Jogador').slice(0,36);
     for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
     contacts.set(c.peer,c);sendView(c);render();
-   }else if(m.kind==='action'&&c.playerId)apply(m.action,m.payload,c.playerId,c.playerName);
-  }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&m.revision>=revision){
-   revision=m.revision;Object.assign(state,m.state);ensureSceneData();render();
+   }else if(m.kind==='action'&&c.playerId){
+    const time=Date.now();if(time-(c.rateStarted||0)>1000){c.rateStarted=time;c.rateCount=0}if(++c.rateCount>15)return;
+    if(typeof m.action!=='string'||!m.payload||typeof m.payload!=='object'||Array.isArray(m.payload))return;
+    if(JSON.stringify(m.payload).length>10000)return;
+    apply(m.action,m.payload,c.playerId,c.playerName);
+   }
+  }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
+   guestSynced=true;revision=m.revision;Object.assign(state,m.state);ensureSceneData();render();
   }
  });
  c.on('close',()=>{
   if(contacts.get(c.peer)===c)contacts.delete(c.peer);
-  if(guest&&hostLink===c){hostLink=null;scheduleReconnect()}
+  if(guest&&hostLink===c){hostLink=null;guestSynced=false;scheduleReconnect()}
   else {announce('Jogador desconectado');render()}
  });
  c.on('error',e=>{announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;scheduleReconnect()}});
