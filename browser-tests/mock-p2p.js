@@ -29,3 +29,5 @@ class Peer {
  destroy(){this.destroyed=true;this.open=false;for(const c of this.links.values())c.close()}
 }
 window.__peerSignal=packet=>window.__activeFakePeer?.receive(packet);
+
+window.Peer=Peer;
