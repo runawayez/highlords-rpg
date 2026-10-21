@@ -185,3 +185,20 @@ test('fog protege os pixels ocultos no payload da mesa',async({page})=>{
  });
  expect(result).toEqual({originalNotSent:true,different:true,visibleRed:true,secretDark:true});
 });
+
+test('WebRTC usa apenas STUN e nunca consulta endpoint TURN',async({page})=>{
+ await mockPeer(page);
+ let turnRequests=0;
+ await page.route('**/api/turn',route=>{turnRequests++;return route.abort()});
+ await page.goto(url());
+ const result=await page.evaluate(()=>{
+  const config=peerOptions().config.iceServers;
+  return {urls:config.flatMap(x=>Array.isArray(x.urls)?x.urls:[x.urls]),isAsync:peerOptions() instanceof Promise};
+ });
+ expect(result.urls.length).toBeGreaterThan(0);
+ expect(result.urls.every(url=>url.startsWith('stun:'))).toBe(true);
+ expect(result.isAsync).toBe(false);
+ await page.locator('#host').click();
+ await expect(page.locator('#game')).toBeVisible();
+ expect(turnRequests).toBe(0);
+});
