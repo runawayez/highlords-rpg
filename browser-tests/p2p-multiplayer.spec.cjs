@@ -47,20 +47,20 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await host.locator('#tabTools').click();await host.locator('#charName').fill('Guardião');
   await host.locator('#tabTools').click();await host.locator('#addChar').click();
   await host.locator('#tabSheets').click();await host.locator('.char > select:first-of-type').selectOption({label:'Convidado'});
-  await expect(player.locator('.char strong')).toHaveText('Guardião');
+  await player.locator('#tabSheets').click();await expect(player.locator('.char strong')).toHaveText('Guardião');
   await player.locator('.char textarea').fill('PV: 24');
   await player.getByRole('button',{name:'Salvar ficha'}).click();
   await expect(host.locator('.char textarea')).toHaveValue('PV: 24');
-  await player.locator('#message').fill('Olá, mestre');
+  await player.locator('#tabChat').click();await player.locator('#message').fill('Olá, mestre');
   await player.locator('#send').click();
-  await expect(host.locator('#history')).toContainText('Olá, mestre');
+  await host.locator('#tabChat').click();await expect(host.locator('#history')).toContainText('Olá, mestre');
   await player.evaluate(()=>hostLink.send({kind:'action',action:'scene:add',payload:{title:'Cena não autorizada'}}));
   await host.waitForTimeout(200);
   await expect(host.locator('#sceneSelect option')).toHaveCount(1);
   await player.evaluate(()=>hostLink.close());
   await expect(player.locator('#status')).toContainText('tentando novamente');
   await expect(player.locator('#status')).toContainText('mesa sincronizada',{timeout:15000});
-  await expect(player.locator('.char textarea')).toHaveValue('PV: 24');
+  await player.locator('#tabSheets').click();await expect(player.locator('.char textarea')).toHaveValue('PV: 24');
  }finally{
   await Promise.allSettled([hostContext.close(),playerContext.close()]);
   await new Promise(resolve=>server.close(resolve));
