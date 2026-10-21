@@ -17,7 +17,7 @@ class Peer {
 }
 window.Peer=Peer;`}))}
 test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/BETA.*v0\.3\.0/)});
-test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Goblin');await page.locator('#tabTools').click();await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabTools').click();await page.locator('#addChar').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
+test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Goblin');await page.locator('#tabTools').click();await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabTools').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
 test('mestre salva ficha e conserva dados ao alternar de cena',async({page})=>{
@@ -411,7 +411,7 @@ test('Beta seleção múltipla: alinhamento e rejeição de ação remota',async
  });
  await page.locator('.piece').nth(0).click();
  await page.locator('.piece').nth(1).click({modifiers:['Shift']});
- await expect(page.getByRole('button',{name:'Alinhar horizontalmente'})).toBeVisible();
+ await page.locator('#tabTools').click();await expect(page.getByRole('button',{name:'Alinhar horizontalmente'})).toBeVisible();
  await page.locator('#tabTools').click();await page.getByRole('button',{name:'Alinhar horizontalmente'}).click();
  const data=await page.evaluate(()=>{
   const y=state.tokens[0].y,first=state.tokens[1].y;
@@ -437,7 +437,7 @@ test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page
  await page.locator('#tabTools').click();
  await expect(page.locator('#masterTools')).toBeVisible();
  await page.locator('#tabSheets').click();
- await expect(page.locator('#characters')).toBeVisible();
+ await expect(page.locator('#sheetsPanel')).toBeVisible();
  await page.locator('#tabChat').click();
  await expect(page.locator('#roll')).toBeVisible();
  const sizes=await page.evaluate(()=>({aside:document.querySelector('#tableSidebar').clientHeight,scroll:document.querySelector('#tableSidebar').scrollHeight,visible:!!document.querySelector('#history').offsetParent}));
