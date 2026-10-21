@@ -219,22 +219,8 @@ function update(fn){if(!hostMode)return;fn();changed()}
 function saveFile(){if(!hostMode)return;rememberScene();const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(state.title||'campanha').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,55)+'-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
 async function restore(file){if(!file)return;try{if(hostMode)throw Error('Saia da mesa antes de importar uma campanha');if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Campanha inválida, incompatível ou corrompida');replaceCampaignState(obj);ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
 const DEFAULT_ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}];
-async function peerOptions(){
- const iceServers=structuredClone(DEFAULT_ICE);
- try{
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),4500);
-  let response;
-  try{response=await fetch('/api/turn',{signal:controller.signal,cache:'no-store',credentials:'same-origin'})}
-  finally{clearTimeout(timeout)}
-  if(response.ok){
-   const config=await response.json();
-   if(Array.isArray(config.iceServers)&&config.iceServers.length)
-    iceServers.push(...config.iceServers.filter(v=>v&&Array.isArray(v.urls)&&v.urls.length<16&&v.urls.every(u=>typeof u==='string'&&/^(stun:|stuns:|turn:|turns:)/.test(u))));
-  }
- }catch{ /* TURN is optional; STUN remains available. */ }
- return {debug:0,config:{iceServers}};
-}
+// TURN is intentionally disabled by product decision: no API calls, no TURN relay.
+function peerOptions(){return {debug:0,config:{iceServers:structuredClone(DEFAULT_ICE)}}}
 async function configurePeer(){
  peer.on('disconnected',()=>{announce('Sinalização offline · reconectando…');if(!peer.destroyed)try{peer.reconnect()}catch{}});
  peer.on('error',e=>{announce('Erro de conexão: '+e.message);if(!hostMode)scheduleReconnect()});
@@ -244,7 +230,7 @@ async function startHost(){
  if(!window.Peer)return announce('PeerJS indisponível, verifique conexão');
  if(peer&&!peer.destroyed)return;
  manualClose=false;hostMode=true;nickname=$('hostName').value.trim()||'Mestre';myId=identity();roomId='hl-'+uid();
- const options=await peerOptions();if(manualClose)return;peer=new Peer(roomId,options);configurePeer();
+ const options=peerOptions();if(manualClose)return;peer=new Peer(roomId,options);configurePeer();
  peer.on('open',()=>{showGame();announce('Mesa pronta · aguardando jogadores');changed()});
  peer.on('connection',c=>{if(contacts.size+pendingGuests.size>=8){c.close();return}pendingGuests.add(c);attach(c)});
 }
