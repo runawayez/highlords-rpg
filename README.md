@@ -26,8 +26,8 @@ O arquivo `.highlords` ainda é JSON; o formato ZIP versionado está planejado.
 ## Limitações da Alpha
 
 - O host deve manter o navegador aberto. TURN dedicado não está configurado; algumas redes podem falhar.
-- Fog of War é **visual**: o mapa original ainda chega aos convidados.
-- Identificadores locais não constituem autenticação forte.
+- Quando a névoa está ativa, convidados recebem uma versão rasterizada somente com áreas reveladas; conteúdos enviados anteriormente não podem ser revogados.
+- Entradas usam prova de posse ECDSA P-256, com confiança na primeira vinculação da chave pública (TOFU); não protege o primeiro vínculo contra usurpação.
 - Autosaves dependem dos dados do navegador: **exporte backups regularmente**.
 - A versão não deve ser usada com conteúdo sigiloso ou sem cópias da campanha.
 
