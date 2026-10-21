@@ -167,3 +167,21 @@ test('importação rejeita cena com coordenadas fora do mapa',async({page})=>{
  });
  expect(result).toBe(false);
 });
+
+test('fog protege os pixels ocultos no payload da mesa',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ const result=await page.evaluate(async()=>{
+  const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=800;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='red';ctx.fillRect(0,0,1200,800);
+  state.map=canvas.toDataURL('image/png');
+  state.fog={enabled:true,reveals:[{x:0,y:0,width:100,height:100}]};
+  const view=playerView('guest-id');
+  const secured=await maskedPlayerMap(state.map,state.fog.reveals);
+  const image=new Image();image.src=secured;await image.decode();
+  const out=document.createElement('canvas');out.width=1200;out.height=800;
+  const o=out.getContext('2d');o.drawImage(image,0,0);
+  const visible=o.getImageData(50,50,1,1).data,secret=o.getImageData(600,500,1,1).data;
+  return {originalNotSent:view.map==='',different:secured!==state.map,visibleRed:visible[0]>140,secretDark:secret[0]<35&&secret[1]<35&&secret[2]<35};
+ });
+ expect(result).toEqual({originalNotSent:true,different:true,visibleRed:true,secretDark:true});
+});
