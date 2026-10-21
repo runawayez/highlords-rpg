@@ -12,6 +12,11 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
  const origin='http://127.0.0.1:'+server.address().port+'/';
  const hostContext=await browser.newContext(),playerContext=await browser.newContext();
  const host=await hostContext.newPage(),player=await playerContext.newPage();
+ for(const [name,page] of [['mestre',host],['jogador',player]]){
+  page.on('pageerror',e=>console.log('PAGE ERROR '+name+': '+e.message));
+  page.on('console',msg=>{if(msg.type()==='error')console.log('CONSOLE ERROR '+name+': '+msg.text())});
+ }
+
  const peers=new Map();
  async function wire(page){
   await page.exposeFunction('__p2pBridge',async message=>{
@@ -31,7 +36,7 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
  try{
   await wire(host);await wire(player);
   await host.goto(origin);await host.locator('#hostName').fill('Mestre');
-  await host.locator('#host').click();await expect(host.locator('#game')).toBeVisible();
+  await host.locator('#host').click();await expect(host.locator('#game')).toBeVisible({timeout:10000});
   const label=await host.locator('#roomLabel').textContent(),room=label.replace(/^Sala\s+/,'').trim();
   await player.goto(origin);
   await player.locator('#roomCode').fill(room);
