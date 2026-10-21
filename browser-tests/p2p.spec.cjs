@@ -245,3 +245,33 @@ test('Beta: ZIP e editor universal e grid',async({page})=>{
  const value=await page.evaluate(async()=>{const bytes=new Uint8Array(await zipCampaign(state).arrayBuffer());const obj=await unzipCampaign(new File([bytes],'campanha.highlords'));return {magic:Array.from(bytes.slice(0,4)),fields:obj.characters[0].fields.length,grid:obj.gridSize}});
  expect(value).toEqual({magic:[80,75,3,4],fields:1,grid:45});
 });
+
+test('Beta editor: grid hexagonal, magnetismo, camadas e formato persistido',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#gridKind').selectOption('hex');
+ await page.locator('#gridSnap').check();
+ await page.locator('#gridOriginX').fill('12');await page.locator('#gridOriginX').dispatchEvent('change');
+ await page.locator('#gridOpacity').fill('35');await page.locator('#gridOpacity').dispatchEvent('change');
+ const result=await page.evaluate(()=>({kind:state.gridKind,snap:state.gridSnap,x:state.gridOriginX,opacity:state.gridOpacity,size:state.gridSize,ice:peerOptions().config.iceServers.map(i=>i.urls)}));
+ expect(result.kind).toBe('hex');expect(result.snap).toBe(true);expect(result.x).toBe(12);expect(result.opacity).toBe(35);
+ expect(result.ice.every(x=>x.startsWith('stun:'))).toBe(true);
+ await page.locator('#layerDrawings').uncheck();
+ await expect(page.locator('#sketchLayer')).toBeHidden();
+ await page.locator('#layerDrawings').check();
+ await expect(page.locator('#sketchLayer')).toBeVisible();
+});
+test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ for(const tool of ['line','rectangle','ellipse','eraser','ruler','pan']){
+  await page.locator('[data-tool="'+tool+'"]').click();
+  await expect(page.locator('[data-tool="'+tool+'"]')).toHaveAttribute('aria-pressed','true');
+ }
+ await page.evaluate(()=>{
+  apply('draw',{points:[[20,20],[80,80]]},myId,nickname);
+ });
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
+ await page.evaluate(()=>apply('draw:remove',{index:0},myId,nickname));
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
+ await page.evaluate(()=>apply('draw',{points:[[20,20],[80,80]]},'malicious-guest','X'));
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
+});
