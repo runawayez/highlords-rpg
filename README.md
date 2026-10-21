@@ -45,8 +45,8 @@ O projeto está em **desenvolvimento ativo**: o escopo de engenharia da **Alpha 
 | Área | Disponível atualmente |
 | --- | --- |
 | Mesas online | Salas por convite, sem conta obrigatória; comunicação P2P com WebRTC e PeerJS |
-| Mapas e cenas | Upload de mapa, múltiplas cenas, navegação, zoom e grid de tamanho ajustável |
-| Ferramentas | Desenho, desfazer/limpar traços e revelação de áreas com névoa de guerra |
+| Mapas e cenas | Upload de mapa, múltiplas cenas, navegação, zoom, grid quadrado/hexagonal calibrável, transparência, origem e encaixe de tokens |
+| Ferramentas | Pincel, linhas, retângulos, elipses, borracha de traços, régua, camadas de exibição e revelação de áreas |
 | Tokens | Criação, movimentação, transferência entre cenas, exclusão e atribuição de controlador |
 | Fichas | Fichas livres com texto e campos personalizados de texto, número, notas e inventário |
 | Interação | Chat e rolagem de dados |
@@ -54,7 +54,7 @@ O projeto está em **desenvolvimento ativo**: o escopo de engenharia da **Alpha 
 | Portabilidade | Exportação `.highlords` em ZIP versionado com manifesto e verificação CRC32; importação de JSON da Alpha |
 | Identidade | Chaves ECDSA P-256 geradas localmente, prova de posse e vinculação inicial de confiança (TOFU) |
 
-As ferramentas da Beta são **implementações iniciais**, não necessariamente versões definitivas. Por exemplo, o ZIP ainda mantém os recursos incorporados ao `campaign.json`, e o editor ainda não possui todas as operações de camadas planejadas.
+As ferramentas da Beta são **implementações iniciais**, não necessariamente versões definitivas. Por exemplo, o ZIP ainda mantém os recursos incorporados ao `campaign.json`, e as camadas atuais são controles locais de exibição; paredes, iluminação dinâmica, histórico completo de desfazer/refazer e painéis acopláveis continuam planejados.
 
 ## Como funciona
 
