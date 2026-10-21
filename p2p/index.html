@@ -52,8 +52,8 @@ body{background:radial-gradient(circle at 60% -20%,#251015 0%,#08090b 48%);lette
 <div id="game"><header><div class="top-brand"><img src="/assets/highlords-mark.svg" alt=""><strong>HIGHLORDS RPG</strong><span class="version-tag">v0.2.0-alpha</span></div><small id="roomLabel"></small><input id="gameCampaignName" maxlength="80" aria-label="Nome da campanha" title="Nome da campanha — salvo automaticamente" placeholder="Nome da campanha" style="max-width:190px;min-height:34px;font-size:12px;padding:7px 9px"><span id="status">Preparando…</span><button id="invite">Copiar convite</button><button id="export">Exportar .highlords</button><button id="leaveGame" type="button" title="Voltar ao início">← Menu</button></header><div id="layout"><div id="board"><div id="canvas"><img id="map" alt=""><div id="grid"></div><div id="pieces"></div><svg id="sketchLayer" viewBox="0 0 1200 800" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg><svg id="fogLayer" viewBox="0 0 1200 800" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg></div></div><aside><section id="masterTools"><h3>Ferramentas do mestre</h3><div class="row"><select id="sceneSelect" aria-label="Cena ativa" style="min-width:0;flex:1"></select><button id="newScene" title="Nova cena">+ Cena</button></div><div class="row"><div id="toolButtons" class="tool-buttons" role="group" aria-label="Ferramentas da mesa"><button type="button" class="tool-choice active" data-tool="pan" aria-pressed="true">✥ Mover</button><button type="button" class="tool-choice" data-tool="draw" aria-pressed="false">✎ Desenhar</button><button type="button" class="tool-choice" data-tool="reveal" aria-pressed="false">◫ Revelar</button></div></div><div class="fog-editor"><div class="fog-header"><strong>NÉVOA DE GUERRA</strong><span id="fogState">Desativada</span></div><p id="fogHelp">Ative a névoa para ocultar o mapa dos jogadores. O mestre continua vendo o cenário.</p><div class="fog-actions"><button id="fogEnable" type="button">Ativar névoa</button><button id="fogReset" type="button" title="Cobrir novamente todas as áreas">Cobrir tudo</button></div><p class="muted">Revelar: ative a névoa, selecione a ferramenta e arraste um retângulo. A imagem original ainda é transmitida aos jogadores.</p></div><div class="draw-actions"><button id="undoDrawing" type="button">↶ Desfazer traço</button><button id="clearDrawings" type="button">Limpar desenhos</button></div><label>Mapa <input id="upload" type="file" accept="image/png,image/jpeg,image/webp"></label><div class="row"><input id="tokenName" placeholder="Nome do token"><button id="addToken">Adicionar token</button></div><div class="row"><input id="charName" placeholder="Novo personagem"><button id="addChar">Criar ficha</button></div><div id="players"></div><h3>Tokens da cena</h3><div id="tokenManager"></div></section><section><h3>Fichas</h3><div id="characters"></div></section><section><h3>Rolagem e conversa</h3><div id="history"></div><div class="row"><input id="message" placeholder="Mensagem"><button id="send">Enviar</button></div><div class="row"><input id="dice" value="1d20"><button id="roll">Rolar</button></div></section><p id="saveStatus" class="muted"></p></aside></div></div>
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
 const APP_VERSION='0.2.0-alpha';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
-const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]}};
-const contacts=new Map();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,recoveryCandidates=[],activeTool='pan';
+const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{}};
+const contacts=new Map();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,identityKeys=null,recoveryCandidates=[],activeTool='pan';
 function ensureSceneData(){
  if(!Array.isArray(state.drawings))state.drawings=[];
  if(!state.fog||typeof state.fog!=='object')state.fog={enabled:false,reveals:[]};
@@ -108,6 +108,25 @@ function cleanCampaignName(value){return String(value||'').trim().slice(0,80)||'
 function setCampaignName(value){const name=cleanCampaignName(value);if(hostMode)update(()=>{state.title=name});else state.title=name;$('campaignName').value=name;$('gameCampaignName').value=name}
 function announce(t){$('notice').textContent=t;$('status').textContent=t}
 function identity(){let id=localStorage.getItem('hl-identity');if(!id){id=uid();localStorage.setItem('hl-identity',id)}return id}
+const authAlgorithm={name:'ECDSA',namedCurve:'P-256'};
+function authPayload(challenge,playerId){return new TextEncoder().encode('highlords-auth-v1:'+roomId+':'+playerId+':'+challenge)}
+function buffer64(data){return btoa(String.fromCharCode(...new Uint8Array(data)))}
+function unbuffer64(data){return Uint8Array.from(atob(data),c=>c.charCodeAt(0))}
+async function loadIdentityKeys(){
+ if(identityKeys)return identityKeys;
+ const db=await openDb();
+ const pair=await new Promise((resolve,reject)=>{const tx=db.transaction('identity','readonly');const req=tx.objectStore('identity').get('device-key');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
+ if(pair?.privateKey&&pair?.publicKey){identityKeys=pair;return pair}
+ const generated=await crypto.subtle.generateKey(authAlgorithm,false,['sign','verify']);
+ await new Promise((resolve,reject)=>{const tx=db.transaction('identity','readwrite');tx.objectStore('identity').put(generated,'device-key');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+ identityKeys=generated;return generated;
+}
+async function signChallenge(challenge,playerId){const pair=await loadIdentityKeys();return {key:await crypto.subtle.exportKey('jwk',pair.publicKey),signature:buffer64(await crypto.subtle.sign({name:'ECDSA',hash:'SHA-256'},pair.privateKey,authPayload(challenge,playerId)))}}
+async function verifyChallenge(challenge,playerId,key,signature){
+ if(!key||key.kty!=='EC'||key.crv!=='P-256'||typeof key.x!=='string'||typeof key.y!=='string'||typeof signature!=='string'||signature.length>300)return false;
+ try{const publicKey=await crypto.subtle.importKey('jwk',key,authAlgorithm,false,['verify']);return await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},publicKey,unbuffer64(signature),authPayload(challenge,playerId))}catch{return false}
+}
+function samePublicKey(a,b){return !!a&&a.kty===b.kty&&a.crv===b.crv&&a.x===b.x&&a.y===b.y}
 function isValidState(s){
  if(!s||typeof s!=='object'||Array.isArray(s)||s.schema!==1)return false;
  const validMap=m=>typeof m==='string'&&m.length<=9000000&&(!m||/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/=]+$/.test(m));
@@ -121,6 +140,7 @@ function isValidState(s){
  if(!s.chat.every(c=>c&&typeof c.name==='string'&&typeof c.text==='string'&&c.text.length<=800))return false;
  if(s.drawings!==undefined&&!validDraws(s.drawings))return false;
  if(s.fog!==undefined&&!validFog(s.fog))return false;
+ if(s.trustedKeys!==undefined){if(!s.trustedKeys||typeof s.trustedKeys!=='object'||Array.isArray(s.trustedKeys)||Object.keys(s.trustedKeys).length>100)return false;for(const [id,key] of Object.entries(s.trustedKeys)){if(!/^[0-9a-f-]{36}$/.test(id)||!key||key.kty!=='EC'||key.crv!=='P-256'||typeof key.x!=='string'||typeof key.y!=='string'||key.x.length>100||key.y.length>100)return false}}
  if(s.scenes!==undefined){
   if(!Array.isArray(s.scenes)||s.scenes.length>25)return false;
   if(!s.scenes.every(c=>c&&typeof c.id==='string'&&typeof c.title==='string'&&c.title.length<=100&&validMap(c.map||'')&&validTokens(c.tokens||[])&&validDraws(c.drawings||[])&&validFog(c.fog||{enabled:false,reveals:[]})))return false;
@@ -128,7 +148,7 @@ function isValidState(s){
  }
  return true;
 }
-async function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open('highlords-p2p',2);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('saves'))db.createObjectStore('saves');if(!db.objectStoreNames.contains('checkpoints'))db.createObjectStore('checkpoints',{keyPath:'timestamp'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open('highlords-p2p',3);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('saves'))db.createObjectStore('saves');if(!db.objectStoreNames.contains('checkpoints'))db.createObjectStore('checkpoints',{keyPath:'timestamp'});if(!db.objectStoreNames.contains('identity'))db.createObjectStore('identity')};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
 async function saveLocal(){
  if(!hostMode||lastSavedRevision===revision)return;
  if(saveInFlight){await saveInFlight;if(!hostMode||lastSavedRevision===revision)return}
@@ -185,35 +205,55 @@ function scheduleReconnect(){
  retryTimer=setTimeout(()=>{retryTimer=null;if(peer?.disconnected&&!peer.destroyed){try{peer.reconnect()}catch{}}
  if(peer?.open)connectGuest();else scheduleReconnect()},delay);
 }
-function startGuest(){
+async function startGuest(){
  if(!window.Peer)return announce('PeerJS indisponível');
  roomId=$('roomCode').value.trim();nickname=$('guestName').value.trim()||'Jogador';
  if(!/^hl-[a-f0-9-]{36}$/.test(roomId))return announce('Código inválido');
  if(peer&&!peer.destroyed)return;
  myId=identity();hostMode=false;manualClose=false;retryCount=0;
+ try{await loadIdentityKeys()}catch(e){return announce('Não foi possível preparar identidade segura: '+e.message)}
  peer=new Peer();configurePeer();
  peer.on('open',()=>{connectGuest()});
 }
 function attach(c,guest=false){
  c.on('open',()=>{
-  if(guest){clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});announce('Conexão estabelecida · sincronizando mesa…')}
+  if(guest){clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});announce('Conexão estabelecida · validando identidade…')}
   else announce('Jogador conectado');
  });
  c.on('data',m=>{
   if(!m||typeof m!=='object'||Array.isArray(m))return;
   if(hostMode){
    if(m.kind==='hello'){
-    if(!/^[0-9a-f-]{36}$/.test(String(m.identity||'')))return c.close();
-    if(m.identity===myId)return c.close();c.playerId=m.identity;c.playerName=String(m.name||'Jogador').slice(0,36);
-    for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
-    contacts.set(c.peer,c);sendView(c);render();
+    if(c.authPending||c.playerId||!/^[0-9a-f-]{36}$/.test(String(m.identity||''))||m.identity===myId)return c.close();
+    c.authPending={identity:m.identity,name:String(m.name||'Jogador').slice(0,36),challenge:uid()};
+    c.send({kind:'challenge',nonce:c.authPending.challenge});
+   }else if(m.kind==='proof'&&c.authPending&&!c.authVerifying){
+    c.authVerifying=true;
+    const pending=c.authPending;
+    (async()=>{
+      const pinned=state.trustedKeys?.[pending.identity];
+      if(pinned&&!samePublicKey(pinned,m.key))throw Error('Chave de jogador divergente');
+      if(!await verifyChallenge(pending.challenge,pending.identity,m.key,m.signature))throw Error('Assinatura inválida');
+      if(!c.open||c.authPending!==pending)return;
+      if(!pinned){
+       state.trustedKeys ||= {};
+       state.trustedKeys[pending.identity]={kty:'EC',crv:'P-256',x:m.key.x,y:m.key.y};
+       for(const ch of state.characters)if(ch.owner===pending.identity)ch.owner='';
+       changed();
+      }
+      c.playerId=pending.identity;c.playerName=pending.name;c.authPending=null;
+      for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
+      contacts.set(c.peer,c);sendView(c);render();
+    })().catch(()=>c.close()).finally(()=>{c.authVerifying=false});
    }else if(m.kind==='action'&&c.playerId){
     const time=Date.now();if(time-(c.rateStarted||0)>1000){c.rateStarted=time;c.rateCount=0}if(++c.rateCount>15)return;
     if(typeof m.action!=='string'||!m.payload||typeof m.payload!=='object'||Array.isArray(m.payload))return;
     let payloadLength;try{payloadLength=JSON.stringify(m.payload).length}catch{return}if(payloadLength>10000)return;
     apply(m.action,m.payload,c.playerId,c.playerName);
    }
-  }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
+  }else if(guest&&m.kind==='challenge'&&typeof m.nonce==='string'&&/^[0-9a-f-]{36}$/.test(m.nonce)){
+    signChallenge(m.nonce,myId).then(proof=>{if(c.open)c.send({kind:'proof',...proof})}).catch(e=>announce('Falha na identidade: '+e.message));
+   }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
    guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;Object.assign(state,m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
   }
  });
