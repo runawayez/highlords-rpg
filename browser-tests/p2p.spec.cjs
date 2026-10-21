@@ -287,3 +287,143 @@ test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({
  expect(overflow).toBe(false);
  await page.locator('#host').click();await expect(page.locator('#board')).toBeVisible();
 });
+
+test('Beta camadas: persistência, autorização e sincronização',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#layerDrawings').uncheck();
+ const result=await page.evaluate(()=>{
+  const before=structuredClone(state.layerVisibility);
+  const revisionBefore=revision;
+  apply('layer:visibility',{layer:'tokens',visible:false},'intruder','X');
+  return {before,after:state.layerVisibility,revisionBefore,revisionAfter:revision,guest:playerView('guest').layerVisibility};
+ });
+ expect(result.before.drawings).toBe(false);
+ expect(result.after.tokens).toBe(true);
+ expect(result.revisionAfter).toBe(result.revisionBefore);
+ expect(result.guest.drawings).toBe(false);
+ const archive=await page.evaluate(async()=>unzipCampaign(new File([zipCampaign(state)],'backup.highlords')).then(x=>x.layerVisibility));
+ expect(archive.drawings).toBe(false);
+});
+
+test('Beta editor: desfazer e refazer alterações, propriedades autorizadas',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#tokenName').fill('Pioneiro');await page.locator('#addToken').click();
+ await expect(page.locator('.piece')).toHaveCount(1);
+ await page.locator('#editorUndo').click();await expect(page.locator('.piece')).toHaveCount(0);
+ await page.locator('#editorRedo').click();await expect(page.locator('.piece')).toHaveCount(1);
+ const check=await page.evaluate(()=>{
+  const id=state.tokens[0].id;
+  apply('token:properties',{id,key:'name',value:'Invasor'},'guest','guest');
+  const denied=state.tokens[0].name;
+  apply('token:properties',{id,key:'size',value:85},myId,nickname);
+  return {denied,size:state.tokens[0].size};
+ });
+ expect(check).toEqual({denied:'Pioneiro',size:85});
+ await page.locator('.piece').click();
+ await expect(page.getByLabel('Tamanho do token')).toHaveValue('85');
+});
+
+test('Beta fichas: seções e campos privados respeitam permissões no host',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#charName').fill('Observador');await page.locator('#addChar').click();
+ await page.getByLabel('Novo campo da ficha').fill('Segredo');
+ await page.getByLabel('Seção do campo').fill('Notas');
+ await page.getByLabel('Visibilidade do campo').selectOption('master');
+ await page.getByRole('button',{name:'+ Campo'}).click();
+ const result=await page.evaluate(()=>{
+  const ch=state.characters[0],field=ch.fields[0];
+  const before=field.value;
+  apply('character:field',{id:ch.id,fieldId:field.id,value:'roubado'},'guest','guest');
+  return {before,after:field.value,section:field.section,visibleToGuest:playerView('guest').characters[0].fields.length};
+ });
+ expect(result).toEqual({before:'',after:'',section:'Notas',visibleToGuest:0});
+});
+
+test('Beta ZIP v3: estrutura separada, validação CRC e compatibilidade v2',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ const value=await page.evaluate(async()=>{
+  ensureSceneData();const image='data:image/png;base64,'+btoa('small-image');
+  state.map=image;state.scenes[0].map=image;rememberScene();
+  const packed=zipCampaign(state),entries=await readStoredZip(new File([packed],'beta.highlords'));
+  const manifest=JSON.parse(new TextDecoder().decode(entries.get('manifest.json')));
+  const restored=await unzipCampaign(new File([packed],'beta.highlords'));
+  const old=packStoredZip([['manifest.json',JSON.stringify({format:'highlords',version:2})],['campaign.json',JSON.stringify(state)]]);
+  const legacy=await unzipCampaign(new File([old],'antigo.highlords'));
+  const damaged=new Uint8Array(await packed.arrayBuffer());damaged[70]^=0x30;
+  let rejects=false;try{await unzipCampaign(new File([damaged],'corrompido.highlords'))}catch{rejects=true}
+  return {version:manifest.version,paths:[...entries.keys()],sameImage:restored.map===image&&restored.scenes[0].map===image,legacy:legacy.map===image,rejects};
+ });
+ expect(value.version).toBe(3);
+ expect(value.paths).toContain('characters/characters.json');
+ expect(value.paths).toContain('scenes/scene-0.json');
+ expect(value.paths).toContain('assets/asset-0.png');
+ expect(value.sameImage).toBe(true);
+ expect(value.legacy).toBe(true);
+ expect(value.rejects).toBe(true);
+});
+
+test('Beta camadas: sigilo, bloqueio e persistência por cena',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ const result=await page.evaluate(()=>{
+  apply('token:add',{name:'Oculto'},myId,nickname);
+  apply('draw',{points:[[0,0],[40,50]]},myId,nickname);
+  state.map='data:image/png;base64,'+btoa('pixels');changed();
+  apply('layer:policy',{layer:'map',property:'private',enabled:true},myId,nickname);
+  apply('layer:policy',{layer:'drawings',property:'private',enabled:true},myId,nickname);
+  apply('layer:policy',{layer:'tokens',property:'private',enabled:true},myId,nickname);
+  const view=playerView('intruso'),before=state.tokens.length;
+  apply('layer:policy',{layer:'tokens',property:'locked',enabled:true},myId,nickname);
+  apply('token:add',{name:'Bloqueado'},myId,nickname);
+  rememberScene();
+  return {map:view.map,draw:view.drawings.length,tokens:view.tokens.length,block:state.tokens.length===before,private:state.scenes[0].layerPolicy.map.private};
+ });
+ expect(result).toEqual({map:'',draw:0,tokens:0,block:true,private:true});
+});
+
+test('Beta identidade: mestre reassocia fichas e tokens e revoga vínculo anterior',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ const result=await page.evaluate(()=>{
+  const oldId='11111111-1111-4111-8111-111111111111',newId='22222222-2222-4222-8222-222222222222';
+  state.trustedKeys[oldId]={kty:'EC',crv:'P-256',x:'a',y:'b'};
+  state.trustedKeys[newId]={kty:'EC',crv:'P-256',x:'c',y:'d'};
+  state.characters.push({id:'sheet-1',name:'Herói',text:'',owner:oldId,fields:[]});
+  state.tokens.push({id:'token-1',name:'Herói',x:50,y:50,owner:oldId});
+  contacts.set('new-browser',{open:true,playerId:newId,playerName:'Jogador',send(){}});
+  apply('identity:transfer',{oldId,newId},oldId,'intruso');
+  const before=state.characters[0].owner;
+  apply('identity:transfer',{oldId,newId},myId,nickname);
+  contacts.delete('new-browser');
+  return {before,after:state.characters[0].owner,token:state.tokens[0].owner,oldKey:!!state.trustedKeys[oldId]};
+ });
+ expect(result.before).toBe('11111111-1111-4111-8111-111111111111');
+ expect(result.after).toBe('22222222-2222-4222-8222-222222222222');
+ expect(result.token).toBe(result.after);
+ expect(result.oldKey).toBe(false);
+});
+
+test('Beta seleção múltipla: alinhamento e rejeição de ação remota',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.evaluate(()=>{
+  ensureSceneData();
+  apply('token:add',{name:'A'},myId,nickname);apply('token:add',{name:'B'},myId,nickname);
+  state.tokens[0].x=100;state.tokens[0].y=120;
+  state.tokens[1].x=350;state.tokens[1].y=310;changed();
+ });
+ await page.locator('.piece').nth(0).click();
+ await page.locator('.piece').nth(1).click({modifiers:['Shift']});
+ await expect(page.getByRole('button',{name:'Alinhar horizontalmente'})).toBeVisible();
+ await page.getByRole('button',{name:'Alinhar horizontalmente'}).click();
+ const data=await page.evaluate(()=>{
+  const y=state.tokens[0].y,first=state.tokens[1].y;
+  apply('token:bulk',{ids:state.tokens.map(t=>t.id),operation:'delete'},'fake-player','evil');
+  return{aligned:y===first,count:state.tokens.length};
+ });
+ expect(data).toEqual({aligned:true,count:2});
+});
+
+test('Beta: papel de mestre é visível na mesa',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#game')).toBeVisible();
+ await expect(page.locator('#sessionRole')).toHaveText('MESTRE');
+ await expect(page.locator('#game .version-tag')).toContainText('BETA');
+});

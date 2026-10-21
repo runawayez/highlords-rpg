@@ -4,7 +4,7 @@ Aplicação publicada: `p2p/index.html` · https://highlords-rpg.vercel.app
 
 ## Recursos
 
-Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War com rasterização de áreas reveladas, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` ZIP v2 (importação JSON Alpha mantida).
+Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War com rasterização de áreas reveladas, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` ZIP v3 com cenas, personagens e imagens separados (importação v2 e JSON Alpha mantida).
 
 ## Desenvolvimento
 
@@ -34,6 +34,16 @@ Limitação aceita: em redes restritivas em que a conexão P2P direta não for v
 
 ## Editor da Beta
 
-O mestre dispõe de pincel, linha, retângulo, elipse, borracha de traços, régua (em unidades de grid), seleção contextual simples, grid quadrado/hexagonal, magnetismo de tokens e controle de visibilidade local do grid, tokens e desenhos. O alinhamento do grid, tamanho, opacidade e encaixe são configurações da campanha; alternar a visibilidade das camadas no painel afeta apenas a renderização local.
+O mestre dispõe de pincel, linha, retângulo, elipse, borracha de traços, régua (em unidades de grid), seleção contextual simples, grid quadrado/hexagonal, magnetismo de tokens e controle de visibilidade local do grid, tokens e desenhos. O alinhamento do grid, tamanho, opacidade e encaixe são configurações da campanha; a visibilidade das camadas é persistida e sincronizada pelo mestre, mas não substitui permissões de dados privadas nem camadas de objetos individuais.
 
-**Limites:** ainda não há paredes, iluminação dinâmica, ordenação/bloqueio persistente de camadas, seleção múltipla de objetos, macros, plugins ou histórico completo de ações. Essas ferramentas exigem evolução de modelo e validações P2P antes de serem anunciadas como implementadas. TURN continua desativado.
+**Limites:** ainda não há paredes, iluminação dinâmica, ordenação/bloqueio de objetos individuais, seleção múltipla, macros, plugins ou histórico de ações persistente entre sessões. O histórico em memória cobre o estado do editor da cena ativa. Essas ferramentas exigem evolução de modelo e validações P2P antes de serem anunciadas como implementadas. TURN continua desativado.
+
+Campos de fichas podem ser organizados por seção e marcados como exclusivos do mestre; o host filtra campos privados antes de projetar a ficha para jogadores e valida direitos de edição a cada ação. Fichas de outros jogadores não recebem seus campos privados.
+
+Exportação ZIP usa entradas armazenadas, sem compressão, com manifesto v3, limite de 15 MB e checagens CRC32, arquivos permitidos e referências válidas. O ZIP v2 legado continua importável; backups JSON originais também.
+
+O mestre controla a visibilidade, bloqueio de edição e confidencialidade das camadas Mapa/Desenhos/Tokens por cena. Campos 'Somente mestre' não entram no payload WebRTC do convidado, mesmo sem Fog; desenhos privados não entram no raster do mapa mascarado. Configuração validada pelo host e preservada em backups.
+
+Recuperação assistida: o mestre escolhe uma identidade previamente vinculada e um novo navegador já autenticado, confirma a identidade por canal externo, transfere personagens e tokens e remove o vínculo de chave antiga. Não exporta ou replica chave privada. Não é recuperação autônoma sem mestre.
+
+O mestre pode selecionar vários tokens pressionando Shift e clicando nos tokens, depois alinhar, distribuir horizontalmente ou excluir em lote. Todas as alterações em lote são verificadas pelo host e negadas aos convidados.

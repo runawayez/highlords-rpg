@@ -46,15 +46,15 @@ O projeto está em **desenvolvimento ativo**: o escopo de engenharia da **Alpha 
 | --- | --- |
 | Mesas online | Salas por convite, sem conta obrigatória; comunicação P2P com WebRTC e PeerJS |
 | Mapas e cenas | Upload de mapa, múltiplas cenas, navegação, zoom, grid quadrado/hexagonal calibrável, transparência, origem e encaixe de tokens |
-| Ferramentas | Pincel, linhas, retângulos, elipses, borracha de traços, régua, camadas de exibição e revelação de áreas |
-| Tokens | Criação, movimentação, transferência entre cenas, exclusão e atribuição de controlador |
-| Fichas | Fichas livres com texto e campos personalizados de texto, número, notas e inventário |
+| Ferramentas | Pincel, linhas, retângulos, elipses, borracha de traços, régua, histórico de desfazer/refazer do editor, inspetor de tokens e camadas de mapa, tokens e desenhos com visibilidade, bloqueio e privacidade persistidas por cena e revelação de áreas |
+| Tokens | Criação, movimentação, seleção múltipla com Shift, alinhamento/distribuição, transferência entre cenas, exclusão e atribuição de controlador |
+| Fichas | Fichas livres com texto e campos e seções personalizados de texto, número, notas e inventário, com visibilidade e edição restritas pelo mestre |
 | Interação | Chat e rolagem de dados |
 | Persistência | Autosave e checkpoints locais em IndexedDB |
-| Portabilidade | Exportação `.highlords` em ZIP versionado com manifesto e verificação CRC32; importação de JSON da Alpha |
+| Portabilidade | Exportação `.highlords` em ZIP v3 com cenas, fichas e imagens separadas, manifesto e verificação CRC32; importação de JSON da Alpha |
 | Identidade | Chaves ECDSA P-256 geradas localmente, prova de posse e vinculação inicial de confiança (TOFU) |
 
-As ferramentas da Beta são **implementações iniciais**, não necessariamente versões definitivas. Por exemplo, o ZIP ainda mantém os recursos incorporados ao `campaign.json`, e as camadas atuais são controles locais de exibição; paredes, iluminação dinâmica, histórico completo de desfazer/refazer e painéis acopláveis continuam planejados.
+As ferramentas da Beta são **implementações iniciais**, não necessariamente versões definitivas. Por exemplo, as camadas atuais possuem visibilidade, bloqueio e modo exclusivo do mestre por tipo, mas ainda não permitem ordenação individual de objetos; paredes, iluminação dinâmica, histórico persistente entre sessões, paredes e painéis acopláveis continuam planejados.
 
 ## Como funciona
 
@@ -78,7 +78,7 @@ Não há login obrigatório nem banco central para armazenar campanhas. O servi�
 
 ## Arquivos de campanha
 
-O formato `.highlords` exportado atualmente é um ZIP versionado, contendo `manifest.json` e `campaign.json`. A importação também aceita arquivos JSON legados da Alpha.
+O formato `.highlords` exportado usa ZIP v3 com `manifest.json`, `campaign.json`, `characters/`, `scenes/` e `assets/`. O importador mantém compatibilidade com ZIP v2 e arquivos JSON legados da Alpha. Arquivos passam por validação de caminhos, entradas permitidas, tamanho, estrutura e CRC32.
 
 **Boas práticas:** mantenha cópias do arquivo exportado em local seguro, especialmente antes de limpar os dados do navegador ou trocar de computador. A chave privada de identidade do jogador não é exportada com a campanha.
 
@@ -86,7 +86,7 @@ O formato `.highlords` exportado atualmente é um ZIP versionado, contendo `mani
 
 - **Conectividade:** certas combinações de NAT, firewall e redes restritivas podem impedir a conexão direta. O TURN não será ativado sem nova decisão explícita.
 - **Sessão:** ao fechar a aba do mestre, a mesa online é encerrada; a campanha pode ser retomada a partir dos dados locais ou de um backup.
-- **Identidade:** a autenticação usa confiança no primeiro vínculo (TOFU). A recuperação segura da identidade em outro navegador ainda não está disponível.
+- **Identidade:** a autenticação usa confiança no primeiro vínculo (TOFU). Há reassociação manual de fichas e tokens por autorização explícita do mestre para um novo navegador autenticado; a chave antiga é revogada. Não existe restauração automática da chave privada original.
 - **Privacidade dos mapas:** ative a névoa **antes** de compartilhar a cena. Conteúdos enviados anteriormente a outros participantes não podem ser revogados.
 - **Persistência:** armazenamento do navegador pode ser apagado pelo usuário ou pelo próprio ambiente. Exporte backups regularmente.
 - **Maturidade:** ainda faltam homologação em redes externas, refinamentos de segurança, acessibilidade e validação de campanhas grandes. Evite usar material sigiloso ou campanhas sem backup.
