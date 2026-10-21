@@ -86,3 +86,20 @@ test('ferramentas são botões e podem alternar',async({page})=>{
  await page.locator('[data-tool="pan"]').click();
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
 });
+
+test('desenho aceita traços consecutivos e revelação ativa névoa',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#game')).toBeVisible();
+ await page.locator('[data-tool="draw"]').click();
+ const board=page.locator('#board'),rect=await board.boundingBox();
+ for(let i=0;i<2;i++){
+  await page.mouse.move(rect.x+90,rect.y+100+i*45);
+  await page.mouse.down();await page.mouse.move(rect.x+180,rect.y+105+i*45,{steps:8});await page.mouse.up();
+ }
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(2);
+ await page.locator('[data-tool="reveal"]').click();
+ await expect(page.locator('#fogEnabled')).toBeChecked();
+ await page.mouse.move(rect.x+70,rect.y+70);await page.mouse.down();
+ await page.mouse.move(rect.x+180,rect.y+180,{steps:4});await page.mouse.up();
+ await expect(page.locator('#fogLayer mask rect')).toHaveCount(2);
+});
