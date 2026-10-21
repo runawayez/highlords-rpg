@@ -117,3 +117,13 @@ test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visíve
  await page.locator('[data-tool="reveal"]').click();
  await expect(page.locator('[data-tool="reveal"]')).toHaveAttribute('aria-pressed','true');
 });
+
+test('mestre aguarda autosave ao sair pelo menu',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#game')).toBeVisible();
+ await page.locator('#charName').fill('Guardião');await page.locator('#addChar').click();
+ await page.locator('#leaveGame').click();
+ await expect(page.locator('#home')).toBeVisible();
+ const saved=await page.evaluate(async()=>{const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('saves');const r=tx.objectStore('saves').get('latest');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})});
+ expect(saved.characters.some(c=>c.name==='Guardião')).toBe(true);
+});
