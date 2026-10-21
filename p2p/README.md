@@ -39,3 +39,10 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - **Névoa de guerra**: marque a opção e selecione **Revelar névoa**; arraste um retângulo sobre a região a revelar.
 - **Aviso de privacidade:** fog é apenas visual nesta Alpha. O estado completo e a imagem original são enviados a todos os participantes; não use a névoa para informações secretas. A separação de estado do mestre será necessária antes da Beta.
 - Não foi executado teste real de navegadores multiusuário nesta rodada; o JavaScript foi validado quanto à sintaxe.
+
+## Sincronização com visibilidade por jogador
+- O mestre continua mantendo o estado completo. Na transmissão para cada participante, apenas a cena ativa é enviada; futuras cenas não são incluídas.
+- Fichas de terceiros chegam sem o conteúdo de suas anotações. O próprio jogador recebe o texto da ficha atribuída a sua identidade local.
+- Tokens cobertos pela névoa são removidos do estado transmitido para os jogadores. O mestre também rejeita movimentações remotas de tokens que não estejam revelados.
+- **Limite de segurança importante:** a imagem original do mapa e as áreas reveladas continuam sendo enviadas ao navegador. **O Fog of War não é uma barreira criptográfica e não esconde segredos impressos no mapa**. Para isso, precisamos fornecer mapas já expurgados/segmentados ou um serviço de entrega por regiões. A identidade local também ainda não é autenticação forte.
+- Verificação desta rodada: sintaxe do JS, sem testes multi-navegador realizados. Não considerar prontidão de produção.
