@@ -1,0 +1,19 @@
+name: P2P browser tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save @playwright/test
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test browser-tests/p2p.spec.cjs --reporter=line
+        env:
+          CI: 'true'
