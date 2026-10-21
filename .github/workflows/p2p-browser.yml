@@ -25,7 +25,7 @@ jobs:
           node -e "const fs=require('fs'); const s=fs.readFileSync('p2p/index.html','utf8'); const a=s.lastIndexOf('<script>')+8; const b=s.lastIndexOf('</script>'); if(a<8||b<a)throw Error('Inline script não encontrado'); new Function(s.slice(a,b));"
       - name: Testar navegador
         id: browser
-        run: npx playwright test browser-tests/p2p.spec.cjs --project=chromium --reporter=line --workers=1 --trace=retain-on-failure
+        run: npx playwright test --project=chromium --reporter=line --workers=1 --trace=retain-on-failure
         env:
           CI: 'true'
       - name: Publicar resultado do Playwright no commit
