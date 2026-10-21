@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
 const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
 const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]}};
-const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false;
+const contacts=new Map();let hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null;
 function ensureSceneData(){
  if(!Array.isArray(state.drawings))state.drawings=[];
  if(!state.fog||typeof state.fog!=='object')state.fog={enabled:false,reveals:[]};
@@ -106,6 +106,9 @@ function connectGuest(){
  if(!peer||peer.destroyed||peer.disconnected||!peer.open)return scheduleReconnect();
  if(hostLink?.open)return;
  guestSynced=false;hostLink=peer.connect(roomId,{reliable:true});
+ const pending=hostLink;
+ clearTimeout(connectionTimer);
+ connectionTimer=setTimeout(()=>{if(hostLink===pending&&!guestSynced){pending.close();hostLink=null;scheduleReconnect()}},12000);
  attach(hostLink,true);
 }
 function scheduleReconnect(){
@@ -126,7 +129,7 @@ function startGuest(){
 }
 function attach(c,guest=false){
  c.on('open',()=>{
-  if(guest){retryCount=0;clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});showGame();announce('Conectado ao mestre')}
+  if(guest){clearTimeout(retryTimer);retryTimer=null;c.send({kind:'hello',identity:myId,name:nickname});announce('Conexão estabelecida · sincronizando mesa…')}
   else announce('Jogador conectado');
  });
  c.on('data',m=>{
@@ -140,19 +143,19 @@ function attach(c,guest=false){
    }else if(m.kind==='action'&&c.playerId){
     const time=Date.now();if(time-(c.rateStarted||0)>1000){c.rateStarted=time;c.rateCount=0}if(++c.rateCount>15)return;
     if(typeof m.action!=='string'||!m.payload||typeof m.payload!=='object'||Array.isArray(m.payload))return;
-    if(JSON.stringify(m.payload).length>10000)return;
+    let payloadLength;try{payloadLength=JSON.stringify(m.payload).length}catch{return}if(payloadLength>10000)return;
     apply(m.action,m.payload,c.playerId,c.playerName);
    }
   }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
-   guestSynced=true;revision=m.revision;Object.assign(state,m.state);ensureSceneData();render();
+   guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;Object.assign(state,m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
   }
  });
  c.on('close',()=>{
   if(contacts.get(c.peer)===c)contacts.delete(c.peer);
-  if(guest&&hostLink===c){hostLink=null;guestSynced=false;scheduleReconnect()}
+  if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}
   else {announce('Jogador desconectado');render()}
  });
- c.on('error',e=>{announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;scheduleReconnect()}});
+ c.on('error',e=>{announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
 }
 function dispatch(action,payload){if(hostMode)apply(action,payload,myId,nickname);else if(hostLink?.open)hostLink.send({kind:'action',action,payload});else announce('Sem conexão com o mestre')}
 function apply(action,p,id,name){if(!p||typeof p!=='object')return;const owner=state.characters.find(x=>x.id===p.id);switch(action){
