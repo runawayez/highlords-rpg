@@ -17,21 +17,21 @@ class Peer {
 }
 window.Peer=Peer;`}))}
 test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/BETA.*v0\.3\.0/)});
-test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await page.locator('#tokenName').fill('Goblin');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#charName').fill('Thorin');await page.locator('#addChar').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
+test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Goblin');await page.locator('#tabTools').click();await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabTools').click();await page.locator('#addChar').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
 test('mestre salva ficha e conserva dados ao alternar de cena',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
- await page.locator('#charName').fill('Arcanista');
- await page.locator('#addChar').click();
- await page.locator('.char textarea').fill('Pontos de vida 22');
- await page.getByRole('button',{name:'Salvar ficha'}).click();
+ await page.locator('#tabTools').click();await page.locator('#charName').fill('Arcanista');
+ await page.locator('#tabTools').click();await page.locator('#addChar').click();
+ await page.locator('#tabSheets').click();await page.locator('.char textarea').fill('Pontos de vida 22');
+ await page.locator('#tabSheets').click();await page.getByRole('button',{name:'Salvar ficha'}).click();
  page.once('dialog',dialog=>dialog.accept('Ruínas'));
- await page.locator('#newScene').click();
+ await page.locator('#tabTools').click();await page.locator('#newScene').click();
  await expect(page.locator('#sceneSelect option')).toHaveCount(2);
  await expect(page.locator('.char textarea')).toHaveValue('Pontos de vida 22');
- await page.locator('#sceneSelect').selectOption({index:0});
+ await page.locator('#tabTools').click();await page.locator('#sceneSelect').selectOption({index:0});
  await expect(page.locator('.char textarea')).toHaveValue('Pontos de vida 22');
 });
 
@@ -68,40 +68,40 @@ test('nome da campanha aparece no save e no download',async({page})=>{
 test('mestre transfere token, exclui e volta ao menu',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
- await page.locator('#tokenName').fill('Sentinela');await page.locator('#addToken').click();
- page.once('dialog',d=>d.accept('Outra cena'));await page.locator('#newScene').click();
- await page.locator('#sceneSelect').selectOption({index:0});
+ await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Sentinela');await page.locator('#tabTools').click();await page.locator('#addToken').click();
+ page.once('dialog',d=>d.accept('Outra cena'));await page.locator('#tabTools').click();await page.locator('#newScene').click();
+ await page.locator('#tabTools').click();await page.locator('#sceneSelect').selectOption({index:0});
  const options=page.locator('#tokenManager .token-actions select');await expect(options).toHaveCount(1);
  await options.selectOption({index:1});
  await expect(page.locator('#tokenManager .token-actions select')).toHaveCount(0);
- await page.locator('#sceneSelect').selectOption({index:1});
+ await page.locator('#tabTools').click();await page.locator('#sceneSelect').selectOption({index:1});
  await expect(page.locator('#tokenManager .token-actions select')).toHaveCount(1);
- page.once('dialog',d=>d.accept());await page.locator('#tokenManager button.danger').click();
+ page.once('dialog',d=>d.accept());await page.locator('#tabTools').click();await page.locator('#tokenManager button.danger').click();
  await expect(page.locator('#tokenManager .token-control')).toHaveCount(0);
  page.on('dialog',d=>d.accept());await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
 });
 test('ferramentas são botões e podem alternar',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#toolButtons button')).toHaveCount(8);
- await page.locator('[data-tool="draw"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  await expect(page.locator('[data-tool="draw"]')).toHaveAttribute('aria-pressed','true');
- await page.locator('[data-tool="pan"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="pan"]').click();
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
 });
 
 test('desenho aceita traços consecutivos e revelação ativa névoa',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
- await page.locator('[data-tool="draw"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  const board=page.locator('#board'),rect=await board.boundingBox();
  for(let i=0;i<2;i++){
   await page.mouse.move(rect.x+90,rect.y+100+i*45);
   await page.mouse.down();await page.mouse.move(rect.x+180,rect.y+105+i*45,{steps:8});await page.mouse.up();
  }
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(2);
- await page.locator('#fogEnable').click();
+ await page.locator('#tabTools').click();await page.locator('#fogEnable').click();
  await expect(page.locator('#fogState')).toContainText('Ativa');
- await page.locator('[data-tool="reveal"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="reveal"]').click();
  await page.mouse.move(rect.x+70,rect.y+70);await page.mouse.down();
  await page.mouse.move(rect.x+180,rect.y+180,{steps:4});await page.mouse.up();
  await expect(page.locator('#fogLayer > rect')).toHaveCount(1);
@@ -109,20 +109,20 @@ test('desenho aceita traços consecutivos e revelação ativa névoa',async({pag
 
 test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visível',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('[data-tool="reveal"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="reveal"]').click();
  await expect(page.locator('#fogState')).toContainText('Desativada');
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
- await page.locator('#fogEnable').click();
+ await page.locator('#tabTools').click();await page.locator('#fogEnable').click();
  await expect(page.locator('#fogState')).toContainText('Ativa');
  await expect(page.locator('#fogLayer mask')).toHaveCount(0);
- await page.locator('[data-tool="reveal"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="reveal"]').click();
  await expect(page.locator('[data-tool="reveal"]')).toHaveAttribute('aria-pressed','true');
 });
 
 test('mestre aguarda autosave ao sair pelo menu',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
- await page.locator('#charName').fill('Guardião');await page.locator('#addChar').click();
+ await page.locator('#tabTools').click();await page.locator('#charName').fill('Guardião');await page.locator('#tabTools').click();await page.locator('#addChar').click();
  await page.locator('#leaveGame').click();
  await expect(page.locator('#home')).toBeVisible();
  const saved=await page.evaluate(async()=>{const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('saves');const r=tx.objectStore('saves').get('latest');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})});
@@ -131,15 +131,15 @@ test('mestre aguarda autosave ao sair pelo menu',async({page})=>{
 
 test('desfazer remove apenas último traço e limpar pede confirmação',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('[data-tool="draw"]').click();
+ await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  const r=await page.locator('#board').boundingBox();
  for(let i=0;i<2;i++){await page.mouse.move(r.x+90,r.y+100+i*40);await page.mouse.down();await page.mouse.move(r.x+180,r.y+110+i*40,{steps:5});await page.mouse.up()}
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(2);
- await page.locator('#undoDrawing').click();
+ await page.locator('#tabTools').click();await page.locator('#undoDrawing').click();
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
- page.once('dialog',d=>d.dismiss());await page.locator('#clearDrawings').click();
+ page.once('dialog',d=>d.dismiss());await page.locator('#tabTools').click();await page.locator('#clearDrawings').click();
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
- page.once('dialog',d=>d.accept());await page.locator('#clearDrawings').click();
+ page.once('dialog',d=>d.accept());await page.locator('#tabTools').click();await page.locator('#clearDrawings').click();
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
 });
 
@@ -205,11 +205,11 @@ test('WebRTC usa apenas STUN e nunca consulta endpoint TURN',async({page})=>{
 
 test('fechamento abrupto preserva cenas e fichas no autosave',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#charName').fill('Cartógrafa');await page.locator('#addChar').click();
- await page.locator('.char textarea').fill('PV 17');await page.getByRole('button',{name:'Salvar ficha'}).click();
- await page.locator('#tokenName').fill('Exploradora');await page.locator('#addToken').click();
- page.once('dialog',d=>d.accept('Templo'));await page.locator('#newScene').click();
- await page.locator('#tokenName').fill('Guardião');await page.locator('#addToken').click();
+ await page.locator('#tabTools').click();await page.locator('#charName').fill('Cartógrafa');await page.locator('#tabTools').click();await page.locator('#addChar').click();
+ await page.locator('#tabSheets').click();await page.locator('.char textarea').fill('PV 17');await page.locator('#tabSheets').click();await page.getByRole('button',{name:'Salvar ficha'}).click();
+ await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Exploradora');await page.locator('#tabTools').click();await page.locator('#addToken').click();
+ page.once('dialog',d=>d.accept('Templo'));await page.locator('#tabTools').click();await page.locator('#newScene').click();
+ await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Guardião');await page.locator('#tabTools').click();await page.locator('#addToken').click();
  await page.evaluate(()=>saveLocal());
  await page.reload();
  await expect(page.locator('#recoveryPanel')).toBeVisible();
@@ -218,7 +218,7 @@ test('fechamento abrupto preserva cenas e fichas no autosave',async({page})=>{
  await expect(page.locator('#sceneSelect option')).toHaveCount(2);
  await expect(page.locator('.char textarea')).toHaveValue('PV 17');
  await expect(page.locator('#tokenManager .token-control')).toHaveCount(1);
- await page.locator('#sceneSelect').selectOption({index:0});
+ await page.locator('#tabTools').click();await page.locator('#sceneSelect').selectOption({index:0});
  await expect(page.locator('#tokenManager .token-control')).toHaveCount(1);
 });
 test('importação de campanha antiga não herda chaves de outra campanha',async({page})=>{
@@ -236,34 +236,34 @@ test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);a
 
 test('Beta: ZIP e editor universal e grid',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#charName').fill('Investigador');await page.locator('#addChar').click();
- await page.getByLabel('Novo campo da ficha').fill('Sanidade');
- await page.getByLabel('Tipo de campo').selectOption('number');
- await page.getByRole('button',{name:'+ Campo'}).click();
+ await page.locator('#tabTools').click();await page.locator('#charName').fill('Investigador');await page.locator('#tabTools').click();await page.locator('#addChar').click();
+ await page.locator('#tabSheets').click();await page.getByLabel('Novo campo da ficha').fill('Sanidade');
+ await page.locator('#tabSheets').click();await page.getByLabel('Tipo de campo').selectOption('number');
+ await page.locator('#tabSheets').click();await page.getByRole('button',{name:'+ Campo'}).click();
  await expect(page.getByLabel('Sanidade')).toBeVisible();
- await page.locator('#gridSize').fill('45');await page.locator('#gridSize').dispatchEvent('change');
+ await page.locator('#tabTools').click();await page.locator('#gridSize').fill('45');await page.locator('#tabTools').click();await page.locator('#gridSize').dispatchEvent('change');
  const value=await page.evaluate(async()=>{const bytes=new Uint8Array(await zipCampaign(state).arrayBuffer());const obj=await unzipCampaign(new File([bytes],'campanha.highlords'));return {magic:Array.from(bytes.slice(0,4)),fields:obj.characters[0].fields.length,grid:obj.gridSize}});
  expect(value).toEqual({magic:[80,75,3,4],fields:1,grid:45});
 });
 
 test('Beta editor: grid hexagonal, magnetismo, camadas e formato persistido',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#gridKind').selectOption('hex');
- await page.locator('#gridSnap').check();
- await page.locator('#gridOriginX').fill('12');await page.locator('#gridOriginX').dispatchEvent('change');
- await page.locator('#gridOpacity').fill('35');await page.locator('#gridOpacity').dispatchEvent('change');
+ await page.locator('#tabTools').click();await page.locator('#gridKind').selectOption('hex');
+ await page.locator('#tabTools').click();await page.locator('#gridSnap').check();
+ await page.locator('#tabTools').click();await page.locator('#gridOriginX').fill('12');await page.locator('#tabTools').click();await page.locator('#gridOriginX').dispatchEvent('change');
+ await page.locator('#tabTools').click();await page.locator('#gridOpacity').fill('35');await page.locator('#tabTools').click();await page.locator('#gridOpacity').dispatchEvent('change');
  const result=await page.evaluate(()=>({kind:state.gridKind,snap:state.gridSnap,x:state.gridOriginX,opacity:state.gridOpacity,size:state.gridSize,ice:peerOptions().config.iceServers.map(i=>i.urls)}));
  expect(result.kind).toBe('hex');expect(result.snap).toBe(true);expect(result.x).toBe(12);expect(result.opacity).toBe(35);
  expect(result.ice.every(x=>x.startsWith('stun:'))).toBe(true);
- await page.locator('#layerDrawings').uncheck();
+ await page.locator('#tabTools').click();await page.locator('#layerDrawings').uncheck();
  await expect(page.locator('#sketchLayer')).toBeHidden();
- await page.locator('#layerDrawings').check();
+ await page.locator('#tabTools').click();await page.locator('#layerDrawings').check();
  await expect(page.locator('#sketchLayer')).toBeVisible();
 });
 test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  for(const tool of ['line','rectangle','ellipse','eraser','ruler','pan']){
-  await page.locator('[data-tool="'+tool+'"]').click();
+  await page.locator('#tabTools').click();await page.locator('[data-tool="'+tool+'"]').click();
   await expect(page.locator('[data-tool="'+tool+'"]')).toHaveAttribute('aria-pressed','true');
  }
  await page.evaluate(()=>{
@@ -290,7 +290,7 @@ test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({
 
 test('Beta camadas: persistência, autorização e sincronização',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#layerDrawings').uncheck();
+ await page.locator('#tabTools').click();await page.locator('#layerDrawings').uncheck();
  const result=await page.evaluate(()=>{
   const before=structuredClone(state.layerVisibility);
   const revisionBefore=revision;
@@ -307,10 +307,10 @@ test('Beta camadas: persistência, autorização e sincronização',async({page}
 
 test('Beta editor: desfazer e refazer alterações, propriedades autorizadas',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#tokenName').fill('Pioneiro');await page.locator('#addToken').click();
+ await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Pioneiro');await page.locator('#tabTools').click();await page.locator('#addToken').click();
  await expect(page.locator('.piece')).toHaveCount(1);
- await page.locator('#editorUndo').click();await expect(page.locator('.piece')).toHaveCount(0);
- await page.locator('#editorRedo').click();await expect(page.locator('.piece')).toHaveCount(1);
+ await page.locator('#tabTools').click();await page.locator('#editorUndo').click();await expect(page.locator('.piece')).toHaveCount(0);
+ await page.locator('#tabTools').click();await page.locator('#editorRedo').click();await expect(page.locator('.piece')).toHaveCount(1);
  const check=await page.evaluate(()=>{
   const id=state.tokens[0].id;
   apply('token:properties',{id,key:'name',value:'Invasor'},'guest','guest');
@@ -325,11 +325,11 @@ test('Beta editor: desfazer e refazer alterações, propriedades autorizadas',as
 
 test('Beta fichas: seções e campos privados respeitam permissões no host',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await page.locator('#charName').fill('Observador');await page.locator('#addChar').click();
- await page.getByLabel('Novo campo da ficha').fill('Segredo');
- await page.getByLabel('Seção do campo').fill('Notas');
- await page.getByLabel('Visibilidade do campo').selectOption('master');
- await page.getByRole('button',{name:'+ Campo'}).click();
+ await page.locator('#tabTools').click();await page.locator('#charName').fill('Observador');await page.locator('#tabTools').click();await page.locator('#addChar').click();
+ await page.locator('#tabSheets').click();await page.getByLabel('Novo campo da ficha').fill('Segredo');
+ await page.locator('#tabSheets').click();await page.getByLabel('Seção do campo').fill('Notas');
+ await page.locator('#tabSheets').click();await page.getByLabel('Visibilidade do campo').selectOption('master');
+ await page.locator('#tabSheets').click();await page.getByRole('button',{name:'+ Campo'}).click();
  const result=await page.evaluate(()=>{
   const ch=state.characters[0],field=ch.fields[0];
   const before=field.value;
@@ -412,7 +412,7 @@ test('Beta seleção múltipla: alinhamento e rejeição de ação remota',async
  await page.locator('.piece').nth(0).click();
  await page.locator('.piece').nth(1).click({modifiers:['Shift']});
  await expect(page.getByRole('button',{name:'Alinhar horizontalmente'})).toBeVisible();
- await page.getByRole('button',{name:'Alinhar horizontalmente'}).click();
+ await page.locator('#tabTools').click();await page.getByRole('button',{name:'Alinhar horizontalmente'}).click();
  const data=await page.evaluate(()=>{
   const y=state.tokens[0].y,first=state.tokens[1].y;
   apply('token:bulk',{ids:state.tokens.map(t=>t.id),operation:'delete'},'fake-player','evil');
@@ -426,4 +426,20 @@ test('Beta: papel de mestre é visível na mesa',async({page})=>{
  await expect(page.locator('#game')).toBeVisible();
  await expect(page.locator('#sessionRole')).toHaveText('MESTRE');
  await expect(page.locator('#game .version-tag')).toContainText('BETA');
+});
+
+test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#tabChat')).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('#message')).toBeVisible();
+ await expect(page.locator('#dice')).toBeVisible();
+ await expect(page.locator('#masterTools')).toBeHidden();
+ await page.locator('#tabTools').click();
+ await expect(page.locator('#masterTools')).toBeVisible();
+ await page.locator('#tabSheets').click();
+ await expect(page.locator('#characters')).toBeVisible();
+ await page.locator('#tabChat').click();
+ await expect(page.locator('#roll')).toBeVisible();
+ const sizes=await page.evaluate(()=>({aside:document.querySelector('#tableSidebar').clientHeight,scroll:document.querySelector('#tableSidebar').scrollHeight,visible:!!document.querySelector('#history').offsetParent}));
+ expect(sizes.scroll).toBeLessThanOrEqual(sizes.aside+2);expect(sizes.visible).toBe(true);
 });
