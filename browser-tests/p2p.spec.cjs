@@ -11,7 +11,7 @@ class Peer {
  constructor(id){this.id=id||'mock-guest';this.destroyed=false;this.disconnected=false;this.open=true;this.handlers={};setTimeout(()=>this.emit('open',this.id),10)}
  on(event,cb){(this.handlers[event]||=[]).push(cb)}
  emit(event,...args){for(const cb of this.handlers[event]||[])cb(...args)}
- connect(){const c={open:true,peer:'hl-mock-room',handlers:{},on(event,cb){(this.handlers[event]||=[]).push(cb)},send(m){if(m.kind==='hello')setTimeout(()=>{for(const cb of this.handlers.data||[])cb({kind:'state',revision:1,state:{schema:1,title:'Teste',updated:Date.now(),activeSceneId:'scene-1',scenes:[{id:'scene-1',title:'Cena teste'}],map:'',tokens:[],drawings:[],fog:{enabled:false,reveals:[]},characters:[],chat:[]}})},15)},close(){this.open=false;for(const cb of this.handlers.close||[])cb()}};setTimeout(()=>{for(const cb of c.handlers.open||[])cb()},10);return c}
+ connect(){const c={open:true,peer:'hl-mock-room',handlers:{},on(event,cb){(this.handlers[event]||=[]).push(cb)},send(m){if(m.kind==='hello')setTimeout(()=>{for(const cb of this.handlers.data||[])cb({kind:'challenge',nonce:'12345678-1234-1234-1234-123456789abc'})},15);if(m.kind==='proof')setTimeout(()=>{for(const cb of this.handlers.data||[])cb({kind:'state',revision:1,state:{schema:1,title:'Teste',updated:Date.now(),activeSceneId:'scene-1',scenes:[{id:'scene-1',title:'Cena teste'}],map:'',tokens:[],drawings:[],fog:{enabled:false,reveals:[]},characters:[],chat:[]}})},15)},close(){this.open=false;for(const cb of this.handlers.close||[])cb()}};setTimeout(()=>{for(const cb of c.handlers.open||[])cb()},10);return c}
  reconnect(){this.disconnected=false;this.emit('open',this.id)}
  destroy(){this.destroyed=true;this.open=false;this.emit('close')}
 }
@@ -141,4 +141,29 @@ test('desfazer remove apenas último traço e limpar pede confirmação',async({
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
  page.once('dialog',d=>d.accept());await page.locator('#clearDrawings').click();
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
+});
+
+test('identidade WebCrypto persiste e verifica assinatura',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const value=await page.evaluate(async()=>{
+  const keys=await loadIdentityKeys();
+  const id=identity(),challenge='12345678-1234-1234-1234-123456789abc';
+  roomId='hl-12345678-1234-1234-1234-123456789abc';
+  const proof=await signChallenge(challenge,id);
+  const valid=await verifyChallenge(challenge,id,proof.key,proof.signature);
+  const invalid=await verifyChallenge(challenge,'different-player',proof.key,proof.signature);
+  identityKeys=null;
+  const persisted=await loadIdentityKeys();
+  return {valid,invalid,privateExtractable:keys.privateKey.extractable,sameKey:keys.privateKey===persisted.privateKey||keys.publicKey.type===persisted.publicKey.type};
+ });
+ expect(value.valid).toBe(true);expect(value.invalid).toBe(false);
+ expect(value.privateExtractable).toBe(false);expect(value.sameKey).toBe(true);
+});
+test('importação rejeita cena com coordenadas fora do mapa',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const result=await page.evaluate(()=>{
+  const scene={id:'scene',title:'Cena',map:'',tokens:[{id:'token',name:'Ruim',x:99999,y:0}],drawings:[],fog:{enabled:false,reveals:[]}};
+  return isValidState({schema:1,title:'Campanha',map:'',tokens:[],characters:[],chat:[],scenes:[scene],activeSceneId:'scene'});
+ });
+ expect(result).toBe(false);
 });
