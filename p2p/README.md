@@ -55,3 +55,7 @@ A interface usa navegação por abas inspirada no padrão de mesas virtuais mode
 ## Robustez e homologação
 
 Ações recebidas de convidados são limitadas em frequência e tamanho antes da validação específica no mestre. O estado recuperado é validado, inclusive IDs duplicados; o autosave valida o snapshot antes da gravação e evidencia falhas de espaço com recomendação de exportar backup. A suíte automatizada cobre regressões, mas não equivale a homologação entre redes físicas independentes ou avaliação de acessibilidade assistiva. TURN permanece desativado.
+
+## Lançamento oficial 1.0
+
+O projeto passou diretamente da Beta para o lançamento 1.0 por decisão de produto, sem etapa formal de Release Candidate. TURN permanece totalmente desativado, inclusive em produção, até segunda ordem. O pacote oficial usa os testes automatizados existentes e testes adicionais de integridade/segurança; a disponibilidade entre operadoras físicas diferentes, auditoria externa de segurança e acessibilidade assistiva não estão certificadas. O acompanhamento de bugs continua via issues e commits pontuais. A Vercel publica apenas a aplicação P2P estática.

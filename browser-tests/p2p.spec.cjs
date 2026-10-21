@@ -16,7 +16,7 @@ class Peer {
  destroy(){this.destroyed=true;this.open=false;this.emit('close')}
 }
 window.Peer=Peer;`}))}
-test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/BETA.*v0\.3\.0/)});
+test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.0/)});
 test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#tokenName').fill('Goblin');await page.locator('#tabTools').click();await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabTools').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabTools').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
@@ -425,7 +425,7 @@ test('Beta: papel de mestre é visível na mesa',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
  await expect(page.locator('#sessionRole')).toHaveText('MESTRE');
- await expect(page.locator('#game .version-tag')).toContainText('BETA');
+ await expect(page.locator('#game .version-tag')).toContainText('VERSÃO 1.0');
 });
 
 test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page})=>{
@@ -485,4 +485,26 @@ test('Beta hardening: aba de chat acessível em mobile e sem rolagem geral do pa
  const result=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,tabHidden:document.querySelector('#masterTools').hidden}));
  expect(result.width).toBeLessThanOrEqual(result.viewport+3);
  expect(result.tabHidden).toBe(true);
+});
+
+test('1.0 mostra identificação oficial e mantém TURN desativado',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ await expect(page.locator('.version-tag').first()).toContainText('VERSÃO 1.0');
+ await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();
+ await page.locator('#host').click();
+ await expect(page.locator('#game .version-tag')).toContainText('VERSÃO 1.0');
+ expect(await page.evaluate(()=>({version:APP_VERSION,ice:peerOptions().config.iceServers.flatMap(s=>[s.urls])}))).toEqual({version:'1.0.0',ice:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']});
+});
+test('1.0 rejeita estado importado com nomes de chat e proprietários excessivos',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const result=await page.evaluate(()=>{
+  const base={schema:1,title:'Campanha',tokens:[],characters:[],chat:[],map:''};
+  return {
+   badChat:isValidState({...base,chat:[{name:'x'.repeat(150),text:'mensagem'}]}),
+   badToken:isValidState({...base,tokens:[{id:'id',name:'Token',x:10,y:10,owner:'x'.repeat(150)}]}),
+   badCharacter:isValidState({...base,characters:[{id:'ficha',name:'Nome',text:'',owner:'x'.repeat(150)}]}),
+   valid:isValidState(base)
+  };
+ });
+ expect(result).toEqual({badChat:false,badToken:false,badCharacter:false,valid:true});
 });

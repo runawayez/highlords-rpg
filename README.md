@@ -20,7 +20,7 @@ Mesa virtual de RPG gratuita e independente de sistemas, direto no navegador.
 
 O Highlords RPG é uma *Virtual Tabletop* (VTT) leve para reunir pessoas em torno de mapas, personagens e histórias, sem impor regras de um sistema específico. O mestre cria a sala, compartilha o convite e mantém o controle da campanha em seu próprio navegador.
 
-O projeto está em **desenvolvimento ativo**: o escopo de engenharia da **Alpha foi encerrado**, e funcionalidades da **Beta estão integradas, mas ainda não homologadas integralmente**. Não se trata de uma versão estável 1.0.
+**Lançamento 1.0:** versão oficial do núcleo gratuito e independente de sistemas. Mantemos correções e evolução contínuas. A publicação não garante funcionamento em todas as redes: TURN permanece desativado e cenários de redes físicas diferentes não foram integralmente homologados.
 
 ## Comece a jogar
 
@@ -90,6 +90,10 @@ O formato `.highlords` exportado usa ZIP v3 com `manifest.json`, `campaign.json`
 
 O projeto inclui testes automatizados de sincronização multiplayer simulada, permissões, integridade dos backups, tratamento de falhas de autosave e navegação móvel. O host limita a frequência de ações enviadas por cada jogador e rejeita cargas anormalmente grandes. **Esses testes não certificam conectividade entre operadoras diferentes ou ausência de vulnerabilidades.** O status definitivo da Beta depende de homologação real documentada.
 
+## Versão oficial 1.0 — compromisso de produto
+
+**A primeira versão oficial está lançada com limitações documentadas.** Não exige conta, não hospeda campanhas centralmente e não usa relay TURN. A decisão de pular o RC formal não substitui ensaios em redes físicas independentes nem auditoria externa de segurança ou acessibilidade; problemas identificados serão corrigidos pontualmente. As sessões dependem de conexão WebRTC direta, com STUN público.
+
 ## Limitações conhecidas
 
 - **Conectividade:** certas combinações de NAT, firewall e redes restritivas podem impedir a conexão direta. O TURN não será ativado sem nova decisão explícita.
@@ -133,9 +137,9 @@ O fluxo automatizado está em [`.github/workflows/p2p-browser.yml`](.github/work
 | Marco | Situação |
 | --- | --- |
 | **Alpha** — núcleo P2P, cenas, tokens, fichas básicas, autosave e testes | Concluído no escopo de engenharia |
-| **Beta** — portabilidade ZIP, fichas customizáveis, ferramentas e permissões avançadas | Implementação parcial; homologação pendente |
-| **Release Candidate** — testes com campanhas reais, segurança, performance e acessibilidade | Planejado |
-| **1.0** — versão estável e documentação final | Planejado |
+| **Beta** — portabilidade ZIP, fichas customizáveis, ferramentas e permissões avançadas | Implementada; encerramento administrativo por decisão de produto |
+| **Release Candidate** — testes com campanhas reais, segurança, performance e acessibilidade | Etapa formal dispensada por decisão do projeto; verificações automatizadas incorporadas à 1.0 |
+| **1.0** — versão oficial do núcleo; correções pontuais posteriores | Lançamento oficial; homologação entre redes independentes permanece como limite conhecido |
 
 Recursos adicionais como iniciativa, música ambiente, macros e templates de sistemas são opcionais e não bloqueiam o núcleo do projeto.
 
