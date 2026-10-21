@@ -465,7 +465,8 @@ function isValidState(s){
  const validFog=f=>f&&typeof f==='object'&&typeof f.enabled==='boolean'&&Array.isArray(f.reveals)&&f.reveals.length<=250&&f.reveals.every(a=>a&&[a.x,a.y,a.width,a.height].every(Number.isFinite)&&a.x>=0&&a.y>=0&&a.width>=0&&a.height>=0&&a.x+a.width<=1200&&a.y+a.height<=800);
  const validTokens=a=>Array.isArray(a)&&a.length<=150&&a.every(validToken);
  const validDraws=a=>Array.isArray(a)&&a.length<=200&&a.every(validDraw);
- if(!validTokens(s.tokens)||!Array.isArray(s.characters)||s.characters.length>50||!Array.isArray(s.chat)||s.chat.length>250||!validMap(s.map))return false;
+ if(!validTokens(s.tokens)||new Set(s.tokens.map(t=>t.id)).size!==s.tokens.length||!Array.isArray(s.characters)||s.characters.length>50||!Array.isArray(s.chat)||s.chat.length>250||!validMap(s.map))return false;
+ if(new Set(s.characters.map(c=>c.id)).size!==s.characters.length)return false;
  if(!s.characters.every(c=>c&&typeof c.id==='string'&&typeof c.name==='string'&&typeof c.text==='string'&&c.name.length<=100&&c.text.length<=30000&&(!c.owner||typeof c.owner==='string')))return false;
  if(!s.chat.every(c=>c&&typeof c.name==='string'&&typeof c.text==='string'&&c.text.length<=800))return false;
  if(s.drawings!==undefined&&!validDraws(s.drawings))return false;
@@ -483,6 +484,7 @@ function isValidState(s){
  if(s.trustedKeys!==undefined){if(!s.trustedKeys||typeof s.trustedKeys!=='object'||Array.isArray(s.trustedKeys)||Object.keys(s.trustedKeys).length>100)return false;for(const [id,key] of Object.entries(s.trustedKeys)){if(!/^[0-9a-f-]{36}$/.test(id)||!key||key.kty!=='EC'||key.crv!=='P-256'||typeof key.x!=='string'||typeof key.y!=='string'||key.x.length>100||key.y.length>100)return false}}
  if(s.scenes!==undefined){
   if(!Array.isArray(s.scenes)||s.scenes.length>25)return false;
+  if(new Set(s.scenes.map(c=>c.id)).size!==s.scenes.length)return false;
   if(!s.scenes.every(c=>c&&(c.layerPolicy===undefined||validPolicy(c.layerPolicy))&&typeof c.id==='string'&&typeof c.title==='string'&&c.title.length<=100&&validMap(c.map||'')&&validTokens(c.tokens||[])&&validDraws(c.drawings||[])&&validFog(c.fog||{enabled:false,reveals:[]})))return false;
   if(s.activeSceneId!==undefined&&s.activeSceneId!==null&&!s.scenes.some(c=>c.id===s.activeSceneId))return false;
  }
@@ -496,6 +498,7 @@ async function saveLocal(){
  const operation=(async()=>{try{
   saveDb ||=await openDb();rememberScene();
   const snapshot=structuredClone(state);
+  if(!isValidState(snapshot))throw Error('Estado local inválido: exporte um backup e reinicie a mesa');
   const timestamp=Date.now();
   await new Promise((resolve,reject)=>{
    const tx=saveDb.transaction(['saves','checkpoints'],'readwrite');
@@ -507,7 +510,7 @@ async function saveLocal(){
   });
   lastSavedRevision=savingRevision;
   $('saveStatus').textContent=revision===savingRevision?'✓ Salvo localmente · '+new Date().toLocaleTimeString():'Alterações recentes aguardando salvamento';
- }catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}})();
+ }catch(e){$('saveStatus').textContent='⚠ Falha no autosave ('+(e?.name==='QuotaExceededError'?'espaço esgotado':e.message)+'). Exporte sua campanha agora.';$('saveStatus').setAttribute('role','alert')}})();
  saveInFlight=operation;
  try{await operation}finally{if(saveInFlight===operation)saveInFlight=null}
 }
@@ -712,7 +715,16 @@ function attach(c,guest=false){
  c.on('error',e=>{pendingGuests.delete(c);clearTimeout(c.authTimer);announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
 }
 function dispatch(action,payload){if(hostMode)apply(action,payload,myId,nickname);else if(hostLink?.open)hostLink.send({kind:'action',action,payload});else announce('Sem conexão com o mestre')}
-function apply(action,p,id,name){if(!p||typeof p!=='object')return;const owner=state.characters.find(x=>x.id===p.id);switch(action){
+const actionRates=new Map();
+function acceptGuestAction(playerId,action,payload){
+ if(typeof playerId!=='string'||typeof action!=='string'||action.length>45||!payload||typeof payload!=='object'||Array.isArray(payload))return false;
+ const nowMs=Date.now(),prior=actionRates.get(playerId)||{since:nowMs,count:0};
+ if(nowMs-prior.since>=1000){prior.since=nowMs;prior.count=0}
+ if(++prior.count>25){actionRates.set(playerId,prior);return false}
+ actionRates.set(playerId,prior);if(actionRates.size>120){for(const [k,v] of actionRates)if(nowMs-v.since>10000)actionRates.delete(k)}
+ try{return JSON.stringify(payload).length<=12000}catch{return false}
+}
+function apply(action,p,id,name){if(!p||typeof p!=='object'||Array.isArray(p))return;if(id!==myId&&!acceptGuestAction(id,action,p))return;const owner=state.characters.find(x=>x.id===p.id);switch(action){
 case 'scene:add':{if(id!==myId||state.scenes.length>=25)return;rememberScene();const scene={id:uid(),title:String(p.title||'Nova cena').slice(0,60),map:'',tokens:[],drawings:[],fog:{enabled:false,reveals:[]}};state.scenes.push(scene);loadScene(scene);return changed()}
 case 'scene:switch':{if(id!==myId)return;const scene=state.scenes.find(x=>x.id===p.id);if(!scene)return;rememberScene();loadScene(scene);return changed()}
 case 'token:delete':{if(state.layerPolicy?.tokens?.locked||id!==myId)return;return update(()=>{state.tokens=state.tokens.filter(t=>t.id!==p.id)})}

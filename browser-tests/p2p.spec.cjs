@@ -443,3 +443,46 @@ test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page
  const sizes=await page.evaluate(()=>({aside:document.querySelector('#tableSidebar').clientHeight,scroll:document.querySelector('#tableSidebar').scrollHeight,visible:!!document.querySelector('#history').offsetParent}));
  expect(sizes.scroll).toBeLessThanOrEqual(sizes.aside+2);expect(sizes.visible).toBe(true);
 });
+
+test('Beta hardening: valida IDs duplicados e impede payloads malformados',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ const result=await page.evaluate(()=>{
+  const base={schema:1,title:'Mesa',tokens:[],characters:[],chat:[],map:''};
+  const duplicate={...base,tokens:[{id:'x',name:'A',x:1,y:1},{id:'x',name:'B',x:2,y:2}]};
+  const before=revision;
+  apply('chat',{text:'malicioso'},'jogador','x');
+  const messages=state.chat.length;
+  apply('chat',{text:'x'.repeat(20000)},'jogador','x');
+  const deniedOversize=state.chat.length===messages;
+  let accepted=0;for(let i=0;i<32;i++)if(acceptGuestAction('flood','chat',{text:'x'}))accepted++;
+  return {duplicate:isValidState(duplicate),before,after:revision,deniedOversize,accepted};
+ });
+ expect(result.duplicate).toBe(false);
+ expect(result.after).toBe(result.before+1);
+ expect(result.deniedOversize).toBe(true);
+ expect(result.accepted).toBe(25);
+});
+test('Beta hardening: falha de armazenamento sinaliza backup sem falso sucesso',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.evaluate(async()=>{
+  await saveLocal();
+  lastSavedRevision=-1;revision++;
+  const previous=openDb;
+  openDb=async()=>{const e=new Error('Espaço insuficiente');e.name='QuotaExceededError';throw e};
+  saveDb=null;
+  try{await saveLocal()}finally{openDb=previous}
+ });
+ await expect(page.locator('#saveStatus')).toContainText('espaço esgotado');
+ await expect(page.locator('#saveStatus')).toContainText('Exporte sua campanha');
+ await expect(page.locator('#saveStatus')).toHaveAttribute('role','alert');
+});
+test('Beta hardening: aba de chat acessível em mobile e sem rolagem geral do painel',async({page})=>{
+ await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());await page.locator('#host').click();
+ await expect(page.locator('#tabChat')).toHaveAttribute('aria-selected','true');
+ await expect(page.locator('#dice')).toBeVisible();
+ await page.locator('#tabTools').click();await expect(page.locator('#tabTools')).toHaveAttribute('aria-selected','true');
+ await page.locator('#tabChat').click();await expect(page.locator('#message')).toBeVisible();
+ const result=await page.evaluate(()=>({width:document.documentElement.scrollWidth,viewport:innerWidth,tabHidden:document.querySelector('#masterTools').hidden}));
+ expect(result.width).toBeLessThanOrEqual(result.viewport+3);
+ expect(result.tabHidden).toBe(true);
+});

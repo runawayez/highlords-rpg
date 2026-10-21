@@ -51,3 +51,7 @@ O mestre pode selecionar vários tokens pressionando Shift e clicando nos tokens
 ## Layout da Beta — painéis da mesa
 
 A interface usa navegação por abas inspirada no padrão de mesas virtuais modernas: Chat e dados (aba padrão, envio e rolagem sempre acessíveis), Fichas e Mestre (apenas host). Somente o conteúdo do painel ativo recebe rolagem, e o histórico de conversa tem rolagem independente da composição fixa. As abas permitem navegação por setas, Home e End; o mapa permanece como área principal. A alteração é exclusivamente de interface, sem dependências adicionais, sem efeitos sobre WebRTC/STUN e sem reativar TURN.
+
+## Robustez e homologação
+
+Ações recebidas de convidados são limitadas em frequência e tamanho antes da validação específica no mestre. O estado recuperado é validado, inclusive IDs duplicados; o autosave valida o snapshot antes da gravação e evidencia falhas de espaço com recomendação de exportar backup. A suíte automatizada cobre regressões, mas não equivale a homologação entre redes físicas independentes ou avaliação de acessibilidade assistiva. TURN permanece desativado.

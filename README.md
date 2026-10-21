@@ -86,6 +86,10 @@ O formato `.highlords` exportado usa ZIP v3 com `manifest.json`, `campaign.json`
 
 **Boas práticas:** mantenha cópias do arquivo exportado em local seguro, especialmente antes de limpar os dados do navegador ou trocar de computador. A chave privada de identidade do jogador não é exportada com a campanha.
 
+## Validação técnica da Beta
+
+O projeto inclui testes automatizados de sincronização multiplayer simulada, permissões, integridade dos backups, tratamento de falhas de autosave e navegação móvel. O host limita a frequência de ações enviadas por cada jogador e rejeita cargas anormalmente grandes. **Esses testes não certificam conectividade entre operadoras diferentes ou ausência de vulnerabilidades.** O status definitivo da Beta depende de homologação real documentada.
+
 ## Limitações conhecidas
 
 - **Conectividade:** certas combinações de NAT, firewall e redes restritivas podem impedir a conexão direta. O TURN não será ativado sem nova decisão explícita.
@@ -93,7 +97,7 @@ O formato `.highlords` exportado usa ZIP v3 com `manifest.json`, `campaign.json`
 - **Identidade:** a autenticação usa confiança no primeiro vínculo (TOFU). Há reassociação manual de fichas e tokens por autorização explícita do mestre para um novo navegador autenticado; a chave antiga é revogada. Não existe restauração automática da chave privada original.
 - **Privacidade dos mapas:** ative a névoa **antes** de compartilhar a cena. Conteúdos enviados anteriormente a outros participantes não podem ser revogados.
 - **Persistência:** armazenamento do navegador pode ser apagado pelo usuário ou pelo próprio ambiente. Exporte backups regularmente.
-- **Maturidade:** ainda faltam homologação em redes externas, refinamentos de segurança, acessibilidade e validação de campanhas grandes. Evite usar material sigiloso ou campanhas sem backup.
+- **Maturidade:** ainda faltam homologação em redes externas, auditoria integral de segurança/acessibilidade e validação de campanhas grandes. Evite usar material sigiloso ou campanhas sem backup.
 
 ## Desenvolvimento
 
