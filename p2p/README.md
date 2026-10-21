@@ -4,7 +4,7 @@ Aplicação publicada: `p2p/index.html` · https://highlords-rpg.vercel.app
 
 ## Recursos
 
-Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War visual, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` (JSON nesta Alpha).
+Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War com rasterização de áreas reveladas, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` (JSON nesta Alpha).
 
 ## Desenvolvimento
 
@@ -20,6 +20,6 @@ A associação inicial da chave é baseada em confiança no primeiro uso (TOFU).
 
 ## Limites conhecidos
 
-PeerJS Cloud para signaling, sem TURN dedicado; conexão entre redes depende do NAT/firewall. A sessão termina quando o navegador do mestre é encerrado. A identidade local usa assinatura criptográfica, mas a primeira vinculação exige confiança e ainda falta recuperação segura. A imagem original do mapa é transmitida aos jogadores, mesmo com névoa ativa: **não use para ocultar conteúdo confidencial**. O autosave é local e não substitui exportações regulares.
+PeerJS Cloud para signaling, sem TURN dedicado; conexão entre redes depende do NAT/firewall. A sessão termina quando o navegador do mestre é encerrado. A identidade local usa assinatura criptográfica, mas a primeira vinculação exige confiança e ainda falta recuperação segura. Com a névoa ativa, o host envia somente uma versão rasterizada das áreas reveladas; o mapa original não entra nas novas projeções. **Ative a névoa antes de conectar jogadores ou mostrar a cena:** mapas já transmitidos anteriormente não podem ser apagados do navegador do participante. Não há auditoria completa desse isolamento em redes reais, portanto continue evitando segredos críticos. O autosave é local e não substitui exportações regulares.
 
 A versão Node.js em `server.js` é legada e separada da aplicação publicada.
