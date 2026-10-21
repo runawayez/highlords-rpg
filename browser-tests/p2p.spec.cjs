@@ -97,9 +97,22 @@ test('desenho aceita traços consecutivos e revelação ativa névoa',async({pag
   await page.mouse.down();await page.mouse.move(rect.x+180,rect.y+105+i*45,{steps:8});await page.mouse.up();
  }
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(2);
+ await page.locator('#fogEnable').click();
+ await expect(page.locator('#fogState')).toContainText('Ativa');
  await page.locator('[data-tool="reveal"]').click();
- await expect(page.locator('#fogEnabled')).toBeChecked();
  await page.mouse.move(rect.x+70,rect.y+70);await page.mouse.down();
  await page.mouse.move(rect.x+180,rect.y+180,{steps:4});await page.mouse.up();
  await expect(page.locator('#fogLayer mask rect')).toHaveCount(2);
+});
+
+test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visível',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('[data-tool="reveal"]').click();
+ await expect(page.locator('#fogState')).toContainText('Desativada');
+ await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#fogEnable').click();
+ await expect(page.locator('#fogState')).toContainText('Ativa');
+ await expect(page.locator('#fogLayer mask')).toHaveCount(0);
+ await page.locator('[data-tool="reveal"]').click();
+ await expect(page.locator('[data-tool="reveal"]')).toHaveAttribute('aria-pressed','true');
 });
