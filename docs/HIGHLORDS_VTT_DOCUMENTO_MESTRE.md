@@ -327,3 +327,8 @@ A revisão visual posterior ao lançamento adota a linguagem de atlas/caderno de
 ### Usabilidade da entrada e do quadro
 
 Após o feedback da interface, a home foi reduzida aos formulários de jogador/mestre, com os salvamentos abaixo. O cabeçalho oferece Exportar e Início diretamente. Adicionar mapa abre o seletor sem iniciar arraste do quadro, e o viewport enquadra a cena conforme a área disponível. Regressões cobrem seletor real de arquivos, convite completo/Enter, ingresso acima da dobra com autosaves e limites do quadro em desktop e celular.
+
+
+### Identidade Highlordiana
+
+Por orientação explícita, a paleta da interface deve permanecer em preto neutro e vermelho (#d6222a), com branco/cinza para legibilidade. Não usar tons terrosos, laranja ou marfim como identidade. As ações principais de mestre e jogador têm o mesmo destaque vermelho. A home inclui uma apresentação breve e instruções iniciais sem deslocar a entrada do jogador para fora da primeira tela. O controle da lateral mostra painel e seta direcional, com estado e nome acessíveis.

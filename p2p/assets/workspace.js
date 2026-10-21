@@ -12,6 +12,8 @@ var configureWorkspace = () => {},
 addEventListener("DOMContentLoaded", () => {
   /* Workspace composition is independent of campaign data and transport. */
   const iconPaths = {
+    sidebarClose: "M3 4h18v16H3zM16 4v16M8 8l4 4-4 4",
+    sidebarOpen: "M3 4h18v16H3zM16 4v16M12 8l-4 4 4 4",
     pan: "M8 3v18M3 8l5-5 5 5M16 9v12m-5-5 5 5 5-5",
     draw: "m4 17 12-12 3 3L7 20H4v-3",
     line: "M5 19 19 5",
@@ -178,18 +180,29 @@ addEventListener("DOMContentLoaded", () => {
   // Primary session commands stay visible in the header.
   const collapse = sheetButton("", () => {
     $("layout").classList.toggle("sidebar-collapsed");
-    const label = $("layout").classList.contains("sidebar-collapsed") ? "Abrir painel" : "Recolher painel";
+    const label = $("layout").classList.contains("sidebar-collapsed") ? "Abrir painel" : "Ocultar painel";
     collapse.title = label;
     collapse.setAttribute("aria-label", label);
+    renderSidebarToggle();
     collapse.setAttribute(
       "aria-expanded",
       String(!$("layout").classList.contains("sidebar-collapsed")),
     );
   });
   collapse.id = "collapseSidebar";
-  collapse.title = "Recolher painel";
-  collapse.setAttribute("aria-label", "Recolher painel");
-  collapse.append(workspaceIcon("rectangle"));
+  collapse.title = "Ocultar painel";
+  collapse.setAttribute("aria-label", "Ocultar painel");
+  collapse.setAttribute("aria-controls", "tableSidebar");
+  function renderSidebarToggle() {
+    const closed = $("layout").classList.contains("sidebar-collapsed");
+    const icon = workspaceIcon(closed ? "sidebarOpen" : "sidebarClose");
+    const shade = document.createElementNS(icon.namespaceURI,"rect");
+    for (const [key,value] of Object.entries({x:16,y:4,width:5,height:16,fill:"currentColor",stroke:"none",opacity:closed ? 0.12 : 0.3})) shade.setAttribute(key,value);
+    icon.prepend(shade);
+    const label = sheetElement("span", closed ? "Abrir painel" : "Ocultar painel", "sidebar-toggle-label");
+    collapse.replaceChildren(icon,label);
+  }
+  renderSidebarToggle();
   collapse.setAttribute("aria-expanded", "true");
   $("game").querySelector(".session-actions").append(collapse);
   const resize = document.createElement("input");

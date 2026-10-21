@@ -1,8 +1,8 @@
 @font-face {font-family:"Highlords Editorial";src:url("/assets/fonts/highlords-editorial.woff") format("woff");font-style:normal;font-weight:400;font-display:swap;}
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color-scheme:dark;color:#e7e3da;background:#11100f;
-  --sidebar-width:360px;--red:#ba5a48;--line:#31302f;--panel:#191817;--muted:#9f9e9d;--ink:#eee5d5;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color-scheme:dark;color:#ededed;background:#0a0a0a;
+  --sidebar-width:360px;--red:#d6222a;--line:#303030;--panel:#141414;--muted:#aaa;--ink:#f2f2f2;
 }
 * {
   box-sizing: border-box;
@@ -15,13 +15,13 @@ input,
 textarea,
 select {font:inherit;font-size:13px;}
 button,summary {cursor:pointer;}
-button {border:1px solid #41403f;background:#262524;color:#e4e6dc;border-radius:4px;padding:9px 12px;font-weight:500;transition:background .12s,border-color .12s;}
-button:hover {background:#31302f;border-color:#706f6e;}
+button {border:1px solid #404040;background:#252525;color:#e5e5e5;border-radius:4px;padding:9px 12px;font-weight:500;transition:background .12s,border-color .12s;}
+button:hover {background:#303030;border-color:#6f6f6f;}
 button:disabled {opacity:.4;cursor:default;}
 button.active,
 button[aria-pressed="true"] {
-  background: #3a1c20;
-  border-color: #a93b41;
+  background: #232323;
+  border-color: #535353;
   color: #fff;
 }
 a:focus-visible,
@@ -30,7 +30,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 summary:focus-visible {
-  outline: 2px solid #fa767b;
+  outline: 2px solid #929292;
   outline-offset: 3px;
 }
 [hidden] {
@@ -38,7 +38,7 @@ summary:focus-visible {
 }
 input,
 textarea,
-select {border:1px solid #41403e;background:#151413;border-radius:4px;padding:9px 10px;color:#e4e4dc;min-width:0;max-width:100%;}
+select {border:1px solid #404040;background:#141414;border-radius:4px;padding:9px 10px;color:#e3e3e3;min-width:0;max-width:100%;}
 input:not([type="checkbox"]):not([type="range"]),
 select,
 textarea {
@@ -50,7 +50,7 @@ textarea {
 }
 input::placeholder,
 textarea::placeholder {
-  color: #92959e;
+  color: #959595;
 }
 input[type="checkbox"] {
   width: 16px !important;
@@ -93,10 +93,10 @@ p {
 .badge,
 .version-tag,
 .role-pill {
-  font:9px ui-monospace,SFMono-Regular,monospace;letter-spacing:.6px;padding:3px 0;color:#a3a2a1;white-space:nowrap;
+  font:9px ui-monospace,SFMono-Regular,monospace;letter-spacing:.6px;padding:3px 0;color:#a2a2a2;white-space:nowrap;
 }
 .danger {
-  color: #ff9ba2 !important;
+  color: #b1b1b1 !important;
 }
 label {
   font-size: 13px;
@@ -116,16 +116,18 @@ svg {
 #home {max-width:940px;margin:auto;padding:0 30px}
 .site-nav {height:72px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
 .nav-brand {display:flex;gap:9px;align-items:center;color:var(--ink);text-decoration:none}
-.brand-icon {width:37px;height:37px}.brand-word {font:27px "Highlords Editorial",Georgia,serif;letter-spacing:-1px}.brand-word > span {font:9px ui-monospace,monospace;letter-spacing:1.5px;margin-left:9px;color:#b1aa9c}
-.landing-grid {padding:30px 0 22px}.welcome {margin-bottom:26px}.welcome h1 {font:normal 38px/1.2 "Highlords Editorial",Georgia,serif;letter-spacing:-1.2px;color:var(--ink);margin:0 0 10px}.welcome h1 em {font-weight:normal;color:#ce8b77}.hero-copy {font-size:13px;color:var(--muted);margin:0;line-height:1.6}
+.brand-icon {width:37px;height:37px}.brand-word {font:27px "Highlords Editorial",Georgia,serif;letter-spacing:-1px}.brand-word > span {font:9px ui-monospace,monospace;letter-spacing:1.5px;margin-left:9px;color:#aaaaaa}
+.landing-grid {padding:30px 0 22px}.welcome {margin-bottom:26px}.welcome h1 {font:normal 38px/1.2 "Highlords Editorial",Georgia,serif;letter-spacing:-1.2px;color:var(--ink);margin:0 0 10px}.welcome h1 em {font-weight:normal;color:#989898}.hero-copy {font-size:13px;color:var(--muted);margin:0;line-height:1.6}
 .entry-desk {min-width:0}.entry-grid {display:grid;grid-template-columns:1fr 1fr;gap:0}.entry-grid section {min-width:0;padding:0 28px 0 0}.entry-grid .entry-host {padding:0 0 0 28px;border-left:1px solid var(--line)}
 .entry-heading h3 {font-size:16px;font-weight:500;margin:0 0 6px}.card-caption {font-size:12px;color:var(--muted);margin:0 0 18px;line-height:1.5}
-.entry-grid .row {display:grid;grid-template-columns:1fr;gap:12px;margin:0}.entry-grid label {display:flex;flex-direction:column;gap:7px;font-size:12px;color:#c4bdae;min-width:0}.entry-grid .row input {width:100%;height:42px;font-size:13px}
+.entry-grid .row {display:grid;grid-template-columns:1fr;gap:12px;margin:0}.entry-grid label {display:flex;flex-direction:column;gap:7px;font-size:12px;color:#bdbdbd;min-width:0}.entry-grid .row input {width:100%;height:42px;font-size:13px}
 .entry-grid .row button {grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;min-height:42px;padding:10px 13px;font-size:12px}.entry-grid .row button span {font-size:18px;line-height:1}
-#join {background:#a8493c;border-color:#bb594b;color:#fff2e8}#join:hover {background:#b55647}#host {background:transparent;border-color:#716757;color:#e2d8c6}#host:hover {background:#292622}
-.entry-grid .file-import {display:block;margin-top:12px;color:#a09a91;font-size:11px}.file-import input {display:block;width:100%;font-size:10px;border:0;background:transparent;padding:6px 0 0;min-height:0!important;border-radius:0;color:#96968a}.file-import input::file-selector-button {font:inherit;color:#d2c6b3;border:0;border-bottom:1px solid #756957;background:transparent;padding:3px 0;margin-right:10px;cursor:pointer}
-.site-footer {display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:18px 0;font-size:11px;color:#a49d90}.site-footer strong {font-weight:400;color:#d0c6b5}
-#notice {font-size:12px;color:#e5a491;margin:16px 0 0;line-height:1.6}#notice:empty {display:none}
+#join,#host {background:var(--red);border-color:#ef3c43;color:#fff;font-weight:600;box-shadow:0 2px 0 #800e14}
+#join:hover,#host:hover {background:#eb2b33;border-color:#ff5057}
+
+.entry-grid .file-import {display:block;margin-top:12px;color:#9b9b9b;font-size:11px}.file-import input {display:block;width:100%;font-size:10px;border:0;background:transparent;padding:6px 0 0;min-height:0!important;border-radius:0;color:#959595}.file-import input::file-selector-button {font:inherit;color:#c7c7c7;border:0;border-bottom:1px solid #6a6a6a;background:transparent;padding:3px 0;margin-right:10px;cursor:pointer}
+.site-footer {display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:18px 0;font-size:11px;color:#9e9e9e}.site-footer strong {font-weight:400;color:#c7c7c7}
+#notice {font-size:12px;color:#b0b0b0;margin:16px 0 0;line-height:1.6}#notice:empty {display:none}
 #recoveryPanel {border-top:1px solid var(--line);padding:18px 0 0;margin:22px 0 0}#recoveryPanel h2 {font-size:14px;margin:0 0 7px}#recoveryPanel p {font-size:11px;color:var(--muted);margin-bottom:10px}#recoveryPanel select {width:100%;font-size:12px;margin-bottom:10px}.recovery-actions {display:flex;gap:7px;flex-wrap:wrap}.recovery-actions button {font-size:11px;padding:8px}
 /* The scene owns the screen. Tools stay beside the thing they manipulate. */
 #game {
@@ -134,7 +136,7 @@ svg {
   overflow: hidden;
 }
 #game header {
-  height:60px;display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);background:#191817;
+  height:60px;display:flex;align-items:center;gap:14px;padding:10px 20px;border-bottom:1px solid var(--line);background:#181818;
 }
 header .top-brand {
   display:flex;align-items:center;gap:8px;flex:none;
@@ -152,13 +154,13 @@ header .version-tag {
   display: none;
 }
 #status {
-  font-size:10px;color:#a2a1a0;margin-left:auto;max-width:225px;
+  font-size:10px;color:#a1a1a1;margin-left:auto;max-width:225px;
 }
 #gameCampaignName {
-  background:transparent;border-color:transparent;border-left:1px solid #424140!important;border-radius:0;font:italic 14px "Highlords Editorial",Georgia,serif!important;color:#c3bdac;
+  background:transparent;border-color:transparent;border-left:1px solid #414141!important;border-radius:0;font:italic 14px "Highlords Editorial",Georgia,serif!important;color:#bdbdbd;
 }
 #invite {
-  background:#a8493c;border-color:#b75d4d;color:#fff2e7;font-size:11px;
+  background:#5c5c5c;border-color:#6f6f6f;color:#f4f4f4;font-size:11px;
 }
 #layout {
   display: grid;
@@ -176,10 +178,10 @@ header .version-tag {
   display: none;
 }
 #board {
-  position:relative;overflow:hidden;touch-action:none;background:#100f0e;cursor:move;
+  position:relative;overflow:hidden;touch-action:none;background:#0f0f0f;cursor:move;
 }
 #canvas {
-  position:absolute;left:0;top:0;width:1200px;height:800px;transform-origin:0 0;background:#1b1a19;box-shadow:0 0 0 1px #363534,0 12px 70px #0004;
+  position:absolute;left:0;top:0;width:1200px;height:800px;transform-origin:0 0;background:#1a1a1a;box-shadow:0 0 0 1px #353535,0 12px 70px #0004;
 }
 #map {
   position: absolute;
@@ -198,13 +200,13 @@ header .version-tag {
   inset: 0;
 }
 .piece {
-  position:absolute;border-radius:50%;width:56px;height:56px;border:2px solid #d7cbb3;box-shadow:0 2px 6px #0008,inset 0 0 0 3px #0002;display:grid;place-items:center;user-select:none;font-weight:500;text-shadow:0 1px 3px #000;cursor:inherit;font-size:11px;text-align:center;
+  position:absolute;border-radius:50%;width:56px;height:56px;border:2px solid #cccccc;box-shadow:0 2px 6px #0008,inset 0 0 0 3px #0002;display:grid;place-items:center;user-select:none;font-weight:500;text-shadow:0 1px 3px #000;cursor:inherit;font-size:11px;text-align:center;
 }
 .piece.selected {
-  outline:2px solid #dcad88;outline-offset:4px;
+  outline:2px solid #b4b4b4;outline-offset:4px;
 }
 #boardToolbar {
-  position:absolute;left:18px;top:76px;z-index:5;padding:5px;background:#1e231ddd;border:1px solid #454443;border-radius:5px;box-shadow:0 5px 18px #0005;
+  position:absolute;left:18px;top:76px;z-index:5;padding:5px;background:#222222dd;border:1px solid #444444;border-radius:5px;box-shadow:0 5px 18px #0005;
 }
 #toolButtons {
   display:flex;flex-direction:column;gap:3px;
@@ -213,28 +215,28 @@ header .version-tag {
   display:flex;align-items:center;justify-content:center;gap:0;background:transparent;border-color:transparent;padding:9px;width:38px;height:38px;font-size:0;border-radius:3px;
 }
 #toolButtons button[aria-pressed="true"] {
-  background:#674336;border-color:#9d6b51;color:#ffe7ce;
+  background:#4a4a4a;border-color:#747474;color:#eaeaea;
 }
 #sceneBar {
-  position:absolute;top:18px;left:18px;display:flex;align-items:center;gap:0;z-index:4;border:1px solid #454443;border-radius:4px;background:#1e231ddd;box-shadow:0 3px 15px #0003;
+  position:absolute;top:18px;left:18px;display:flex;align-items:center;gap:0;z-index:4;border:1px solid #444444;border-radius:4px;background:#222222dd;box-shadow:0 3px 15px #0003;
 }
 #sceneBar select {
-  max-width:250px;background:transparent;border:0;font-size:12px;border-radius:3px 0 0 3px;color:#ddd6c5;
+  max-width:250px;background:transparent;border:0;font-size:12px;border-radius:3px 0 0 3px;color:#d6d6d6;
 }
 #boardEmpty {
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:100px;color:#ddd6c5;
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center;padding:100px;color:#d6d6d6;
 }
 #boardEmpty strong {
   font:normal 32px/1.2 "Highlords Editorial",Georgia,serif;letter-spacing:-1px;max-width:360px;
 }
 #boardEmpty p {
-  font-size:12px;color:#a9a8a7;margin:13px 0 22px;max-width:280px;
+  font-size:12px;color:#a8a8a8;margin:13px 0 22px;max-width:280px;
 }
 #boardEmpty button {
-  pointer-events:auto;background:#292827;border-color:#5b5a59;font-size:11px;
+  pointer-events:auto;background:#282828;border-color:#5a5a5a;font-size:11px;
 }
 #zoomControls {
-  position:absolute;bottom:18px;left:18px;display:flex;gap:0;z-index:4;border:1px solid #454443;border-radius:4px;overflow:hidden;background:#1e231ddd;
+  position:absolute;bottom:18px;left:18px;display:flex;gap:0;z-index:4;border:1px solid #444444;border-radius:4px;overflow:hidden;background:#222222dd;
 }
 #zoomControls button {
   font-size:11px;background:transparent;border:0;border-radius:0;min-height:34px;
@@ -244,20 +246,20 @@ header .version-tag {
 }
 /* Panels share one set of controls, spacing and scrolling rules. */
 #tableSidebar {
-  position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;background:#1b1a19;border-left:1px solid #3d3c3b;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;min-height:0;min-width:0;background:#1a1a1a;border-left:1px solid #3c3c3c;overflow:hidden;
 }
 .table-tabs {
-  display:flex;flex-shrink:0;border-bottom:1px solid #3d3c3b;padding:0 13px;background:#201f1e;
+  display:flex;flex-shrink:0;border-bottom:1px solid #3c3c3c;padding:0 13px;background:#1f1f1f;
 }
 .table-tabs button {
-  flex:1;font-size:11px;border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;color:#aaa9a8;padding:16px 6px;white-space:nowrap;
+  flex:1;font-size:11px;border:0;border-radius:0;border-bottom:2px solid transparent;background:transparent;color:#a9a9a9;padding:16px 6px;white-space:nowrap;
 }
 .table-tabs button[aria-selected="true"] {
-  color:#eee1c9;border-bottom-color:#c08361;
+  color:#e2e2e2;border-bottom-color:#8e8e8e;
 }
 .table-panel,
 #participantsPanel {
-  padding:22px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#5a5958 #1b1a19;
+  padding:22px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin;scrollbar-color:#595959 #1a1a1a;
 }
 .table-panel[hidden] {
   display: none;
@@ -270,10 +272,10 @@ header .version-tag {
   flex:1;min-height:0;overflow-y:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.8;
 }
 #history p {
-  padding:15px 0;border-bottom:1px solid #3c443333;margin:0;color:#d2d8c8;
+  padding:15px 0;border-bottom:1px solid #41414133;margin:0;color:#d6d6d6;
 }
 #history:empty:before {
-  content:"A conversa começa com vocês. Conte o que seu personagem faz ou role os dados abaixo.";display:block;max-width:240px;margin:24px 0;color:#a6a5a4;font:italic 17px/1.6 "Highlords Editorial",Georgia,serif;
+  content:"A conversa começa com vocês. Conte o que seu personagem faz ou role os dados abaixo.";display:block;max-width:240px;margin:24px 0;color:#a5a5a5;font:italic 17px/1.6 "Highlords Editorial",Georgia,serif;
 }
 .chat-compose {
   flex-shrink: 0;
@@ -285,7 +287,7 @@ header .version-tag {
   min-width: 0;
 }
 #saveStatus {
-  margin:0;padding:12px 18px;font-size:10px;border-top:1px solid #3d3c3b;flex-shrink:0;color:#b1b0af;
+  margin:0;padding:12px 18px;font-size:10px;border-top:1px solid #3c3c3c;flex-shrink:0;color:#b0b0b0;
 }
 #panelWidth {
   height: 14px;
@@ -295,7 +297,7 @@ header .version-tag {
   padding: 0;
 }
 .workspace-sections {
-  display:flex;gap:0;margin-bottom:22px;padding:3px;background:#131211;border:1px solid #3c3b3a;border-radius:4px;
+  display:flex;gap:0;margin-bottom:22px;padding:3px;background:#121212;border:1px solid #3b3b3b;border-radius:4px;
 }
 .workspace-sections button {
   flex:1;font-size:10px;background:transparent;border-color:transparent;border-radius:2px;padding:8px;
@@ -340,7 +342,7 @@ header .version-tag {
 }
 .fog-editor p {
   font-size: 11px;
-  color: #9da5b1;
+  color: #a4a4a4;
   margin: 10px 0;
 }
 .fog-actions,
@@ -357,7 +359,7 @@ header .version-tag {
   margin: 12px 0;
 }
 .layer-policy-row {
-  border:0;border-top:1px solid #3c3b3a;border-radius:0;margin:14px 0;padding:9px 0;
+  border:0;border-top:1px solid #3b3b3b;border-radius:0;margin:14px 0;padding:9px 0;
 }
 .layer-policy-row legend {
   font-size: 12px;
@@ -371,7 +373,7 @@ header .version-tag {
   margin: 6px;
 }
 .token-control {
-  border:0;border-top:1px solid #424140;border-radius:0;padding:16px 0;margin:8px 0;
+  border:0;border-top:1px solid #414141;border-radius:0;padding:16px 0;margin:8px 0;
 }
 .token-control strong {
   display: block;
@@ -416,16 +418,16 @@ header .version-tag {
   overflow: visible;
 }
 .char {
-  padding:0 0 26px;background:transparent;border:0;border-bottom:1px solid #474645;border-radius:0;margin:24px 0;
+  padding:0 0 26px;background:transparent;border:0;border-bottom:1px solid #464646;border-radius:0;margin:24px 0;
 }
 .sheet-title {
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:19px;
 }
 .sheet-title strong {
-  font:normal 32px/1.1 "Highlords Editorial",Georgia,serif;letter-spacing:-1px;color:#e8dfcc;margin-right:auto;
+  font:normal 32px/1.1 "Highlords Editorial",Georgia,serif;letter-spacing:-1px;color:#e0e0e0;margin-right:auto;
 }
 .sheet-title button {
-  font-size:10px;background:transparent;border-color:transparent;color:#a9a8a7;padding:6px 2px;
+  font-size:10px;background:transparent;border-color:transparent;color:#a8a8a8;padding:6px 2px;
 }
 .char > select {
   width: 100%;
@@ -436,7 +438,7 @@ header .version-tag {
   min-height: 110px;
 }
 .sheet-block {
-  padding:16px 0;border-top:1px solid #403f3e;margin-top:20px;
+  padding:16px 0;border-top:1px solid #3f3f3f;margin-top:20px;
 }
 .block-heading {
   display: flex;
@@ -464,8 +466,8 @@ header .version-tag {
   margin: 8px 8px 0 0;
 }
 .field-status.conflict {
-  color: #ffc4a1;
-  background: #3b2920;
+  color: #cecece;
+  background: #2c2c2c;
   padding: 12px;
   border-radius: 6px;
 }
@@ -480,14 +482,14 @@ header .version-tag {
   margin-top: 8px;
 }
 .block-actions button {
-  font-size:10px;background:transparent;border-color:transparent;color:#afaead;padding:4px 6px;
+  font-size:10px;background:transparent;border-color:transparent;color:#aeaeae;padding:4px 6px;
 }
 .block-builder {
-  border:0;border-top:1px solid #494847;padding:18px 0;border-radius:0;margin-top:25px;
+  border:0;border-top:1px solid #484848;padding:18px 0;border-radius:0;margin-top:25px;
 }
 .block-builder summary {
   font-size: 12px;
-  color: #c0c6d1;
+  color: #c6c6c6;
 }
 .block-builder > input,
 .block-builder > select {
@@ -503,7 +505,7 @@ header .version-tag {
   font-size: 12px;
 }
 .sheet-section {
-  margin:30px 0 12px;font:10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:1.5px;color:#bec3ab;
+  margin:30px 0 12px;font:10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:1.5px;color:#c0c0c0;
 }
 .resource-row {
   display: flex;
@@ -511,7 +513,7 @@ header .version-tag {
   align-items: center;
 }
 .resource-row input {
-  width:100%;font:normal 28px "Highlords Editorial",Georgia,serif;font-variant-numeric:tabular-nums;color:#e9dfc9;
+  width:100%;font:normal 28px "Highlords Editorial",Georgia,serif;font-variant-numeric:tabular-nums;color:#e0e0e0;
 }
 .item-row {
   display: flex;
@@ -533,11 +535,11 @@ header .version-tag {
 .empty-state {
   font-size: 13px;
   line-height: 1.8;
-  color: #9da5b1;
+  color: #a4a4a4;
   padding: 24px 0;
 }
 #sheetConnection {
-  font-size:10px;color:#aaa9a8;margin-bottom:17px;
+  font-size:10px;color:#a9a9a9;margin-bottom:17px;
 }
 @media (max-width: 1000px) {
   #status {
@@ -678,7 +680,7 @@ header .version-tag {
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 12px;
-  border: 1px solid #424a56;
+  border: 1px solid #494949;
 }
 
 .product-preview {
@@ -688,17 +690,17 @@ header .version-tag {
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid #303640;
+  border: 1px solid #353535;
   border-radius: 8px;
 }
 .product-preview figcaption {
-  color: #8c95a3;
+  color: #949494;
   font-size: 11px;
   margin-top: 8px;
 }
 #panelWidth {
   appearance: none;
-  background: #303640;
+  background: #353535;
   border: 0;
   border-radius: 3px;
   height: 3px;
@@ -710,19 +712,19 @@ header .version-tag {
   width: 12px;
   height: 7px;
   border-radius: 3px;
-  background: #7e899a;
+  background: #888888;
 }
 #panelWidth::-moz-range-thumb {
   width: 12px;
   height: 7px;
   border: 0;
   border-radius: 3px;
-  background: #7e899a;
+  background: #888888;
 }
 
 .block-settings {
   font-size: 11px;
-  color: #9da6b5;
+  color: #a5a5a5;
   margin-top: 10px;
 }
 .block-settings > input,
@@ -742,7 +744,7 @@ header .version-tag {
   font-size: 11px;
 }
 
-.domain-migration{padding:16px;border:1px solid #794148;border-radius:6px;background:#24181b;margin-top:20px;font-size:13px}.domain-migration p{font-size:12px;color:#c8b8bd;margin:8px 0}.domain-migration a{color:#f7a2aa}
+.domain-migration{padding:16px;border:1px solid #4d4d4d;border-radius:6px;background:#1b1b1b;margin-top:20px;font-size:13px}.domain-migration p{font-size:12px;color:#bcbcbc;margin:8px 0}.domain-migration a{color:#b5b5b5}
 
 /* Tool cursors stay consistent over the scene and its tokens. SVG hotspots mark the brush/eraser tip. */
 #board[data-active-tool="pan"] { cursor: move; }
@@ -754,46 +756,46 @@ header .version-tag {
 #board[data-active-tool="pan"][data-gesture="panning"] { cursor: grabbing; }
 
 /* Scene and linked-token controls, v1.1 */
-.scene-dimensions{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line,#303038);border-radius:8px;padding:12px;margin:12px 0}
+.scene-dimensions{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line,#313131);border-radius:8px;padding:12px;margin:12px 0}
 .scene-dimensions label{min-width:0}.scene-dimensions input{width:100%;min-width:0}.scene-dimensions small{grid-column:1/-1;color:#aaa}
 .piece{isolation:isolate}.token-portrait{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:-1;opacity:.7;pointer-events:none}
-.token-resource{position:absolute;left:0;right:0;bottom:-8px;height:5px;background:#292a30;border:1px solid #111;border-radius:3px;overflow:hidden}.token-resource i{display:block;height:100%;background:#54b88c}
+.token-resource{position:absolute;left:0;right:0;bottom:-8px;height:5px;background:#2a2a2a;border:1px solid #111;border-radius:3px;overflow:hidden}.token-resource i{display:block;height:100%;background:#a0a0a0}
 #board[data-gesture="panning"] .piece{cursor:grabbing}
 
 /* Quiet secondary commands and consistent surfaces. */
-#newScene {border:0;border-left:1px solid #454443;border-radius:0;background:transparent;font-size:11px;padding:10px}
-#chatPanel > h3,#masterTools > h3,#sheetsPanel > h3,#participantsPanel > h3 {font:normal 23px "Highlords Editorial",Georgia,serif;color:#e6ddc7;letter-spacing:-.4px;margin-bottom:21px}
-#collapseSidebar {background:transparent;border-color:transparent;color:#bcc4af;font-size:10px;padding:8px}
-.char > button,.sheet-block > button {background:transparent;border-color:#504f4e;font-size:10px;padding:6px 9px;color:#c5cdb6}
-.field-status {color:#aaa9a8;font-size:9px;padding:6px 0}
+#newScene {border:0;border-left:1px solid #444444;border-radius:0;background:transparent;font-size:11px;padding:10px}
+#chatPanel > h3,#masterTools > h3,#sheetsPanel > h3,#participantsPanel > h3 {font:normal 23px "Highlords Editorial",Georgia,serif;color:#dddddd;letter-spacing:-.4px;margin-bottom:21px}
+#collapseSidebar {background:transparent;border-color:transparent;color:#c1c1c1;font-size:10px;padding:8px}
+.char > button,.sheet-block > button {background:transparent;border-color:#4f4f4f;font-size:10px;padding:6px 9px;color:#cacaca}
+.field-status {color:#a9a9a9;font-size:9px;padding:6px 0}
 .field-status[data-state="synced"] {position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.field-status.conflict {display:block;color:#ffceb1;background:#493427;border-radius:3px}
-#panelWidth {background:#464544}
-#panelWidth::-webkit-slider-thumb {background:#9a9998}
+.field-status.conflict {display:block;color:#d6d6d6;background:#383838;border-radius:3px}
+#panelWidth {background:#454545}
+#panelWidth::-webkit-slider-thumb {background:#999999}
 #editorInspector select {width:100%;margin-top:6px}
-.scene-dimensions {border:0;border-top:1px solid #434241;border-radius:0;padding:16px 0;margin:20px 0;gap:12px}
-.scene-dimensions legend {font-size:12px;color:#d2dac3;padding:0 8px 0 0}
+.scene-dimensions {border:0;border-top:1px solid #424242;border-radius:0;padding:16px 0;margin:20px 0;gap:12px}
+.scene-dimensions legend {font-size:12px;color:#d7d7d7;padding:0 8px 0 0}
 .scene-dimensions button {font-size:10px;padding:8px}
-.scene-dimensions small {font-size:10px;color:#abaaa9}
-.sheet-portrait {border-radius:3px;border-color:#646362}
+.scene-dimensions small {font-size:10px;color:#aaaaaa}
+.sheet-portrait {border-radius:3px;border-color:#636363}
 @media(max-width:800px) {
   #game header {padding:8px 10px;gap:6px}header .top-brand strong {font:18px "Highlords Editorial",Georgia,serif;letter-spacing:-.6px}header .top-brand img {width:27px;height:27px}header .version-tag {font-size:7px;margin-left:3px}.table-panel,#participantsPanel {padding:16px}.char {padding:0 0 20px}.sheet-title strong {font-size:28px}.sheet-title {gap:10px}.sheet-title button {font-size:9px}
   #sceneBar {top:10px;left:10px}#sceneBar select {max-width:190px}#sceneBar button {font-size:10px;padding:9px}#boardToolbar {left:10px;top:58px;max-height:calc(100% - 70px);overflow:auto}#toolButtons button {width:30px;height:30px;padding:6px}#zoomControls {bottom:10px;left:auto;right:10px}#zoomControls button {min-height:30px;padding:7px 10px}#boardEmpty {padding:40px 65px}#boardEmpty strong {font-size:25px}#boardEmpty p {font-size:11px}#boardEmpty button {padding:8px;font-size:10px}.workspace-sections button {padding:9px 5px}
 }
 
 .welcome h1 {font-family:"Highlords Editorial",Georgia,"Times New Roman",serif;font-weight:400;}
-.workspace-sections button.active {background:#39312a;border-color:#75604c;color:#f0dfc8}
+.workspace-sections button.active {background:#323232;border-color:#636363;color:#e1e1e1}
 .workspace-group > label:has(input[type="file"]) {flex-direction:column;align-items:stretch;gap:9px}
-.workspace-group input[type="file"] {border:1px solid #49423b;background:transparent;padding:7px;border-radius:3px}
-.workspace-group input[type="file"]::file-selector-button {font:inherit;background:#34302a;color:#e0d4c0;border:0;border-radius:2px;padding:7px 9px;margin-right:8px;cursor:pointer}
+.workspace-group input[type="file"] {border:1px solid #434343;background:transparent;padding:7px;border-radius:3px}
+.workspace-group input[type="file"]::file-selector-button {font:inherit;background:#303030;color:#d5d5d5;border:0;border-radius:2px;padding:7px 9px;margin-right:8px;cursor:pointer}
 
 /* Direct session actions, with a dedicated row on narrow screens. */
 #game header {height:var(--header-height,60px);gap:12px}
 .session-actions {display:flex;align-items:center;gap:8px;flex:none}
 .session-actions button {min-height:34px;white-space:nowrap;font-size:11px;padding:8px 11px}
-#leaveGame {background:transparent;border-color:#61574b;color:#ede1cc}
-#export {background:transparent;border-color:#61574b;color:#ede1cc}
-.session-actions #collapseSidebar {display:grid;place-items:center;width:32px;min-width:32px;height:34px;padding:7px;background:transparent;border:1px solid #48433c}
+#leaveGame {background:transparent;border-color:#585858;color:#e2e2e2}
+#export {background:transparent;border-color:#585858;color:#e2e2e2}
+.session-actions #collapseSidebar {display:flex;align-items:center;justify-content:center;gap:8px;width:auto;min-width:36px;height:34px;padding:7px 10px;background:#191919;border:1px solid #454545;color:#e0e0e0}
 @media(min-width:801px) and (max-width:1200px) {header .top-brand strong {display:none}#sessionRole {display:none}#gameCampaignName {max-width:150px!important}#status {max-width:140px}}
 @media(max-width:800px) {
   :root {--header-height:108px}
@@ -805,3 +807,44 @@ header .version-tag {
   .session-actions {grid-row:2;gap:7px;justify-content:flex-start}.session-actions button {font-size:11px;padding:8px 12px;min-height:34px}.session-actions #collapseSidebar {margin-left:auto}
   #status {grid-row:3;order:initial;max-width:none;width:100%;font-size:9px;margin:0;line-height:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
+
+/* Highlords identity: black surfaces, neutral text, red accents. */
+body {background:#0a0a0a}
+.welcome {position:relative;padding:0 0 0 18px;border-left:3px solid var(--red);margin-bottom:28px}
+.home-eyebrow {margin:0 0 10px;font:10px ui-monospace,monospace;letter-spacing:1.7px;color:#ff6268}
+.welcome h1 {font-size:39px;margin-bottom:12px}.welcome h1 em {color:#ef363e}
+.hero-copy {max-width:600px;line-height:1.7;font-size:13px;color:#b4b4b4}
+.entry-grid {gap:28px}.entry-grid section {padding:20px 0 0;border-top:1px solid #353535}.entry-grid .entry-host {padding:20px 0 0;border-left:0}
+.entry-heading h3 {font-size:17px;color:#f0f0f0}.card-caption {color:#aaa}
+.entry-grid .row input {background:#151515;border-color:#3a3a3a;border-radius:4px}.entry-grid .row input:focus {border-color:#e8363e}
+.entry-grid .row button {margin-top:2px;min-height:44px;border-radius:4px}
+#home {max-width:1040px}.landing-grid {padding:30px 0 24px}
+.home-guide {border-top:1px solid #303030;padding:21px 0 24px}
+.guide-heading {display:flex;align-items:baseline;gap:15px;margin-bottom:16px}.guide-heading h2 {font-size:14px;font-weight:600;margin:0}.guide-heading > p {font-size:11px;color:#969696;margin:0}
+.home-guide ol {counter-reset:step;display:grid;grid-template-columns:1fr 1fr 1fr;gap:25px;list-style:none;padding:0;margin:0}.home-guide li {counter-increment:step;position:relative;padding-left:26px}.home-guide li::before {content:"0" counter(step);position:absolute;left:0;top:1px;font:10px ui-monospace,monospace;color:#ff535b}.home-guide strong {font-size:12px;font-weight:500;color:#e5e5e5}.home-guide li p {font-size:11px;line-height:1.7;color:#a4a4a4;margin:7px 0 0}
+.site-footer {color:#a5a5a5}.site-footer strong {color:#ddd}
+#invite {background:var(--red);border-color:#ef3c43;color:#fff}
+#toolButtons button[aria-pressed="true"] {background:#341013;border-color:#b4252d;color:#ffbabe}
+button.active,button[aria-pressed="true"] {background:#341013;border-color:#b4252d}
+.table-tabs button[aria-selected="true"] {border-bottom-color:var(--red);color:#fff}
+.workspace-sections button.active {background:#341013;border-color:#9c2027;color:#fff}
+.piece.selected {outline-color:#ee363e}.token-resource i {background:var(--red)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible {outline-color:#ff535b}
+#notice {color:#ff8b93}.field-status.conflict {background:#351214;color:#ffbdc2}
+.session-actions #collapseSidebar:hover {background:#292929;border-color:#e33b43}.session-actions #collapseSidebar svg {width:22px;height:22px;stroke-width:1.7}
+.session-actions #collapseSidebar[aria-expanded="false"] {background:#351014;border-color:#bf2931;color:#ffbec2}
+@media(max-width:800px) {
+  #home {padding:0 18px}.landing-grid {padding-top:22px}.welcome {padding-left:12px;margin-bottom:22px}.home-eyebrow {font-size:8px;letter-spacing:1.3px;margin-bottom:9px}.welcome h1 {font-size:29px;line-height:1.2;margin-bottom:10px}.hero-copy {font-size:12px;line-height:1.6}
+  .entry-grid {gap:23px}.entry-grid section,.entry-grid .entry-host {padding:17px 0 0;border-top:1px solid #353535}.entry-heading h3 {font-size:16px}.entry-grid .row button {min-height:44px}
+  .home-guide {padding:20px 0}.guide-heading {display:block;margin-bottom:18px}.guide-heading > p {margin:7px 0 0}.home-guide ol {grid-template-columns:1fr;gap:16px}.home-guide li p {margin-top:4px}.home-guide li {padding-left:27px}
+  .sidebar-toggle-label {display:none}.session-actions #collapseSidebar {width:36px;min-width:36px;padding:6px}
+}
+
+#status {min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-toggle-label {font-size:11px;white-space:nowrap}
+
+#game header,#tableSidebar {background:#111}
+.table-tabs {background:#151515}
+#canvas {background:#121212}
+#board {background:#080808}
+#boardToolbar,#sceneBar,#zoomControls {background:#121212;border-color:#383838}

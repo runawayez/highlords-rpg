@@ -675,3 +675,11 @@ test('cena inicia enquadrada e acompanha viewport, painel e dimensões',async({p
  await page.evaluate(()=>dispatch('scene:dimensions',{width:4096,height:4096}));await expect.poll(fits).toBe(true);
  await expect(page.locator('#export')).toBeInViewport({ratio:1});await expect(page.locator('#leaveGame')).toBeInViewport({ratio:1});
 });
+test('identidade usa preto e vermelho e o controle do painel indica sua ação',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const colors=await page.evaluate(()=>({host:getComputedStyle($('host')).backgroundColor,join:getComputedStyle($('join')).backgroundColor,background:getComputedStyle(document.body).backgroundColor}));
+ expect(colors.host).toBe(colors.join);const [red,green,blue]=colors.host.match(/\d+/g).map(Number);expect(red).toBeGreaterThan(green*2);expect(blue).toBeLessThan(red*.4);const bg=colors.background.match(/\d+/g).map(Number);expect(Math.max(...bg)-Math.min(...bg)).toBeLessThanOrEqual(1);
+ await expect(page.getByRole('heading',{name:'Primeira vez por aqui?'})).toBeVisible();await expect(page.locator('.home-guide li')).toHaveCount(3);
+ await page.locator('#host').click();const toggle=page.locator('#collapseSidebar');await expect(toggle).toHaveAttribute('aria-controls','tableSidebar');await expect(toggle).toHaveAccessibleName('Ocultar painel');await expect(toggle.locator('svg rect')).toHaveCount(1);const path=await toggle.locator('svg path').getAttribute('d');
+ await toggle.click();await expect(toggle).toHaveAccessibleName('Abrir painel');await expect(page.locator('#tableSidebar')).toBeHidden();expect(await toggle.locator('svg path').getAttribute('d')).not.toBe(path);await toggle.click();await expect(page.locator('#tableSidebar')).toBeVisible();
+});
