@@ -1,4 +1,17 @@
 'use strict';
+// TURN integration is intentionally disabled by product decision.
+// This endpoint MUST NOT issue credentials or contact any TURN provider,
+// even if an operator accidentally configures TURN environment variables.
+// The historical broker implementation is retained below for future review.
+module.exports = async function disabledTurn(req,res){
+ res.setHeader('Cache-Control','no-store, private');
+ res.setHeader('X-Content-Type-Options','nosniff');
+ if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({error:'method_not_allowed'})}
+ return res.status(503).json({error:'turn_disabled'});
+};
+
+/*
+'use strict';
 // Optional TURN broker. Requires a dedicated Cloudflare Realtime TURN key.
 // Keep TURN_KEY_API_TOKEN server-side. Protect this endpoint with a production
 // rate-limit rule before enabling: TURN relay bandwidth is billable.
@@ -29,3 +42,5 @@ module.exports = async function handler(req,res){
  }catch{return res.status(502).json({error:'turn_unavailable'})}
  finally{clearTimeout(timeout)}
 };
+
+*/
