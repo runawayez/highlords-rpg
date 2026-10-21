@@ -86,8 +86,18 @@ test('ferramentas são botões e podem alternar',async({page})=>{
  await expect(page.locator('#toolButtons button')).toHaveCount(8);
  await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  await expect(page.locator('[data-tool="draw"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#board')).toHaveCSS('cursor',/cursor-brush\.svg/);
+ await page.evaluate(()=>apply('token:add',{name:'Cursor'},myId,nickname));
+ await expect(page.locator('.piece')).toHaveCSS('cursor',/cursor-brush\.svg/);
+ await page.locator('[data-tool="rectangle"]').click();
+ await expect(page.locator('#board')).toHaveCSS('cursor','crosshair');
+ await expect(page.locator('.piece')).toHaveCSS('cursor','crosshair');
  await page.locator('#tabTools').click();await page.locator('[data-tool="pan"]').click();
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#board')).toHaveCSS('cursor','move');
+ const area=await page.locator('#board').boundingBox();await page.mouse.move(area.x+400,area.y+500);await page.mouse.down();
+ await expect(page.locator('#board')).toHaveCSS('cursor','grabbing');await page.mouse.up();
+ await expect(page.locator('#board')).toHaveCSS('cursor','move');
 });
 
 test('desenho aceita traços consecutivos e revelação ativa névoa',async({page})=>{
@@ -113,6 +123,10 @@ test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visíve
  await page.locator('#tabTools').click();await page.locator('[data-tool="reveal"]').click();
  await expect(page.locator('#fogState')).toContainText('Desativada');
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#board')).toHaveCSS('cursor','move');
+ const area=await page.locator('#board').boundingBox();await page.mouse.move(area.x+400,area.y+500);await page.mouse.down();
+ await expect(page.locator('#board')).toHaveCSS('cursor','grabbing');await page.mouse.up();
+ await expect(page.locator('#board')).toHaveCSS('cursor','move');
  await page.locator('#tabTools').click();await page.locator('#fogEnable').click();
  await expect(page.locator('#fogState')).toContainText('Ativa');
  await expect(page.locator('#fogLayer mask')).toHaveCount(0);

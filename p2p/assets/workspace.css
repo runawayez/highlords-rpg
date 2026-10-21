@@ -436,7 +436,7 @@ header .version-tag {
   background: #0c0e11;
   background-image: radial-gradient(#ffffff14 1px, transparent 1px);
   background-size: 24px 24px;
-  cursor: grab;
+  cursor: move;
 }
 #canvas {
   position: absolute;
@@ -475,7 +475,7 @@ header .version-tag {
   user-select: none;
   font-weight: 650;
   text-shadow: 0 1px 2px #000;
-  cursor: move;
+  cursor: inherit;
   font-size: 12px;
   text-align: center;
 }
@@ -1197,3 +1197,12 @@ header .version-tag {
 }
 
 .domain-migration{padding:16px;border:1px solid #794148;border-radius:6px;background:#24181b;margin-top:20px;font-size:13px}.domain-migration p{font-size:12px;color:#c8b8bd;margin:8px 0}.domain-migration a{color:#f7a2aa}
+
+/* Tool cursors stay consistent over the scene and its tokens. SVG hotspots mark the brush/eraser tip. */
+#board[data-active-tool="pan"] { cursor: move; }
+#board[data-active-tool="draw"], #board[data-active-tool="line"] { cursor: url("/assets/cursor-brush.svg") 4 27, crosshair; }
+#board[data-active-tool="rectangle"], #board[data-active-tool="ellipse"], #board[data-active-tool="reveal"], #board[data-active-tool="ruler"] { cursor: crosshair; }
+#board[data-active-tool="eraser"] { cursor: url("/assets/cursor-eraser.svg") 5 24, crosshair; }
+#board[data-active-tool] .piece { cursor: inherit; }
+#board[data-active-tool="pan"] .piece[data-movable="false"] { cursor: not-allowed; }
+#board[data-active-tool="pan"][data-gesture="panning"] { cursor: grabbing; }
