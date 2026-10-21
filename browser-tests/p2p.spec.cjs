@@ -231,3 +231,5 @@ test('importação de campanha antiga não herda chaves de outra campanha',async
  });
  expect(result).toEqual({title:'Campanha legada',trustedKeys:{},scenes:1});
 });
+
+test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.getByRole('button',{name:'Preparar minha mesa'}).click();await expect(page.locator('#board')).toBeVisible()});
