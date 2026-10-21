@@ -199,17 +199,19 @@ function loadScene(scene){state.activeSceneId=scene.id;state.map=scene.map||'';s
 function svgNode(tag,attributes){const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [key,val] of Object.entries(attributes))node.setAttribute(key,String(val));return node}
 
 let selectedDrawing=-1,editorMeasure=null;
+let renderedGridKey='',renderedGridImage='';
 function renderEditorGrid(){
  const grid=$('grid'),size=state.gridSize||60,ox=state.gridOriginX||0,oy=state.gridOriginY||0;
  grid.hidden=state.gridVisible===false||!document.getElementById('layerGrid')?.checked;
  grid.style.opacity=String((state.gridOpacity??18)/100);
  if(state.gridKind==='hex'){
+  const key=[size,ox,oy].join(':');if(renderedGridKey===key&&renderedGridImage){grid.style.backgroundImage=renderedGridImage;grid.style.backgroundSize='1200px 800px';grid.style.backgroundPosition='0 0';return}
   const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=800;const c=canvas.getContext('2d');c.strokeStyle='#ffffff';c.lineWidth=1;
   const r=size/Math.sqrt(3),stepX=1.5*r,stepY=size;
   for(let col=0;col<Math.ceil(1200/stepX)+2;col++)for(let row=0;row<Math.ceil(800/stepY)+2;row++){
    const x=ox+col*stepX,y=oy+row*stepY+(col%2)*stepY/2;c.beginPath();for(let k=0;k<6;k++){let a=Math.PI*k/3;let px=x+r*Math.cos(a),py=y+r*Math.sin(a);if(k===0)c.moveTo(px,py);else c.lineTo(px,py)}c.closePath();c.stroke();
   }
-  grid.style.backgroundImage='url('+canvas.toDataURL('image/png')+')';grid.style.backgroundSize='1200px 800px';grid.style.backgroundPosition='0 0';
+  renderedGridKey=key;renderedGridImage='url('+canvas.toDataURL('image/png')+')';grid.style.backgroundImage=renderedGridImage;grid.style.backgroundSize='1200px 800px';grid.style.backgroundPosition='0 0';
  }else{
   grid.style.backgroundImage='linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px)';
   grid.style.backgroundSize=size+'px '+size+'px';grid.style.backgroundPosition=ox+'px '+oy+'px';
@@ -258,7 +260,7 @@ function playerView(playerId){
  // and unrelated character notes never enter their WebRTC payload.
  const active=(state.scenes||[]).find(x=>x.id===state.activeSceneId);
  return {
-  schema:1,title:state.title,updated:state.updated,
+  schema:1,title:state.title,updated:state.updated,gridSize:state.gridSize,gridKind:state.gridKind,gridVisible:state.gridVisible,gridOriginX:state.gridOriginX,gridOriginY:state.gridOriginY,gridOpacity:state.gridOpacity,gridSnap:state.gridSnap,
   activeSceneId:state.activeSceneId,
   scenes:active?[{id:active.id,title:active.title}]:[],
   // Never include the original map in a player's payload while fog is active.
