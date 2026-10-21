@@ -1,6 +1,6 @@
 # Highlords VTT — Documento Mestre
 
-**Versão:** 1.0 · **Data:** 20/10/2026  
+**Versão:** 1.1 · **Data:** 21/10/2026
 **Finalidade:** fonte permanente de decisões, requisitos e contexto para todos os chats do projeto Highlords VTT.
 
 > **Regra fundamental:** Highlords VTT é somente a mesa. A campanha pertence ao mestre.
@@ -312,3 +312,8 @@ O repositório GitHub foi renomeado para `runawayez/highlords-vtt`. O remoto loc
 O domínio antigo continua disponível para exportação dos autosaves existentes. IndexedDB, localStorage e chaves de identidade são vinculados à origem do navegador; não migram automaticamente ao novo domínio. Não renomear `highlords-p2p`, `hl-identity` ou o domínio de assinatura `highlords-auth-v1` por razões de marca: são identificadores de compatibilidade. Ao usar outro domínio, o jogador precisa de reatribuição ou recuperação assistida pelo mestre. Nenhuma chave privada é exportada.
 
 As descrições históricas da Alpha acima não representam a implementação atual. O refinamento da 1.0 adicionou ZIP v3, identidade com assinatura, proteção por rasterização da névoa e fichas modulares com sincronização por campo. Consultar o código atual e `docs/REFINAMENTO_1.0.md` para implementação e limites, sem presumir homologação entre redes físicas.
+
+
+## Evolução 1.1
+
+Implementação descrita nas [notas de lançamento](../RELEASE_1.1.md). A biblioteca IndexedDB mantém campanhas por `campaignId` e cinco checkpoints por campanha, preservando os stores e as chaves de identidade anteriores. Rascunhos pendentes são locais à campanha e identidade; versões e permissões do mestre continuam prevalecendo na recuperação. Cada cena tem dimensões próprias (240–4096 px), com 1200 × 800 como padrão legado. Tokens podem vincular fichas/retratos e um recurso, sem conceder acesso adicional a jogadores. A configuração de TURN permanece inalterada.

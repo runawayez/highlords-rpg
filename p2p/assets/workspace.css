@@ -1206,3 +1206,10 @@ header .version-tag {
 #board[data-active-tool] .piece { cursor: inherit; }
 #board[data-active-tool="pan"] .piece[data-movable="false"] { cursor: not-allowed; }
 #board[data-active-tool="pan"][data-gesture="panning"] { cursor: grabbing; }
+
+/* Scene and linked-token controls, v1.1 */
+.scene-dimensions{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line,#303038);border-radius:8px;padding:12px;margin:12px 0}
+.scene-dimensions label{min-width:0}.scene-dimensions input{width:100%;min-width:0}.scene-dimensions small{grid-column:1/-1;color:#aaa}
+.piece{isolation:isolate}.token-portrait{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:-1;opacity:.7;pointer-events:none}
+.token-resource{position:absolute;left:0;right:0;bottom:-8px;height:5px;background:#292a30;border:1px solid #111;border-radius:3px;overflow:hidden}.token-resource i{display:block;height:100%;background:#54b88c}
+#board[data-gesture="panning"] .piece{cursor:grabbing}

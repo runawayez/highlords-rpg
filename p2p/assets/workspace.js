@@ -68,7 +68,7 @@ addEventListener("DOMContentLoaded", () => {
     }),
     sheetButton("Enquadrar", () => {
       const rect = $("board").getBoundingClientRect();
-      zoom = Math.min((rect.width - 140) / 1200, (rect.height - 100) / 800, 1);
+      zoom = Math.min((rect.width - 140) / boardWidth(), (rect.height - 100) / boardHeight(), 1);
       offset = { x: 90, y: 70 };
       transform();
     }),

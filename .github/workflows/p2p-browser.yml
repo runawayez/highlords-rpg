@@ -24,6 +24,7 @@ jobs:
           node --check browser-tests/p2p.spec.cjs
           node --check p2p/assets/sheets.js
           node --check p2p/assets/workspace.js
+          node --check p2p/assets/release11.js
           node -e "const fs=require('fs'); const s=fs.readFileSync('p2p/index.html','utf8'); const a=s.lastIndexOf('<script>')+8; const b=s.lastIndexOf('</script>'); if(a<8||b<a)throw Error('Inline script não encontrado'); new Function(s.slice(a,b));"
       - name: Testar endpoint TURN sem credenciais
         run: node --test tests/turn-config.test.js

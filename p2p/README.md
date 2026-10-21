@@ -69,3 +69,8 @@ As alterações da ficha são enviadas por campo após 700 ms sem digitação, o
 Rascunhos são mantidos em memória durante a sessão, inclusive durante atualizações e reconexão. Recarregar ou encerrar a página pode descartá-los, com aviso do navegador quando suportado. Não há coedição de texto por caractere, histórico persistente de fichas nem recuperação de rascunhos após fechamento. Campos privados e permissões continuam validados no host. O cliente atual envia versões; chamadas legadas sem versão seguem compatíveis.
 
 Os blocos estruturados usam strings JSON no esquema existente e mantêm importação de campos antigos em texto. A conversão de inventários/listas antigas em itens é explícita. ZIP v3, assinatura local e TURN desativado foram preservados. Os módulos de ficha, composição da interface e estilos ficam em `assets/sheets.js`, `assets/workspace.js` e `assets/workspace.css`; o núcleo de transporte e persistência segue em `index.html`.
+
+
+## Versão 1.1
+
+Veja [RELEASE_1.1.md](../RELEASE_1.1.md) para interação do mapa, vínculo de fichas, dimensões por cena, biblioteca e recuperação de rascunhos. O módulo `assets/release11.js` integra os novos controles e a persistência de rascunhos; `sheets.js` e a autoridade principal continuam responsáveis pelas permissões e versões dos campos.

@@ -76,6 +76,15 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await expect(player.locator('#status')).toContainText('mesa sincronizada',{timeout:15000});
   await player.locator('#tabSheets').click();await expect(player.locator('.char > textarea')).toHaveValue('PV: 24');
   await expect(host.getByLabel('Vida',{exact:true})).toHaveValue('12');
+  await host.evaluate(()=>dispatch('scene:dimensions',{width:2000,height:1000}));
+  await expect(player.locator('#canvas')).toHaveCSS('width','2000px');
+  await player.evaluate(()=>{manualClose=true;clearTimeout(retryTimer);hostLink.close();const c=state.characters[0],f=c.fields.find(f=>f.name==='Vida');editSheetDraft(c.id,f.id,'11');clearTimeout(sheetDrafts.get(sheetKey(c.id,f.id)).timer);persistSheetDrafts()});
+  await host.getByLabel('Vida',{exact:true}).fill('9');await host.getByRole('button',{name:'Salvar Vida',exact:true}).click();
+  await player.reload();await player.locator('#roomCode').fill(room);await player.locator('#join').click();await expect(player.locator('#game')).toBeVisible({timeout:20000});await player.locator('#tabSheets').click();
+  await expect(player.getByLabel('Vida',{exact:true})).toHaveValue('11');
+  await expect(player.getByText('Este campo mudou em outro navegador.',{exact:false})).toBeVisible();
+  await player.getByRole('button',{name:'Aplicar meu rascunho'}).click();await expect(host.getByLabel('Vida',{exact:true})).toHaveValue('11');
+
  }finally{
   await Promise.allSettled([hostContext.close(),playerContext.close()]);
   await new Promise(resolve=>server.close(resolve));

@@ -77,6 +77,7 @@ function sheetValue(id, fieldId) {
     : null;
 }
 function resetSheetDrafts() {
+  loadedDraftScope = "";
   for (const d of sheetDrafts.values()) clearTimeout(d.timer);
   sheetDrafts.clear();
   sheetsFingerprint = "";
@@ -171,6 +172,7 @@ function saveSheetDraft(id, fieldId, resolve = false) {
   renderSheetsStatus();
 }
 function renderSheetsStatus() {
+  persistSheetDrafts();
   document.querySelectorAll("[data-sheet-status]").forEach((el) => {
     const d = sheetDrafts.get(el.dataset.sheetStatus);
     el.replaceChildren();

@@ -20,7 +20,7 @@ Mesa virtual de RPG gratuita e independente de sistemas, direto no navegador.
 
 O Highlords VTT é uma *Virtual Tabletop* (VTT) leve para reunir pessoas em torno de mapas, personagens e histórias, sem impor regras de um sistema específico. O mestre cria a sala, compartilha o convite e mantém o controle da campanha em seu próprio navegador.
 
-**Lançamento 1.0:** versão oficial do núcleo gratuito e independente de sistemas. Mantemos correções e evolução contínuas. A publicação não garante funcionamento em todas as redes: TURN permanece desativado e cenários de redes físicas diferentes não foram integralmente homologados.
+**Versão 1.1:** interação refinada com o mapa, tokens vinculados às fichas, dimensões por cena, biblioteca local de campanhas e rascunhos recuperáveis. Veja as [notas da versão](RELEASE_1.1.md). A publicação não garante funcionamento em todas as redes: TURN permanece desativado e cenários de redes físicas diferentes não foram integralmente homologados.
 
 ## Comece a jogar
 
@@ -140,6 +140,7 @@ O fluxo automatizado está em [`.github/workflows/p2p-browser.yml`](.github/work
 | **Beta** — portabilidade ZIP, fichas customizáveis, ferramentas e permissões avançadas | Implementada; encerramento administrativo por decisão de produto |
 | **Release Candidate** — testes com campanhas reais, segurança, performance e acessibilidade | Etapa formal dispensada por decisão do projeto; verificações automatizadas incorporadas à 1.0 |
 | **1.0** — versão oficial do núcleo; correções pontuais posteriores | Lançamento oficial; homologação entre redes independentes permanece como limite conhecido |
+| **1.1** — uso da mesa e recuperação local | Tokens/fichas vinculados, dimensões por cena, biblioteca de campanhas e rascunhos persistentes |
 
 Recursos adicionais como iniciativa, música ambiente, macros e templates de sistemas são opcionais e não bloqueiam o núcleo do projeto.
 
