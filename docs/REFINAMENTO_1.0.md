@@ -4,7 +4,7 @@ Data: 21/10/2026. Complemento técnico ao Documento Mestre de lançamento 1.0.
 
 ## Decisões implementadas
 
-- Home compacta com gratuidade antes das ações e captura real da interface em uma campanha demonstrativa.
+- A home foi posteriormente redesenhada na 1.1: apresentação editorial, ilustração vetorial de mapa e acesso de mestre/jogador em uma área própria. Veja [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
 - Ferramentas SVG consistentes ao lado do mapa; navegação de cenas independente do painel.
 - Biblioteca do mestre organizada em Mapa, Tokens e Propriedades contextuais.
 - Fichas e criação de personagens no mesmo local; participantes e recuperação de acesso em Grupo.

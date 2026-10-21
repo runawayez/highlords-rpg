@@ -176,6 +176,8 @@ function renderSheetsStatus() {
   document.querySelectorAll("[data-sheet-status]").forEach((el) => {
     const d = sheetDrafts.get(el.dataset.sheetStatus);
     el.replaceChildren();
+    el.dataset.state = !d ? "synced" : d.conflict ? "conflict" : "draft";
+    el.classList.toggle("conflict", !!d?.conflict);
     if (!d) {
       el.textContent = "Sincronizado";
       return;

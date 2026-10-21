@@ -317,3 +317,8 @@ As descrições históricas da Alpha acima não representam a implementação at
 ## Evolução 1.1
 
 Implementação descrita nas [notas de lançamento](../RELEASE_1.1.md). A biblioteca IndexedDB mantém campanhas por `campaignId` e cinco checkpoints por campanha, preservando os stores e as chaves de identidade anteriores. Rascunhos pendentes são locais à campanha e identidade; versões e permissões do mestre continuam prevalecendo na recuperação. Cada cena tem dimensões próprias (240–4096 px), com 1200 × 800 como padrão legado. Tokens podem vincular fichas/retratos e um recurso, sem conceder acesso adicional a jogadores. A configuração de TURN permanece inalterada.
+
+
+### Direção visual da 1.1
+
+A revisão visual posterior ao lançamento adota a linguagem de atlas/caderno de campanha, com preto quente, vermelho terroso e títulos em serifa. Entrada, mesa e fichas compartilham a mesma hierarquia. Detalhes e prévia em [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).

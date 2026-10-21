@@ -5,7 +5,7 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
  const server=http.createServer((req,res)=>{
   const file=path.join(process.cwd(),'p2p',req.url.startsWith('/assets/')?req.url.slice(1):'index.html');
   fs.readFile(file,(error,data)=>{
-   res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');
+   res.setHeader('Content-Type',file.endsWith('.woff')?'font/woff':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');
    if(error){res.writeHead(404);res.end('Não encontrado')}else res.end(data);
   });
  });

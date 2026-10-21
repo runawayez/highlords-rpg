@@ -51,7 +51,7 @@ addEventListener("DOMContentLoaded", () => {
   const boardEmpty = document.createElement("div");
   boardEmpty.id = "boardEmpty";
   boardEmpty.innerHTML =
-    "<strong>Sua próxima história começa aqui.</strong><p>Adicione um mapa ou use o grid para improvisar.</p>";
+    "<strong>O palco da sua próxima aventura.</strong><p>Traga um mapa ou comece a história com o que já está aqui.</p>";
   const mapStart = sheetButton("Adicionar mapa", () => {
     $("tabTools").click();
     openWorkspaceSection("map");
@@ -197,7 +197,7 @@ addEventListener("DOMContentLoaded", () => {
   resize.type = "range";
   resize.min = 300;
   resize.max = 720;
-  resize.value = 380;
+  resize.value = 360;
   resize.setAttribute("aria-label", "Largura do painel");
   resize.oninput = () =>
     document.documentElement.style.setProperty(

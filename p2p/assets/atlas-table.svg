@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320" viewBox="0 0 640 320" fill="none">
+<defs><pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" stroke="#33322f" stroke-width=".5"/></pattern><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M0 0V6" stroke="#656057" stroke-width="1"/></pattern></defs>
+<path d="M0 0H640V320H0z" fill="#141312"/><path d="M22 18H618V300H22z" fill="url(#grid)"/>
+<g stroke="#45443e" stroke-width=".7"><path d="M22 36V18H40M600 18H618V36M22 282V300H40M600 300H618V282"/><path d="M308 18H332M320 12V24M308 300H332M320 294V306"/></g>
+<path d="M98 82H254V42H430V98H526V246H430V278H254V238H98Z" fill="url(#hatch)" stroke="#777166"/>
+<path d="M112 96H268V56H416V112H512V232H416V264H268V224H112Z" fill="#1b1a19" stroke="#b0a38d" stroke-width="1.4"/>
+<path d="M112 96H268V56H416V112H512V232H416V264H268V224H112Z" fill="url(#grid)"/>
+<path d="M268 56V126M268 184V264M416 56V126M416 184V264M112 160H172M212 160H268M416 160H450M490 160H512" stroke="#b0a38d" stroke-width="3"/>
+<path d="M268 126V166Q286 166 286 148M416 184V144Q398 144 398 162M172 160H212Q212 140 192 140M450 160H490Q490 180 470 180" stroke="#777166" stroke-width="1"/>
+<g fill="#272625" stroke="#b0a38d"><circle cx="304" cy="96" r="8"/><circle cx="380" cy="96" r="8"/><circle cx="304" cy="222" r="8"/><circle cx="380" cy="222" r="8"/></g>
+<g stroke="#8c8475" stroke-width="1"><path d="M134 112H160V128H134ZM134 192H160V208H134ZM468 124H494V138H468ZM468 200H494V214H468Z"/><path d="M320 66H364M324 71H360M328 76H356"/></g>
+<path d="M177 207L223 207L240 189L240 149L304 149L328 173L378 173" stroke="#be6656" stroke-width="1.5" stroke-dasharray="3 5" stroke-linecap="round"/>
+<path d="M374 169L379 173L374 177" stroke="#be6656" stroke-width="1.5"/>
+<g><circle cx="236" cy="188" r="15" fill="#302821" stroke="#d1bda1"/><path d="M236 180L241 191H231Z" stroke="#d1bda1"/><circle cx="307" cy="150" r="15" fill="#71372f" stroke="#d99e87"/><path d="M301 150H313M307 144V156" stroke="#eed7c1"/><circle cx="379" cy="172" r="15" fill="#292827" stroke="#acabaa"/><path d="M374 176L379 166L384 176M376 172H382" stroke="#d1dbc9"/></g>
+<g font-family="Georgia,serif" fill="#ada08c"><text x="153" y="145" font-size="12" font-style="italic">I</text><text x="337" y="203" font-size="12" font-style="italic">II</text><text x="467" y="192" font-size="12" font-style="italic">III</text></g>
+<g stroke="#8b8070" stroke-width=".8"><path d="M576 65V109M554 87H598M561 72L591 102M561 102L591 72"/><path d="M576 65L580 87L576 82L572 87Z" fill="#b5a68d"/></g><text x="572" y="56" font-family="Georgia,serif" font-size="10" fill="#b5a68d">N</text>
+<g fill="#888277" font-family="monospace" font-size="8" letter-spacing="1"><text x="42" y="40">H / 001</text><text x="42" y="282">O SALÃO ESQUECIDO</text><text x="526" y="282">1 : 100</text></g>
+<path d="M529 266H585M529 263V269M557 263V269M585 263V269" stroke="#888277"/>
+</svg>

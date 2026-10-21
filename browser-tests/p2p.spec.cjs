@@ -4,7 +4,7 @@ const {test,expect}=require('@playwright/test');
 test.setTimeout(45000);
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 let server;
-test.beforeAll(async()=>{server=http.createServer((req,res)=>{const file=path.join(process.cwd(),'p2p',req.url.startsWith('/assets/')?req.url.slice(1):'index.html');if(!file.startsWith(path.join(process.cwd(),'p2p'))){res.writeHead(403);return res.end()}fs.readFile(file,(err,data)=>{res.setHeader('Content-Type',file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(err?'missing':data)})}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r))});
+test.beforeAll(async()=>{server=http.createServer((req,res)=>{const file=path.join(process.cwd(),'p2p',req.url.startsWith('/assets/')?req.url.slice(1):'index.html');if(!file.startsWith(path.join(process.cwd(),'p2p'))){res.writeHead(403);return res.end()}fs.readFile(file,(err,data)=>{res.setHeader('Content-Type',file.endsWith('.woff')?'font/woff':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(err?'missing':data)})}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r))});
 test.afterAll(async()=>{await new Promise(r=>server.close(r))});
 const url=()=>`http://127.0.0.1:${server.address().port}/`;
 async function mockPeer(page){await page.route('https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js',route=>route.fulfill({status:200,contentType:'application/javascript',body:`
@@ -293,7 +293,7 @@ test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
 
 test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({page})=>{
  await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());
- await expect(page.getByRole('heading',{name:/Um espaço para qualquer história/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/A aventura.*começa à mesa/})).toBeVisible();
  await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();
  await expect(page.locator('#host')).toBeVisible();
  await expect(page.getByRole('button',{name:/Preparar minha mesa/})).toBeVisible();
