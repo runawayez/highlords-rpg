@@ -128,3 +128,17 @@ test('mestre aguarda autosave ao sair pelo menu',async({page})=>{
  const saved=await page.evaluate(async()=>{const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('saves');const r=tx.objectStore('saves').get('latest');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})});
  expect(saved.characters.some(c=>c.name==='Guardião')).toBe(true);
 });
+
+test('desfazer remove apenas último traço e limpar pede confirmação',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('[data-tool="draw"]').click();
+ const r=await page.locator('#board').boundingBox();
+ for(let i=0;i<2;i++){await page.mouse.move(r.x+90,r.y+100+i*40);await page.mouse.down();await page.mouse.move(r.x+180,r.y+110+i*40,{steps:5});await page.mouse.up()}
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(2);
+ await page.locator('#undoDrawing').click();
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
+ page.once('dialog',d=>d.dismiss());await page.locator('#clearDrawings').click();
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(1);
+ page.once('dialog',d=>d.accept());await page.locator('#clearDrawings').click();
+ await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
+});
