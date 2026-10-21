@@ -53,3 +53,9 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - A exportação atualiza a cena ativa antes de gerar o arquivo JSON `.highlords`.
 - Não há criptografia dos backups locais nem proteção contra exclusão da base IndexedDB. O mestre deve baixar arquivos `.highlords` regularmente.
 - Ainda faltam ZIP portátil definitivo, migração avançada de versões, teste de queda abrupta de energia e teste E2E.
+
+## Estabilização Alpha — 20/10/2026
+- Reentrada do convidado agora aceita o primeiro snapshot da nova conexão mesmo quando a revisão é inferior à revisão da conexão anterior; snapshots posteriores continuam ordenados.
+- O mestre restringe ações recebidas a até 15 por segundo e payloads de até 10.000 caracteres, e rejeita identidade igual à do mestre.
+- Falhas ao enviar estado ao convidado são sinalizadas em vez de encerrar silenciosamente o fluxo.
+- **Validação executada:** parse do JavaScript. **Ainda pendente:** E2E real, TURN, identidade criptográfica, proteção segura de mapas e teste de rede adversa.
