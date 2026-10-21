@@ -15,7 +15,7 @@ Mesa virtual gratuita de RPG, independente de sistema, acessível pelo navegador
 
 **Alpha concluída (escopo de engenharia) · v0.2.0-alpha.** Frontend estático em `p2p/`, publicado na Vercel, com WebRTC/PeerJS e navegador do mestre como host. Inclui múltiplas cenas, transferência/exclusão de tokens, ferramentas de desenho e revelação, fichas livres básicas, reconexão tentativa e checkpoints no IndexedDB.
 
-O arquivo `.highlords` ainda é JSON; o formato ZIP versionado está planejado.
+O `.highlords` exportado é ZIP v2 com manifesto e CRC32; arquivos JSON legados continuam importáveis.
 
 ## Desenvolvimento e testes
 
@@ -29,7 +29,7 @@ Concluído após CI aprovado com **20 testes de navegador Chromium + 3 testes No
 
 **Decisão de produto:** somente WebRTC P2P + STUN público; TURN permanece integralmente desativado, sem chamadas do cliente ou emissão de credenciais pelo servidor. A conexão com redes restritivas não é garantida. **Homologação manual com pessoas em operadoras/redes distintas não foi reproduzida nesta rodada** e não é requisito bloqueante para encerrar a Alpha conforme decisão do responsável.
 
-Próxima etapa: Beta (arquivo `.highlords` ZIP versionado, fichas universais, editor e UX). O marco Alpha não equivale a auditoria completa de segurança nem lançamento estável 1.0.
+Beta integrada: ZIP, fichas com campos customizados, grid, controle de tokens, feedback de autosave e formulários acessíveis. Beta ainda requer homologação. O marco Alpha não equivale a auditoria completa de segurança nem lançamento estável 1.0.
 
 ## Limitações da Alpha
 

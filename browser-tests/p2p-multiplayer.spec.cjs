@@ -46,7 +46,7 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await expect(player.locator('#status')).toContainText('sincronizada');
   await host.locator('#charName').fill('Guardião');
   await host.locator('#addChar').click();
-  await host.locator('.char select').selectOption({label:'Convidado'});
+  await host.locator('.char select:not([aria-label="Tipo de campo"])').selectOption({label:'Convidado'});
   await expect(player.locator('.char strong')).toHaveText('Guardião');
   await player.locator('.char textarea').fill('PV: 24');
   await player.getByRole('button',{name:'Salvar ficha'}).click();

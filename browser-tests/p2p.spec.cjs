@@ -71,11 +71,11 @@ test('mestre transfere token, exclui e volta ao menu',async({page})=>{
  await page.locator('#tokenName').fill('Sentinela');await page.locator('#addToken').click();
  page.once('dialog',d=>d.accept('Outra cena'));await page.locator('#newScene').click();
  await page.locator('#sceneSelect').selectOption({index:0});
- const options=page.locator('#tokenManager select');await expect(options).toHaveCount(1);
+ const options=page.locator('#tokenManager .token-actions select');await expect(options).toHaveCount(1);
  await options.selectOption({index:1});
- await expect(page.locator('#tokenManager select')).toHaveCount(0);
+ await expect(page.locator('#tokenManager .token-actions select')).toHaveCount(0);
  await page.locator('#sceneSelect').selectOption({index:1});
- await expect(page.locator('#tokenManager select')).toHaveCount(1);
+ await expect(page.locator('#tokenManager .token-actions select')).toHaveCount(1);
  page.once('dialog',d=>d.accept());await page.locator('#tokenManager button.danger').click();
  await expect(page.locator('#tokenManager .token-control')).toHaveCount(0);
  page.on('dialog',d=>d.accept());await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
@@ -233,3 +233,15 @@ test('importação de campanha antiga não herda chaves de outra campanha',async
 });
 
 test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.getByRole('button',{name:'Preparar minha mesa'}).click();await expect(page.locator('#board')).toBeVisible()});
+
+test('Beta: ZIP e editor universal e grid',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#charName').fill('Investigador');await page.locator('#addChar').click();
+ await page.getByLabel('Novo campo da ficha').fill('Sanidade');
+ await page.getByLabel('Tipo de campo').selectOption('number');
+ await page.getByRole('button',{name:'+ Campo'}).click();
+ await expect(page.getByLabel('Sanidade')).toBeVisible();
+ await page.locator('#gridSize').fill('45');await page.locator('#gridSize').dispatchEvent('change');
+ const value=await page.evaluate(async()=>{const bytes=new Uint8Array(await zipCampaign(state).arrayBuffer());const obj=await unzipCampaign(new File([bytes],'campanha.highlords'));return {magic:Array.from(bytes.slice(0,4)),fields:obj.characters[0].fields.length,grid:obj.gridSize}});
+ expect(value).toEqual({magic:[80,75,3,4],fields:1,grid:45});
+});

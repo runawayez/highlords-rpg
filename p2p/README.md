@@ -4,7 +4,7 @@ Aplicação publicada: `p2p/index.html` · https://highlords-rpg.vercel.app
 
 ## Recursos
 
-Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War com rasterização de áreas reveladas, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` (JSON nesta Alpha).
+Salas por convite, mapas, múltiplas cenas, tokens transferíveis e removíveis, ferramentas de navegação/desenho/revelação, Fog of War com rasterização de áreas reveladas, chat, dados e fichas básicas. Campanhas podem ser nomeadas, recuperadas por autosave IndexedDB e exportadas como arquivo `.highlords` ZIP v2 (importação JSON Alpha mantida).
 
 ## Desenvolvimento
 

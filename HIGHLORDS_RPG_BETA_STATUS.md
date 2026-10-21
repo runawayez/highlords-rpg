@@ -1,0 +1,3 @@
+# Highlords RPG — Estado Beta (21/10/2026)
+
+Documento complementar ao Documento Mestre original. A Alpha está encerrada. A Beta integrada implementa ZIP v2 com manifesto/CRC32 e importação JSON legado; fichas com campos livres; grid ajustável; proprietário de token e autorização no host; status de salvamento; ajustes de formulário responsivo. Ainda faltam homologação em redes reais, refinamentos avançados de camadas/identidade e testes de desempenho. TURN segue 100% desativado, somente P2P + STUN público. Não declarar versão 1.0 nem Beta concluída sem homologação. ZIP armazena assets embutidos no campaign.json, não ainda separados em diretórios. Nenhum banco central ou conta obrigatória.
