@@ -56,6 +56,10 @@ O projeto está em **desenvolvimento ativo**: o escopo de engenharia da **Alpha 
 
 As ferramentas da Beta são **implementações iniciais**, não necessariamente versões definitivas. Por exemplo, as camadas atuais possuem visibilidade, bloqueio e modo exclusivo do mestre por tipo, mas ainda não permitem ordenação individual de objetos; paredes, iluminação dinâmica, histórico persistente entre sessões, paredes e painéis acopláveis continuam planejados.
 
+## Organização da mesa
+
+A lateral da mesa usa três abas — **Chat e dados**, **Fichas** e **Mestre**. O chat e a rolagem ficam acessíveis diretamente na aba inicial, com o campo de mensagem e dados fixos ao fim do painel. As ferramentas extensas do mestre rolam **somente dentro da própria aba**; o mapa continua visível. Em telas menores, a lateral aparece abaixo do mapa. A aba Mestre não aparece para convidados.
+
 ## Como funciona
 
 ```text
