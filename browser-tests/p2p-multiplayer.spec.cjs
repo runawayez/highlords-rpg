@@ -54,6 +54,9 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await player.locator('#message').fill('Olá, mestre');
   await player.locator('#send').click();
   await expect(host.locator('#history')).toContainText('Olá, mestre');
+  await player.evaluate(()=>hostLink.send({kind:'action',action:'scene:add',payload:{title:'Cena não autorizada'}}));
+  await host.waitForTimeout(200);
+  await expect(host.locator('#sceneSelect option')).toHaveCount(1);
   await player.evaluate(()=>hostLink.close());
   await expect(player.locator('#status')).toContainText('tentando novamente');
   await expect(player.locator('#status')).toContainText('mesa sincronizada',{timeout:15000});
