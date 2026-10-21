@@ -59,3 +59,9 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - O mestre restringe ações recebidas a até 15 por segundo e payloads de até 10.000 caracteres, e rejeita identidade igual à do mestre.
 - Falhas ao enviar estado ao convidado são sinalizadas em vez de encerrar silenciosamente o fluxo.
 - **Validação executada:** parse do JavaScript. **Ainda pendente:** E2E real, TURN, identidade criptográfica, proteção segura de mapas e teste de rede adversa.
+
+## Handshake da Alpha — Outubro/2026
+- Convidados só entram na interface da mesa após receber o primeiro snapshot válido do mestre; antes disso aparece status de sincronização.
+- Tentativas de conexão que não recebem snapshot em 12 segundos são fechadas e reiniciadas usando backoff.
+- Erros de serialização do payload não devem interromper o processamento das próximas mensagens.
+- Testes realizados: verificação estática dos marcadores de fluxo e parse do JavaScript. Testes E2E reais entre redes distintas e TURN continuam pendentes.
