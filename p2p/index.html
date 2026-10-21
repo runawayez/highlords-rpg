@@ -54,6 +54,10 @@ body{background:radial-gradient(circle at 60% -20%,#251015 0%,#08090b 48%);lette
 const APP_VERSION='0.2.0-alpha';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
 const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{}};
 const contacts=new Map(),pendingGuests=new Set();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,identityKeys=null,recoveryCandidates=[],activeTool='pan';
+function replaceCampaignState(data){
+ const defaults={schema:1,title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{}};
+ for(const [key,fallback] of Object.entries(defaults))state[key]=structuredClone(data[key]??fallback);
+}
 function ensureSceneData(){
  if(!Array.isArray(state.drawings))state.drawings=[];
  if(!state.fog||typeof state.fog!=='object')state.fog={enabled:false,reveals:[]};
@@ -175,7 +179,7 @@ function scheduleSave(){if(!hostMode)return;$('saveStatus').textContent='Altera�
 function changed(){rememberScene();state.updated=now();revision++;scheduleSave();render();for(const c of contacts.values())sendView(c)}
 function update(fn){if(!hostMode)return;fn();changed()}
 function saveFile(){if(!hostMode)return;rememberScene();const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=(state.title||'campanha').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,55)+'-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
-async function restore(file){if(!file)return;try{if(hostMode)throw Error('Saia da mesa antes de importar uma campanha');if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Campanha inválida, incompatível ou corrompida');Object.assign(state,obj);ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
+async function restore(file){if(!file)return;try{if(hostMode)throw Error('Saia da mesa antes de importar uma campanha');if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Campanha inválida, incompatível ou corrompida');replaceCampaignState(obj);ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
 async function configurePeer(){
  peer.on('disconnected',()=>{announce('Sinalização offline · reconectando…');if(!peer.destroyed)try{peer.reconnect()}catch{}});
  peer.on('error',e=>{announce('Erro de conexão: '+e.message);if(!hostMode)scheduleReconnect()});
@@ -257,7 +261,7 @@ function attach(c,guest=false){
     signChallenge(m.nonce,myId).then(proof=>{if(c.open)c.send({kind:'proof',...proof})}).catch(e=>announce('Falha na identidade: '+e.message));
    }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
    if(c!==hostLink)return;
-   guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;Object.assign(state,m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
+   guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;replaceCampaignState(m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
   }
  });
  c.on('close',()=>{
@@ -371,7 +375,7 @@ board.onpointerup=e=>finishPointer(e);
 board.onpointercancel=e=>finishPointer(e,true);
 document.addEventListener('pointerup',e=>{if((drag&&!drag.pan)||sketch)finishPointer(e)});
 board.onwheel=e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY<0?1.1:.9)));transform()};transform();
-$('recoveryRestore').onclick=()=>{const index=Number($('recoveryChoice').value),candidate=recoveryCandidates[index];if(!candidate||!isValidState(candidate))return announce('Salvamento inválido');Object.assign(state,structuredClone(candidate));ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('recoveryPanel').hidden=true;announce('Campanha recuperada. Agora você pode criar a mesa.')};
+$('recoveryRestore').onclick=()=>{const index=Number($('recoveryChoice').value),candidate=recoveryCandidates[index];if(!candidate||!isValidState(candidate))return announce('Salvamento inválido');replaceCampaignState(candidate);ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('recoveryPanel').hidden=true;announce('Campanha recuperada. Agora você pode criar a mesa.')};
 $('recoveryNew').onclick=()=>{$('recoveryPanel').hidden=true;announce('Nova mesa selecionada. Os salvamentos anteriores continuam guardados até que novos autosaves os substituam.')};
 $('roomCode').value=new URLSearchParams(location.search).get('room')||'';
 openDb().then(async db=>{
