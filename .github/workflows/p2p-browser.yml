@@ -6,21 +6,31 @@ on:
 jobs:
   browser-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save @playwright/test
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test browser-tests/p2p.spec.cjs --reporter=line --workers=1 --trace=retain-on-failure
+      - name: Instalar Playwright
+        run: npm install --no-save --package-lock=false @playwright/test
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validar sintaxe da aplicação e dos testes
+        run: |
+          node --check browser-tests/p2p.spec.cjs
+          node -e "const fs=require('fs'); const s=fs.readFileSync('p2p/index.html','utf8'); const m=s.match(/<script>([\\s\\S]*?)<\\/script>/); if(!m)throw Error('Inline script não encontrado'); new Function(m[1]);"
+      - name: Testar navegador
+        run: npx playwright test browser-tests/p2p.spec.cjs --project=chromium --reporter=line --workers=1 --trace=retain-on-failure
         env:
           CI: 'true'
-      - name: Guardar diagnóstico quando falhar
+      - name: Guardar diagnóstico
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-failure
-          path: test-results/
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
           retention-days: 7
