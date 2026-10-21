@@ -77,6 +77,7 @@ function renderLayers(){
   for(const a of state.fog.reveals||[]){if([a.x,a.y,a.width,a.height].every(Number.isFinite))mask.append(svgNode('rect',{x:a.x,y:a.y,width:a.width,height:a.height,fill:'black'}))}
   defs.append(mask);fog.append(defs);fog.append(svgNode('rect',{width:1200,height:800,fill:'#050507','fill-opacity':.94,mask:'url(#highlords-fog-mask)'}));
  }
+ if(sketch?.tool==='draw')updateSketchPreview();
  if(hostMode){const sel=$('sceneSelect');sel.replaceChildren();for(const scene of state.scenes||[]){const opt=document.createElement('option');opt.value=scene.id;opt.textContent=scene.title;sel.append(opt)}sel.value=state.activeSceneId;$('fogEnabled').checked=!!state.fog.enabled}
 }
 function boardPoint(e){const rect=$('board').getBoundingClientRect();return {x:Math.round((e.clientX-rect.left-offset.x)/zoom),y:Math.round((e.clientY-rect.top-offset.y)/zoom)}}
@@ -223,7 +224,7 @@ case 'token:add':{if(id!==myId||state.tokens.length>=120)return;return update(()
 case 'map':{if(id!==myId||typeof p.data!=='string'||p.data.length>8500000||!/^data:image\/(png|jpeg|webp);base64,/.test(p.data))return;return update(()=>state.map=p.data)}
 }}
 function showGame(){ensureSceneData();$('gameCampaignName').value=state.title||'Mesa sem título';$('gameCampaignName').style.display=hostMode?'block':'none';$('home').style.display='none';$('game').style.display='block';$('masterTools').style.display=hostMode?'block':'none';$('export').style.display=hostMode?'block':'none';$('roomLabel').textContent='Sala '+roomId;render()}
-function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();if($('map').getAttribute('src')!==(state.map||''))$('map').src=state.map||'';const pieces=$('pieces');pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.onpointerdown=e=>{if(!hostMode&&state.fog?.enabled&&!tokenInRevealedArea(t,state.fog))return;e.stopPropagation();drag={token:t.id,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
+function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();if($('map').getAttribute('src')!==(state.map||''))$('map').src=state.map||'';const pieces=$('pieces');pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.onpointerdown=e=>{if(hostMode&&activeTool!=='pan')return;if(!hostMode&&state.fog?.enabled&&!tokenInRevealedArea(t,state.fog))return;e.stopPropagation();drag={token:t.id,pointerId:e.pointerId,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
 if(hostMode){const manager=$('tokenManager');manager.replaceChildren();for(const t of state.tokens){const card=document.createElement('div');card.className='token-control';const title=document.createElement('strong');title.textContent=t.name;card.append(title);const actions=document.createElement('div');actions.className='token-actions';const select=document.createElement('select');const placeholder=document.createElement('option');placeholder.textContent='Enviar para cena…';placeholder.value='';select.append(placeholder);for(const scene of state.scenes){if(scene.id===state.activeSceneId)continue;const option=document.createElement('option');option.value=scene.id;option.textContent=scene.title;select.append(option)}select.onchange=()=>{if(select.value)dispatch('token:transfer',{id:t.id,sceneId:select.value})};const del=document.createElement('button');del.className='danger';del.textContent='Excluir';del.title='Excluir token da cena';del.onclick=()=>{if(confirm('Excluir token '+t.name+'?'))dispatch('token:delete',{id:t.id})};actions.append(select,del);card.append(actions);manager.append(card)}}
 const h=$('history');h.replaceChildren();for(let line of state.chat){const p=document.createElement('p');p.textContent=line.name+': '+line.text;h.append(p)}h.scrollTop=h.scrollHeight;
 const players=hostMode?[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))]:[{id:myId,name:nickname}];$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
@@ -232,9 +233,62 @@ let field=document.createElement('textarea');field.value=c.text;field.disabled=!
 }
 $('gameCampaignName').onchange=e=>setCampaignName(e.target.value);$('campaignName').onchange=e=>{if(!hostMode)state.title=cleanCampaignName(e.target.value)};$('newScene').onclick=()=>{const title=prompt('Nome da cena:','Nova cena');if(title)dispatch('scene:add',{title})};$('sceneSelect').onchange=e=>dispatch('scene:switch',{id:e.target.value});$('fogEnabled').onchange=e=>dispatch('fog:toggle',{enabled:e.target.checked});$('clearDrawings').onclick=()=>dispatch('draw:clear',{});$('host').onclick=startHost;$('join').onclick=startGuest;$('load').onchange=e=>restore(e.target.files[0]);$('export').onclick=saveFile;$('invite').onclick=()=>navigator.clipboard.writeText(location.origin+location.pathname+'?room='+roomId).then(()=>announce('Convite copiado')).catch(()=>prompt('Convite:',location.origin+location.pathname+'?room='+roomId));$('addChar').onclick=()=>dispatch('character:add',{name:$('charName').value});$('addToken').onclick=()=>dispatch('token:add',{name:$('tokenName').value});$('send').onclick=()=>{dispatch('chat',{text:$('message').value});$('message').value=''};$('roll').onclick=()=>dispatch('roll',{expr:$('dice').value});
 $('upload').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>6000000)return announce('Mapa excede 6MB');const reader=new FileReader();reader.onload=()=>dispatch('map',{data:reader.result});reader.readAsDataURL(f)};
-$('toolButtons').querySelectorAll('[data-tool]').forEach(btn=>btn.onclick=()=>{activeTool=btn.dataset.tool;for(const item of $('toolButtons').querySelectorAll('[data-tool]')){const on=item===btn;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on))}});
+$('toolButtons').querySelectorAll('[data-tool]').forEach(btn=>btn.onclick=()=>{activeTool=btn.dataset.tool;if(activeTool==='reveal'&&!state.fog.enabled)dispatch('fog:toggle',{enabled:true});for(const item of $('toolButtons').querySelectorAll('[data-tool]')){const on=item===btn;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on))}});
 $('leaveGame').onclick=()=>{if(hostMode&&revision!==lastSavedRevision&&!confirm('Há alterações ainda não confirmadas no autosave. Sair da mesa mesmo assim?'))return;if(hostMode){saveLocal()}manualClose=true;clearTimeout(retryTimer);clearTimeout(connectionTimer);for(const c of contacts.values())c.close();contacts.clear();hostLink?.close();peer?.destroy();peer=null;hostLink=null;hostMode=false;guestSynced=false;roomId='';$('game').style.display='none';$('home').style.display='block';$('status').textContent='Preparando…';$('notice').textContent='Você voltou ao menu. A sessão P2P foi encerrada.'};
-const board=$('board');function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}board.onpointerdown=e=>{const tool=hostMode?activeTool:'pan';if(tool==='draw'||tool==='reveal'){const p=boardPoint(e);sketch={tool,start:p,points:[[p.x,p.y]]};board.setPointerCapture(e.pointerId);return}drag={pan:true,start:[e.clientX,e.clientY],x:offset.x,y:offset.y}};document.onpointermove=e=>{if(sketch){const p=boardPoint(e);if(sketch.tool==='draw'&&sketch.points.length<500)sketch.points.push([Math.max(0,Math.min(1200,p.x)),Math.max(0,Math.min(800,p.y))]);return}if(!drag)return;const dx=e.clientX-drag.start[0],dy=e.clientY-drag.start[1];if(drag.pan){offset.x=drag.x+dx;offset.y=drag.y+dy;transform()}else{const piece=Array.from($('pieces').children).find(x=>state.tokens.find(t=>t.id===drag.token)?.name===x.textContent);if(piece){piece.style.left=drag.x+dx/zoom+'px';piece.style.top=drag.y+dy/zoom+'px'}}};document.onpointerup=e=>{if(sketch){const p=boardPoint(e),start=sketch.start;if(sketch.tool==='draw'&&sketch.points.length>=2)dispatch('draw',{points:sketch.points});if(sketch.tool==='reveal')dispatch('fog:reveal',{x:Math.min(start.x,p.x),y:Math.min(start.y,p.y),width:Math.abs(start.x-p.x),height:Math.abs(start.y-p.y)});if(board.hasPointerCapture?.(e.pointerId))board.releasePointerCapture(e.pointerId);sketch=null;return}if(drag&&!drag.pan)dispatch('move',{id:drag.token,x:drag.x+(e.clientX-drag.start[0])/zoom,y:drag.y+(e.clientY-drag.start[1])/zoom});drag=null};board.onpointercancel=e=>{sketch=null;drag=null;if(board.hasPointerCapture?.(e.pointerId))board.releasePointerCapture(e.pointerId)};board.onwheel=e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY<0?1.1:.9)));transform()};transform();
+const board=$('board');const preview=svgNode('polyline',{fill:'none',stroke:'#ff777b','stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'});function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}function updateSketchPreview(){
+ const layer=$('sketchLayer');
+ if(sketch?.tool==='draw'){
+  if(!preview.isConnected)layer.append(preview);
+  preview.setAttribute('points',sketch.points.map(p=>p.join(',')).join(' '));
+ }else preview.remove();
+}
+function finishPointer(e,cancel=false){
+ if(sketch&&e.pointerId===sketch.pointerId){
+  const stroke=sketch;sketch=null;preview.remove();
+  if(board.hasPointerCapture?.(e.pointerId))board.releasePointerCapture(e.pointerId);
+  if(cancel)return;
+  const point=boardPoint(e);
+  if(stroke.tool==='draw'){
+   const points=stroke.points;
+   points.push([Math.max(0,Math.min(1200,point.x)),Math.max(0,Math.min(800,point.y))]);
+   if(points.length<2)points.push([...points[0]]);
+   dispatch('draw',{points});
+  }else if(stroke.tool==='reveal'){
+   const x=Math.max(0,Math.min(stroke.start.x,point.x)),y=Math.max(0,Math.min(stroke.start.y,point.y));
+   const width=Math.min(1200-x,Math.max(12,Math.abs(stroke.start.x-point.x))),height=Math.min(800-y,Math.max(12,Math.abs(stroke.start.y-point.y)));
+   dispatch('fog:reveal',{x,y,width,height});
+  }
+  return;
+ }
+ if(drag&&e.pointerId===drag.pointerId){
+  const completed=drag;drag=null;
+  if(!cancel&&!completed.pan)dispatch('move',{id:completed.token,x:completed.x+(e.clientX-completed.start[0])/zoom,y:completed.y+(e.clientY-completed.start[1])/zoom});
+ }
+}
+board.onpointerdown=e=>{
+ if(e.button!==0||sketch||drag)return;
+ const tool=hostMode?activeTool:'pan';
+ if(tool==='draw'||tool==='reveal'){
+  const p=boardPoint(e);
+  sketch={pointerId:e.pointerId,tool,start:p,points:[[Math.max(0,Math.min(1200,p.x)),Math.max(0,Math.min(800,p.y))]]};
+  board.setPointerCapture(e.pointerId);updateSketchPreview();e.preventDefault();return;
+ }
+ drag={pan:true,pointerId:e.pointerId,start:[e.clientX,e.clientY],x:offset.x,y:offset.y};
+};
+board.onpointermove=e=>{
+ if(sketch&&e.pointerId===sketch.pointerId){
+  if(sketch.tool==='draw'&&sketch.points.length<499){
+   const p=boardPoint(e);const point=[Math.max(0,Math.min(1200,p.x)),Math.max(0,Math.min(800,p.y))];
+   const last=sketch.points.at(-1);if(Math.hypot(point[0]-last[0],point[1]-last[1])>=1)sketch.points.push(point);
+   updateSketchPreview();
+  }return;
+ }
+ if(drag?.pan&&e.pointerId===drag.pointerId){offset.x=drag.x+e.clientX-drag.start[0];offset.y=drag.y+e.clientY-drag.start[1];transform()}
+};
+board.onpointerup=e=>finishPointer(e);
+board.onpointercancel=e=>finishPointer(e,true);
+document.addEventListener('pointerup',e=>{if((drag&&!drag.pan)||sketch)finishPointer(e)});
+board.onwheel=e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY<0?1.1:.9)));transform()};transform();
 $('recoveryRestore').onclick=()=>{const index=Number($('recoveryChoice').value),candidate=recoveryCandidates[index];if(!candidate||!isValidState(candidate))return announce('Salvamento inválido');Object.assign(state,structuredClone(candidate));ensureSceneData();$('campaignName').value=state.title||'Mesa sem título';revision++;$('recoveryPanel').hidden=true;announce('Campanha recuperada. Agora você pode criar a mesa.')};
 $('recoveryNew').onclick=()=>{$('recoveryPanel').hidden=true;announce('Nova mesa selecionada. Os salvamentos anteriores continuam guardados até que novos autosaves os substituam.')};
 $('roomCode').value=new URLSearchParams(location.search).get('room')||'';
