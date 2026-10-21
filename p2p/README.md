@@ -20,16 +20,14 @@ A associação inicial da chave é baseada em confiança no primeiro uso (TOFU).
 
 ## Limites conhecidos
 
-PeerJS Cloud para signaling; broker TURN opcional implementado, mas desligado até cadastrar provedor e regras de limitação de tráfego. Sem TURN ativo, conexão entre redes depende do NAT/firewall. A sessão termina quando o navegador do mestre é encerrado. A identidade local usa assinatura criptográfica, mas a primeira vinculação exige confiança e ainda falta recuperação segura. Com a névoa ativa, o host envia somente uma versão rasterizada das áreas reveladas; o mapa original não entra nas novas projeções. **Ative a névoa antes de conectar jogadores ou mostrar a cena:** mapas já transmitidos anteriormente não podem ser apagados do navegador do participante. Não há auditoria completa desse isolamento em redes reais, portanto continue evitando segredos críticos. O autosave é local e não substitui exportações regulares.
+PeerJS Cloud para signaling; TURN deliberadamente desativado no cliente e no endpoint; apenas STUN público está ativo. Sem TURN ativo, conexão entre redes depende do NAT/firewall. A sessão termina quando o navegador do mestre é encerrado. A identidade local usa assinatura criptográfica, mas a primeira vinculação exige confiança e ainda falta recuperação segura. Com a névoa ativa, o host envia somente uma versão rasterizada das áreas reveladas; o mapa original não entra nas novas projeções. **Ative a névoa antes de conectar jogadores ou mostrar a cena:** mapas já transmitidos anteriormente não podem ser apagados do navegador do participante. Não há auditoria completa desse isolamento em redes reais, portanto continue evitando segredos críticos. O autosave é local e não substitui exportações regulares.
 
 A versão Node.js em `server.js` é legada e separada da aplicação publicada.
 
-## TURN opcional — implantação
+## Decisão atual: somente WebRTC P2P + STUN público
 
-O frontend tenta obter configuração ICE temporária em `GET /api/turn`; se estiver indisponível, utiliza STUN público e mantém o P2P sem retransmissão. Uma função serverless no diretório raiz `api/turn.js` pode gerar credenciais de **Cloudflare Realtime TURN** com TTL de 1 hora, sem disponibilizar a chave permanente ao navegador.
+TURN está **100% desativado** nesta versão, por decisão explícita do projeto. O navegador não consulta `/api/turn` nem inclui servidores TURN no ICE; somente STUN público é usado. O endpoint `/api/turn` responde sempre `503 turn_disabled`, **inclusive se houver credenciais de um provedor configuradas por engano**.
 
-**Desligado por padrão:** não há credenciais TURN cadastradas no projeto até que o operador autorize o custo. Para habilitar, criar na Vercel as variáveis de servidor `TURN_ENABLED=true`, `TURN_KEY_ID` e `TURN_KEY_API_TOKEN` (sensíveis). **Antes de habilitar**, configurar uma regra de rate limiting no Vercel Firewall para `/api/turn`, com limite por IP e observabilidade de uso/custo no provedor TURN. Sem essas medidas, a emissão aberta de credenciais temporárias pode gerar tráfego tarifado.
+O código histórico de integração TURN permanece apenas como referência, inacessível durante as partidas. Não habilitar TURN, contratar serviços ou configurar credenciais sem uma nova decisão explícita do responsável pelo projeto.
 
-O endpoint retorna 503 sem configuração, 403 para origem cruzada, e nunca retorna a chave permanente. A aplicação usa PeerJS com `iceServers` obtidos antes de criar a sala. Credenciais já emitidas têm validade limitada; partidas superiores a uma hora podem exigir atualização de ICE em versão futura.
-
-**Teste de homologação externa ainda obrigatório:** dois dispositivos em ISPs/redes distintas, depois repetir com ao menos um deles em rede que bloqueie P2P direto, verificar na ferramenta WebRTC do navegador que o candidato selecionado seja `relay` e registrar taxa de sucesso, reconexões, latência e custo TURN. Dois contextos de Chromium no CI validam transporte e protocolo, mas não comprovam travessia de NAT.
+Limitação aceita: em redes restritivas em que a conexão P2P direta não for viável, o jogador pode não conseguir entrar. Testes positivos em navegadores e redes conhecidas não eliminam essa restrição.
