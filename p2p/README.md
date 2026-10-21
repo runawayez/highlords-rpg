@@ -46,3 +46,10 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - Tokens cobertos pela névoa são removidos do estado transmitido para os jogadores. O mestre também rejeita movimentações remotas de tokens que não estejam revelados.
 - **Limite de segurança importante:** a imagem original do mapa e as áreas reveladas continuam sendo enviadas ao navegador. **O Fog of War não é uma barreira criptográfica e não esconde segredos impressos no mapa**. Para isso, precisamos fornecer mapas já expurgados/segmentados ou um serviço de entrega por regiões. A identidade local também ainda não é autenticação forte.
 - Verificação desta rodada: sintaxe do JS, sem testes multi-navegador realizados. Não considerar prontidão de produção.
+
+## Checkpoints locais (IndexedDB v2)
+- Cada autosave grava o estado atualizado e mantém até cinco checkpoints recentes no navegador do mestre.
+- Na abertura do site, a recuperação verifica a cópia mais recente e os checkpoints, ignorando versões que não atendam à validação básica.
+- A exportação atualiza a cena ativa antes de gerar o arquivo JSON `.highlords`.
+- Não há criptografia dos backups locais nem proteção contra exclusão da base IndexedDB. O mestre deve baixar arquivos `.highlords` regularmente.
+- Ainda faltam ZIP portátil definitivo, migração avançada de versões, teste de queda abrupta de energia e teste E2E.
