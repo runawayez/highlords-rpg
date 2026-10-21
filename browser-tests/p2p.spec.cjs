@@ -82,7 +82,7 @@ test('mestre transfere token, exclui e volta ao menu',async({page})=>{
 });
 test('ferramentas são botões e podem alternar',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
- await expect(page.locator('#toolButtons button')).toHaveCount(3);
+ await expect(page.locator('#toolButtons button')).toHaveCount(8);
  await page.locator('[data-tool="draw"]').click();
  await expect(page.locator('[data-tool="draw"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('[data-tool="pan"]').click();
