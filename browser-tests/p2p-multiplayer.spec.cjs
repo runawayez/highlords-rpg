@@ -44,9 +44,9 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await player.locator('#join').click();
   await expect(player.locator('#game')).toBeVisible({timeout:20000});
   await expect(player.locator('#status')).toContainText('sincronizada');
-  await host.locator('#charName').fill('Guardião');
-  await host.locator('#addChar').click();
-  await host.locator('.char > select:first-of-type').selectOption({label:'Convidado'});
+  await host.locator('#tabTools').click();await host.locator('#charName').fill('Guardião');
+  await host.locator('#tabTools').click();await host.locator('#addChar').click();
+  await host.locator('#tabSheets').click();await host.locator('.char > select:first-of-type').selectOption({label:'Convidado'});
   await expect(player.locator('.char strong')).toHaveText('Guardião');
   await player.locator('.char textarea').fill('PV: 24');
   await player.getByRole('button',{name:'Salvar ficha'}).click();
