@@ -60,14 +60,36 @@ function playerView(playerId){
 function sendView(conn){if(conn.open&&conn.playerId)conn.send({kind:'state',state:playerView(conn.playerId),revision})}
 function announce(t){$('notice').textContent=t;$('status').textContent=t}
 function identity(){let id=localStorage.getItem('hl-identity');if(!id){id=uid();localStorage.setItem('hl-identity',id)}return id}
-function isValidState(s){return s&&s.schema===1&&Array.isArray(s.tokens)&&Array.isArray(s.characters)&&Array.isArray(s.chat)&&typeof s.map==='string'&&s.map.length<9000000}
-async function openDb(){return new Promise((resolve,reject)=>{let r=indexedDB.open('highlords-p2p',1);r.onupgradeneeded=()=>r.result.createObjectStore('saves');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-async function saveLocal(){if(!hostMode||lastSavedRevision===revision)return;const savingRevision=revision;try{saveDb ||= await openDb();await new Promise((resolve,reject)=>{const tx=saveDb.transaction('saves','readwrite');tx.objectStore('saves').put(JSON.parse(JSON.stringify(state)),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});lastSavedRevision=savingRevision;$('saveStatus').textContent='✓ Autosave local confirmado · '+new Date().toLocaleTimeString()}catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}}
+function isValidState(s){
+ if(!s||s.schema!==1||!Array.isArray(s.tokens)||s.tokens.length>150||!Array.isArray(s.characters)||s.characters.length>50||!Array.isArray(s.chat)||s.chat.length>250||typeof s.map!=='string'||s.map.length>9000000)return false;
+ if(s.scenes!==undefined&&(!Array.isArray(s.scenes)||s.scenes.length>30))return false;
+ return s.tokens.every(t=>t&&typeof t.id==='string'&&typeof t.name==='string'&&Number.isFinite(t.x)&&Number.isFinite(t.y))&&s.characters.every(c=>c&&typeof c.id==='string'&&typeof c.name==='string'&&typeof c.text==='string');
+}
+async function openDb(){return new Promise((resolve,reject)=>{const r=indexedDB.open('highlords-p2p',2);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('saves'))db.createObjectStore('saves');if(!db.objectStoreNames.contains('checkpoints'))db.createObjectStore('checkpoints',{keyPath:'timestamp'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+async function saveLocal(){
+ if(!hostMode||lastSavedRevision===revision)return;
+ const savingRevision=revision;
+ try{
+  saveDb ||=await openDb();rememberScene();
+  const snapshot=structuredClone(state);
+  const timestamp=Date.now();
+  await new Promise((resolve,reject)=>{
+   const tx=saveDb.transaction(['saves','checkpoints'],'readwrite');
+   tx.objectStore('saves').put(snapshot,'latest');
+   const store=tx.objectStore('checkpoints');store.put({timestamp,state:snapshot});
+   const cursor=store.openCursor(null,'prev');let count=0;
+   cursor.onsuccess=()=>{const c=cursor.result;if(c){count++;if(count>5)c.delete();c.continue()}};
+   tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Transação cancelada'));
+  });
+  lastSavedRevision=savingRevision;
+  $('saveStatus').textContent=revision===savingRevision?'✓ Salvo localmente · '+new Date().toLocaleTimeString():'Alterações recentes aguardando salvamento';
+ }catch(e){$('saveStatus').textContent='⚠ Falha no autosave: '+e.message}
+}
 function scheduleSave(){if(!hostMode)return;$('saveStatus').textContent='Alterações pendentes de salvamento';clearTimeout(saveTimer);saveTimer=setTimeout(saveLocal,1500)}
 function changed(){rememberScene();state.updated=now();revision++;scheduleSave();render();for(const c of contacts.values())sendView(c)}
 function update(fn){if(!hostMode)return;fn();changed()}
-function saveFile(){if(!hostMode)return;const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='campanha-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
-async function restore(file){if(!file)return;try{if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Formato inválido');Object.assign(state,obj);ensureSceneData();$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
+function saveFile(){if(!hostMode)return;rememberScene();const blob=new Blob([JSON.stringify(state)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='campanha-'+new Date().toISOString().slice(0,10)+'.highlords';a.click();setTimeout(()=>URL.revokeObjectURL(url),3000)}
+async function restore(file){if(!file)return;try{if(file.size>10000000)throw Error('Máximo 10MB');const obj=JSON.parse(await file.text());if(!isValidState(obj))throw Error('Formato inválido');Object.assign(state,obj);ensureSceneData();revision++;$('notice').textContent='Campanha carregada. Crie a mesa.'}catch(e){announce(e.message)}}
 async function configurePeer(){
  peer.on('disconnected',()=>{announce('Sinalização offline · reconectando…');if(!peer.destroyed)try{peer.reconnect()}catch{}});
  peer.on('error',e=>{announce('Erro de conexão: '+e.message);if(!hostMode)scheduleReconnect()});
@@ -155,7 +177,14 @@ $('newScene').onclick=()=>{const title=prompt('Nome da cena:','Nova cena');if(ti
 $('upload').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>6000000)return announce('Mapa excede 6MB');const reader=new FileReader();reader.onload=()=>dispatch('map',{data:reader.result});reader.readAsDataURL(f)};
 const board=$('board');function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}board.onpointerdown=e=>{const tool=hostMode?$('boardTool').value:'pan';if(tool==='draw'||tool==='reveal'){const p=boardPoint(e);sketch={tool,start:p,points:[[p.x,p.y]]};board.setPointerCapture(e.pointerId);return}drag={pan:true,start:[e.clientX,e.clientY],x:offset.x,y:offset.y}};document.onpointermove=e=>{if(sketch){const p=boardPoint(e);if(sketch.tool==='draw'&&sketch.points.length<500)sketch.points.push([Math.max(0,Math.min(1200,p.x)),Math.max(0,Math.min(800,p.y))]);return}if(!drag)return;const dx=e.clientX-drag.start[0],dy=e.clientY-drag.start[1];if(drag.pan){offset.x=drag.x+dx;offset.y=drag.y+dy;transform()}else{const piece=Array.from($('pieces').children).find(x=>state.tokens.find(t=>t.id===drag.token)?.name===x.textContent);if(piece){piece.style.left=drag.x+dx/zoom+'px';piece.style.top=drag.y+dy/zoom+'px'}}};document.onpointerup=e=>{if(sketch){const p=boardPoint(e),start=sketch.start;if(sketch.tool==='draw'&&sketch.points.length>=2)dispatch('draw',{points:sketch.points});if(sketch.tool==='reveal')dispatch('fog:reveal',{x:Math.min(start.x,p.x),y:Math.min(start.y,p.y),width:Math.abs(start.x-p.x),height:Math.abs(start.y-p.y)});sketch=null;return}if(drag&&!drag.pan)dispatch('move',{id:drag.token,x:drag.x+(e.clientX-drag.start[0])/zoom,y:drag.y+(e.clientY-drag.start[1])/zoom});drag=null};board.onwheel=e=>{e.preventDefault();zoom=Math.max(.3,Math.min(3,zoom*(e.deltaY<0?1.1:.9)));transform()};transform();
 $('roomCode').value=new URLSearchParams(location.search).get('room')||'';
-openDb().then(db=>{saveDb=db;const tx=db.transaction('saves');const req=tx.objectStore('saves').get('latest');req.onsuccess=()=>{if(req.result&&confirm('Há um autosave local. Carregar esta campanha?')){Object.assign(state,req.result);$('notice').textContent='Autosave restaurado. Crie a mesa.'}}}).catch(()=>{});
+openDb().then(async db=>{
+ saveDb=db;
+ const candidates=await new Promise((resolve,reject)=>{const tx=db.transaction(['saves','checkpoints'],'readonly');const latest=tx.objectStore('saves').get('latest');const checkpoints=tx.objectStore('checkpoints').getAll();tx.oncomplete=()=>resolve([latest.result,...(checkpoints.result||[]).sort((a,b)=>b.timestamp-a.timestamp).map(c=>c.state)]);tx.onerror=()=>reject(tx.error)});
+ const valid=candidates.filter(isValidState);
+ if(valid.length&&confirm('Há '+valid.length+' salvamento(s) local(is) recuperável(is). Restaurar a cópia mais recente?')){
+  Object.assign(state,valid[0]);ensureSceneData();revision++;$('notice').textContent='Campanha recuperada. Crie a mesa.';
+ }
+}).catch(e=>{$('notice').textContent='Não foi possível consultar autosaves: '+e.message});
 setInterval(()=>{if(hostMode&&revision!==lastSavedRevision)saveLocal()},30000);
 window.addEventListener('beforeunload',e=>{if(hostMode&&revision!==lastSavedRevision){e.preventDefault();e.returnValue=''}});
 </script></body></html>
