@@ -32,7 +32,7 @@ jobs:
         if: always() && github.event_name == 'push'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JOB_RESULT: ${{ steps.browser.result }}
+          JOB_RESULT: ${{ steps.browser.outcome }}
           GH_SHA: ${{ github.sha }}
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
