@@ -65,3 +65,9 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - Tentativas de conexão que não recebem snapshot em 12 segundos são fechadas e reiniciadas usando backoff.
 - Erros de serialização do payload não devem interromper o processamento das próximas mensagens.
 - Testes realizados: verificação estática dos marcadores de fluxo e parse do JavaScript. Testes E2E reais entre redes distintas e TURN continuam pendentes.
+
+## Preparação de Alpha fechada — v0.2.0-alpha
+- Home reformulada com tipografia ampliada, contraste refinado, cartões de mestre/jogador e informação de versão visível na home e mesa.
+- Mensagem explícita de acesso limitado para grupos convidados e recomendação de backups e cautela com segredos no mapa.
+- Teste browser ampliado para versão visível, salvamento de ficha e alternância de cenas.
+- **Não declarar lançamento validado:** testes reais P2P em redes distintas, compatibilidade TURN, autenticação forte e proteção do mapa original seguem pendentes. O uso deve ser restrito a grupos de confiança.
