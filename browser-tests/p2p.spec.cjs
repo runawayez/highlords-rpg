@@ -202,3 +202,32 @@ test('WebRTC usa apenas STUN e nunca consulta endpoint TURN',async({page})=>{
  await expect(page.locator('#game')).toBeVisible();
  expect(turnRequests).toBe(0);
 });
+
+test('fechamento abrupto preserva cenas e fichas no autosave',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await page.locator('#charName').fill('Cartógrafa');await page.locator('#addChar').click();
+ await page.locator('.char textarea').fill('PV 17');await page.getByRole('button',{name:'Salvar ficha'}).click();
+ await page.locator('#tokenName').fill('Exploradora');await page.locator('#addToken').click();
+ page.once('dialog',d=>d.accept('Templo'));await page.locator('#newScene').click();
+ await page.locator('#tokenName').fill('Guardião');await page.locator('#addToken').click();
+ await page.evaluate(()=>saveLocal());
+ await page.reload();
+ await expect(page.locator('#recoveryPanel')).toBeVisible();
+ await page.locator('#recoveryRestore').click();
+ await page.locator('#host').click();
+ await expect(page.locator('#sceneSelect option')).toHaveCount(2);
+ await expect(page.locator('.char textarea')).toHaveValue('PV 17');
+ await expect(page.locator('#tokenManager .token-control')).toHaveCount(1);
+ await page.locator('#sceneSelect').selectOption({index:0});
+ await expect(page.locator('#tokenManager .token-control')).toHaveCount(1);
+});
+test('importação de campanha antiga não herda chaves de outra campanha',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const result=await page.evaluate(async()=>{
+  state.trustedKeys={'12345678-1234-1234-1234-123456789abc':{kty:'EC',crv:'P-256',x:'old',y:'old'}};
+  const legacy={schema:1,title:'Campanha legada',updated:Date.now(),map:'',tokens:[],characters:[],chat:[]};
+  await restore(new File([JSON.stringify(legacy)],'legacy.highlords',{type:'application/json'}));
+  return {title:state.title,trustedKeys:state.trustedKeys,scenes:state.scenes.length};
+ });
+ expect(result).toEqual({title:'Campanha legada',trustedKeys:{},scenes:1});
+});
