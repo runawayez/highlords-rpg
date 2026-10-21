@@ -190,7 +190,7 @@ Exibir de maneira elegante **antes** das ações de criar ou entrar na mesa. A o
 
 ## 11. Código e infraestrutura — não confundir versões
 
-- Repositório: https://github.com/runawayez/highlords-rpg
+- Repositório: https://github.com/runawayez/highlords-vtt
 - Branch principal: `main`
 - Vercel: https://highlords-vtt.vercel.app
 - Projeto Vercel: `highlords-vtt`; equipe `highlords`
@@ -307,7 +307,7 @@ O usuário decidiu saltar a etapa formal de Release Candidate e promover diretam
 
 O nome oficial passou a ser **Highlords VTT**. VTT significa **Virtual Tabletop**. O endereço principal é https://highlords-vtt.vercel.app e o projeto Vercel chama-se `highlords-vtt`, na equipe `highlords`. A marca Highlords e os arquivos `.highlords` foram preservados.
 
-O nome técnico do repositório GitHub continua `runawayez/highlords-rpg` até que haja acesso administrativo para renomeá-lo. Links técnicos para esse repositório permanecem válidos.
+O repositório GitHub foi renomeado para `runawayez/highlords-vtt`. O remoto local, os links de documentação e os comandos de instalação usam o novo nome.
 
 O domínio antigo continua disponível para exportação dos autosaves existentes. IndexedDB, localStorage e chaves de identidade são vinculados à origem do navegador; não migram automaticamente ao novo domínio. Não renomear `highlords-p2p`, `hl-identity` ou o domínio de assinatura `highlords-auth-v1` por razões de marca: são identificadores de compatibilidade. Ao usar outro domínio, o jogador precisa de reatribuição ou recuperação assistida pelo mestre. Nenhuma chave privada é exportada.
 

@@ -8,7 +8,7 @@
 
 Mesa virtual de RPG gratuita e independente de sistemas, direto no navegador.
 
-[**Abrir a mesa**](https://highlords-vtt.vercel.app) · [Reportar problema](https://github.com/runawayez/highlords-rpg/issues) · [Documentação técnica](p2p/README.md)
+[**Abrir a mesa**](https://highlords-vtt.vercel.app) · [Reportar problema](https://github.com/runawayez/highlords-vtt/issues) · [Documentação técnica](p2p/README.md)
 
 </div>
 
@@ -110,8 +110,8 @@ A aplicação publicada é o frontend da pasta `p2p/`. Para executá-la localmen
 Exemplo com Python 3:
 
 ```bash
-git clone https://github.com/runawayez/highlords-rpg.git
-cd highlords-rpg/p2p
+git clone https://github.com/runawayez/highlords-vtt.git
+cd highlords-vtt/p2p
 python -m http.server 8000
 ```
 
@@ -145,7 +145,7 @@ Recursos adicionais como iniciativa, música ambiente, macros e templates de sis
 
 ## Contribuição e suporte
 
-Problemas de uso, sugestões e relatos de bugs podem ser registrados nas [issues do repositório](https://github.com/runawayez/highlords-rpg/issues). Ao relatar um problema, informe o navegador, o cenário utilizado, o comportamento observado e, quando possível, as etapas para reproduzi-lo. **Não publique arquivos de campanha com dados privados em issues públicas.**
+Problemas de uso, sugestões e relatos de bugs podem ser registrados nas [issues do repositório](https://github.com/runawayez/highlords-vtt/issues). Ao relatar um problema, informe o navegador, o cenário utilizado, o comportamento observado e, quando possível, as etapas para reproduzi-lo. **Não publique arquivos de campanha com dados privados em issues públicas.**
 
 ## Licença
 
