@@ -47,3 +47,7 @@ O mestre controla a visibilidade, bloqueio de edição e confidencialidade das c
 Recuperação assistida: o mestre escolhe uma identidade previamente vinculada e um novo navegador já autenticado, confirma a identidade por canal externo, transfere personagens e tokens e remove o vínculo de chave antiga. Não exporta ou replica chave privada. Não é recuperação autônoma sem mestre.
 
 O mestre pode selecionar vários tokens pressionando Shift e clicando nos tokens, depois alinhar, distribuir horizontalmente ou excluir em lote. Todas as alterações em lote são verificadas pelo host e negadas aos convidados.
+
+## Layout da Beta — painéis da mesa
+
+A interface usa navegação por abas inspirada no padrão de mesas virtuais modernas: Chat e dados (aba padrão, envio e rolagem sempre acessíveis), Fichas e Mestre (apenas host). Somente o conteúdo do painel ativo recebe rolagem, e o histórico de conversa tem rolagem independente da composição fixa. As abas permitem navegação por setas, Home e End; o mapa permanece como área principal. A alteração é exclusivamente de interface, sem dependências adicionais, sem efeitos sobre WebRTC/STUN e sem reativar TURN.
