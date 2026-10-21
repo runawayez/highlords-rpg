@@ -1,4 +1,4 @@
-# Highlords RPG — refinamento da mesa e fichas
+# Highlords VTT — refinamento da mesa e fichas
 
 Data: 21/10/2026. Complemento técnico ao Documento Mestre de lançamento 1.0.
 

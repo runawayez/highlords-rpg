@@ -1,4 +1,4 @@
-# Highlords RPG — Notas de lançamento 1.0
+# Highlords VTT — Notas de lançamento 1.0
 
 **Data:** 21/10/2026
 

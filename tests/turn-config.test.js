@@ -21,7 +21,7 @@ test('TURN endpoint only accepts GET',async()=>{
 test('TURN remains disabled even when credentials are configured',async()=>{
  const prev={enabled:process.env.TURN_ENABLED,id:process.env.TURN_KEY_ID,token:process.env.TURN_KEY_API_TOKEN};
  try{process.env.TURN_ENABLED='true';process.env.TURN_KEY_ID='test';process.env.TURN_KEY_API_TOKEN='not-real';
- const r=await call('GET',{origin:'https://attacker.example',host:'highlords-rpg.vercel.app','x-forwarded-proto':'https'});
+ const r=await call('GET',{origin:'https://attacker.example',host:'highlords-vtt.vercel.app','x-forwarded-proto':'https'});
  assert.equal(r.code,503);assert.deepEqual(r.body,{error:'turn_disabled'});
  }finally{for(const [key,value] of Object.entries({TURN_ENABLED:prev.enabled,TURN_KEY_ID:prev.id,TURN_KEY_API_TOKEN:prev.token}))value===undefined?delete process.env[key]:process.env[key]=value}
 });

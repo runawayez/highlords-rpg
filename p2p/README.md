@@ -1,6 +1,6 @@
-# Highlords RPG — Frontend P2P
+# Highlords VTT — Frontend P2P
 
-Aplicação publicada: `p2p/index.html` · https://highlords-rpg.vercel.app
+Aplicação publicada: `p2p/index.html` · https://highlords-vtt.vercel.app
 
 ## Recursos
 

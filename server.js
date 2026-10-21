@@ -86,5 +86,5 @@ if(method==='GET'&&(p==='/'||p==='/index.html')){res.writeHead(200,{'Content-Typ
 throw err(404,'Rota não encontrada');
 }catch(e){if(!res.headersSent)send(res,e.status||500,{error:e.status?e.message:'Erro interno'});else res.end();}
 });
-if(require.main===module)server.listen(PORT,HOST,()=>console.log('Highlords RPG em http://'+HOST+':'+PORT));
+if(require.main===module)server.listen(PORT,HOST,()=>console.log('Highlords VTT em http://'+HOST+':'+PORT));
 module.exports={server,roll};

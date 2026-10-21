@@ -1195,3 +1195,5 @@ header .version-tag {
 .block-settings button {
   font-size: 11px;
 }
+
+.domain-migration{padding:16px;border:1px solid #794148;border-radius:6px;background:#24181b;margin-top:20px;font-size:13px}.domain-migration p{font-size:12px;color:#c8b8bd;margin:8px 0}.domain-migration a{color:#f7a2aa}

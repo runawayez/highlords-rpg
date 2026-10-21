@@ -1,24 +1,24 @@
 <div align="center">
 
-<img src="p2p/assets/highlords-mark.svg" alt="Highlords RPG" width="104">
+<img src="p2p/assets/highlords-mark.svg" alt="Highlords VTT" width="104">
 
-# Highlords RPG
+# Highlords VTT
 
 **Sua mesa. Suas regras. Suas histórias.**
 
 Mesa virtual de RPG gratuita e independente de sistemas, direto no navegador.
 
-[**Abrir a mesa**](https://highlords-rpg.vercel.app) · [Reportar problema](https://github.com/runawayez/highlords-rpg/issues) · [Documentação técnica](p2p/README.md)
+[**Abrir a mesa**](https://highlords-vtt.vercel.app) · [Reportar problema](https://github.com/runawayez/highlords-rpg/issues) · [Documentação técnica](p2p/README.md)
 
 </div>
 
 ---
 
-> **Highlords RPG é e sempre será gratuito.** Sem cadastro obrigatório, sem instalação e sem campanhas armazenadas permanentemente em um servidor. **A campanha pertence ao mestre.**
+> **Highlords VTT é e sempre será gratuito.** Sem cadastro obrigatório, sem instalação e sem campanhas armazenadas permanentemente em um servidor. **A campanha pertence ao mestre.**
 
 ## Visão geral
 
-O Highlords RPG é uma *Virtual Tabletop* (VTT) leve para reunir pessoas em torno de mapas, personagens e histórias, sem impor regras de um sistema específico. O mestre cria a sala, compartilha o convite e mantém o controle da campanha em seu próprio navegador.
+O Highlords VTT é uma *Virtual Tabletop* (VTT) leve para reunir pessoas em torno de mapas, personagens e histórias, sem impor regras de um sistema específico. O mestre cria a sala, compartilha o convite e mantém o controle da campanha em seu próprio navegador.
 
 **Lançamento 1.0:** versão oficial do núcleo gratuito e independente de sistemas. Mantemos correções e evolução contínuas. A publicação não garante funcionamento em todas as redes: TURN permanece desativado e cenários de redes físicas diferentes não foram integralmente homologados.
 
@@ -26,7 +26,7 @@ O Highlords RPG é uma *Virtual Tabletop* (VTT) leve para reunir pessoas em torn
 
 **Para mestres**
 
-1. Acesse [highlords-rpg.vercel.app](https://highlords-rpg.vercel.app).
+1. Acesse [highlords-vtt.vercel.app](https://highlords-vtt.vercel.app).
 2. Informe um nome para a campanha e selecione **Preparar minha mesa**.
 3. Compartilhe o convite com o grupo.
 4. Organize a cena, os mapas, os tokens e as fichas.
@@ -149,16 +149,16 @@ Problemas de uso, sugestões e relatos de bugs podem ser registrados nas [issues
 
 ## Licença
 
-Consulte o arquivo de licença disponível no repositório para verificar os termos aplicáveis ao código. O compromisso de **uso gratuito do Highlords RPG** não substitui os termos da licença de software.
+Consulte o arquivo de licença disponível no repositório para verificar os termos aplicáveis ao código. O compromisso de **uso gratuito do Highlords VTT** não substitui os termos da licença de software.
 
 ---
 
 <div align="center">
 
-**Highlords RPG**
+**Highlords VTT**
 
 *Abra a mesa. Convide seus amigos. Jogue.*
 
-[**Jogar gratuitamente**](https://highlords-rpg.vercel.app)
+[**Jogar gratuitamente**](https://highlords-vtt.vercel.app)
 
 </div>

@@ -17,7 +17,7 @@ class Peer {
  destroy(){this.destroyed=true;this.open=false;this.emit('close')}
 }
 window.Peer=Peer;`}))}
-test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.0/)});
+test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.0/)});
 test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Goblin');await openHostSection(page,'tokens');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabSheets').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabSheets').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#campaignMenu > summary').click();await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
@@ -233,7 +233,7 @@ test('importação de campanha antiga não herda chaves de outra campanha',async
  expect(result).toEqual({title:'Campanha legada',trustedKeys:{},scenes:1});
 });
 
-test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.getByRole('button',{name:'Preparar minha mesa'}).click();await expect(page.locator('#board')).toBeVisible()});
+test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.getByRole('button',{name:'Preparar minha mesa'}).click();await expect(page.locator('#board')).toBeVisible()});
 
 test('Beta: ZIP e editor universal e grid',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
@@ -280,7 +280,7 @@ test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
 test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({page})=>{
  await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());
  await expect(page.getByRole('heading',{name:/Um espaço para qualquer história/})).toBeVisible();
- await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();
+ await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();
  await expect(page.locator('#host')).toBeVisible();
  await expect(page.getByRole('button',{name:/Preparar minha mesa/})).toBeVisible();
  await expect(page.getByRole('button',{name:/Sentar à mesa/})).toBeVisible();
@@ -491,7 +491,7 @@ test('Beta hardening: aba de chat acessível em mobile e sem rolagem geral do pa
 test('1.0 mostra identificação oficial e mantém TURN desativado',async({page})=>{
  await mockPeer(page);await page.goto(url());
  await expect(page.locator('.version-tag').first()).toContainText('VERSÃO 1.0');
- await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();
+ await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();
  await page.locator('#host').click();
  await expect(page.locator('#game .version-tag')).toContainText('VERSÃO 1.0');
  expect(await page.evaluate(()=>({version:APP_VERSION,ice:peerOptions().config.iceServers.flatMap(s=>[s.urls])}))).toEqual({version:'1.0.0',ice:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']});
