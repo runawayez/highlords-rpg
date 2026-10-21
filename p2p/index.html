@@ -1,301 +1,26 @@
-<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Highlords RPG — Sua mesa, suas histórias</title><meta name="theme-color" content="#08090b"><meta name="description" content="Uma mesa virtual gratuita de RPG. Sem conta, sem instalação e sem complicação."><link rel="icon" type="image/svg+xml" href="/assets/highlords-mark.svg"><link rel="apple-touch-icon" href="/assets/highlords-mark.svg"><style>
-:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;background:#08090b;color:#f4f3f2;--red:#ed3036;--line:#2a2a30;--panel:#131418;--muted:#a5a5ae}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#08090b;color:#f4f3f2}button,input,textarea,select{font:inherit}button{border:1px solid #f34a4e;background:#e92e34;color:white;border-radius:9px;padding:11px 15px;font-weight:650;cursor:pointer;transition:background .15s,transform .15s}button:hover{background:#fb4046;transform:translateY(-1px)}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid #fa686b;outline-offset:3px}button:disabled{opacity:.45;cursor:default}input,textarea,select{background:#101115;color:#eee;border:1px solid #34343b;border-radius:9px;padding:11px 12px;min-height:42px}input::placeholder,textarea::placeholder{color:#85858f}section{padding:20px;background:#141418;border:1px solid var(--line);border-radius:14px;margin:12px}h1,h2,h3,p{margin-top:0}h1{letter-spacing:-.045em;font-size:clamp(33px,5vw,48px)}h2{font-size:21px;letter-spacing:-.025em;margin:0 0 9px}h3{font-size:14px;margin:0 0 15px}p{line-height:1.65}.muted{color:var(--muted);font-size:13px}
-#home{max-width:1050px;margin:0 auto;padding:42px 26px 56px}#home:before{content:"";position:fixed;z-index:-1;inset:0;background:radial-gradient(ellipse at 50% -15%,#57101346,transparent 48%),linear-gradient(180deg,#100c0e 0%,#08090b 55%)}.site-nav{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #272428;padding-bottom:22px}.nav-brand{display:flex;align-items:center;gap:12px}.brand-icon{width:43px;height:43px;object-fit:contain}.brand-word{font-weight:850;letter-spacing:.075em;font-size:14px}.brand-word span{color:inherit}.nav-note{font-size:11px;color:#aaa4a9;letter-spacing:.17em;font-weight:700}.hero{text-align:center;padding:56px 12px 22px}.hero-icon{height:126px;width:126px;object-fit:contain;filter:drop-shadow(0 10px 26px #ee30352f)}.eyebrow{color:#fa5b60;font-size:11px;letter-spacing:.28em;font-weight:800;margin:16px 0}.hero h1{margin:0 0 13px}.hero h1 span{color:#ff4248}.hero-copy{max-width:555px;margin:0 auto 19px;color:#b2afb5;font-size:15px;line-height:1.85}.promise{margin:20px auto 36px;max-width:735px;display:flex;gap:13px;text-align:left;background:#171317;border:1px solid #503035;border-radius:12px;padding:16px 19px}.promise-icon{color:#ff585e;font-size:20px}.promise strong{font-size:13px}.promise p{font-size:12px;color:#bdb5b8;margin:3px 0 0}.entry-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.entry-grid section{margin:0;padding:25px;border-radius:15px;background:#121316;box-shadow:0 12px 32px #00000021}.card-icon{width:37px;height:37px;border:1px solid #5d2b30;background:#28161a;color:#ff5257;border-radius:10px;display:grid;place-items:center;font-size:18px;margin-bottom:22px}.card-caption{font-size:13px;line-height:1.6;color:#a4a2a8;min-height:43px;margin:0 0 20px}.card-kicker{font-size:10px;color:#e65b60;letter-spacing:.16em;font-weight:750;margin-bottom:7px}.entry-grid .row{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin:0}.entry-grid input:not([type=file]){width:100%}.entry-grid button{width:100%}.file-import{display:flex;align-items:center;gap:8px;margin-top:15px;padding-top:14px;border-top:1px solid #29282d;color:#aba8ae;font-size:12px}.file-import input{font-size:11px;min-width:0;width:100%;border:none;background:transparent;padding:0;min-height:0}#notice{margin:22px 0 0;color:#ff898d;text-align:center;min-height:22px}.site-footer{margin-top:36px;border-top:1px solid #262328;padding-top:18px;display:flex;justify-content:space-between;gap:12px;color:#7e7b82;font-size:11px}
-#game{display:none}header{display:flex;align-items:center;gap:12px;padding:10px 18px;background:#111114;border-bottom:1px solid #303035;min-height:70px;flex-wrap:wrap}header .top-brand{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:.035em}header .top-brand img{width:37px;height:37px}header small{color:#99969c;font-size:11px;overflow:hidden;text-overflow:ellipsis;max-width:190px}header button{font-size:12px;padding:8px 11px}#status{margin-left:auto;color:#aaa6aa;font-size:12px}#layout{display:grid;grid-template-columns:minmax(0,1fr) 336px;height:calc(100vh - 70px)}#board{position:relative;overflow:hidden;background:#0d0e11;touch-action:none;cursor:grab}#canvas{position:absolute;left:0;top:0;width:1200px;height:800px;transform-origin:0 0;background:#24262b}#map{position:absolute;width:100%;height:100%;object-fit:contain;pointer-events:none}#grid{position:absolute;inset:0;pointer-events:none;background-size:60px 60px;background-image:linear-gradient(to right,#ffffff20 1px,transparent 1px),linear-gradient(to bottom,#ffffff20 1px,transparent 1px)}#pieces{position:absolute;inset:0}.piece{position:absolute;border-radius:50%;width:56px;height:56px;border:2px solid #f6ced0;display:grid;place-items:center;user-select:none;font-weight:700;text-shadow:0 1px 2px #000;cursor:move;font-size:12px;text-align:center}aside{background:#111215;border-left:1px solid #303035;overflow:auto;padding:14px}aside section{margin:0 0 12px;padding:16px;border-radius:12px;background:#17181c}aside input,aside textarea{width:100%;font-size:12px}aside button{font-size:12px;padding:9px 11px}#history{height:170px;overflow:auto;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}input[type=file]{width:100%;font-size:11px}.row{display:flex;gap:7px;margin:9px 0;align-items:center}.row input{min-width:0;flex:1}#players{font-size:12px;color:#aaa}#characters{max-height:250px;overflow:auto}.char{background:#202024;padding:10px;border-radius:8px;margin-bottom:8px}.char textarea{width:100%;height:75px}.char select{width:100%;padding:6px}.char button{margin-top:6px}#saveStatus{font-size:11px;color:#97929a;padding:8px}#roomLabel{font-size:11px}#invite{background:#2a2022;border-color:#5e3337}#invite:hover{background:#4e292d}#export{background:#1e1f23;border-color:#414148}#export:hover{background:#2b2b31}
-@media(max-width:800px){#home{padding:23px 17px 38px}.hero{padding-top:37px}.hero-icon{height:100px;width:100px}.entry-grid{grid-template-columns:1fr}.entry-grid section{padding:21px}.site-footer{flex-direction:column}.promise{margin-bottom:21px}#layout{display:flex;flex-direction:column;height:auto}#board{height:55vh}aside{min-height:45vh}header{min-height:70px}header small{max-width:120px}#status{order:5;width:100%;margin:0}}
-
- .release-disclaimer{margin:0 auto 23px;text-align:center;font-size:12px;color:#ad9b9e;max-width:780px;line-height:1.6}.release-disclaimer strong{color:#f0c2c4}
-/* Highlords — estilos de interface */
-:root{--hl-accent:#ed3036;--hl-ink:#08090b;--hl-line:#292a30}
-body{background:radial-gradient(circle at 60% -20%,#251015 0%,#08090b 48%);letter-spacing:.003em}
-#home{max-width:1152px;padding-top:28px}
-.site-nav{padding-bottom:18px}.nav-brand{gap:14px}.brand-icon{width:48px;height:48px}
-.nav-note{display:flex;gap:12px;align-items:center}
-.version-tag{font-size:10px;letter-spacing:.11em;color:#e7b4b5;border:1px solid #673035;background:#1e1417;padding:6px 9px;border-radius:5px;font-weight:800;white-space:nowrap}
-.hero{padding:62px 12px 24px}.hero-icon{height:112px;width:112px}.eyebrow{margin:20px 0 12px}
-.hero h1{font-size:clamp(42px,7vw,76px);line-height:1.01;letter-spacing:-.065em;max-width:760px;margin:0 auto 22px}
-.hero-copy{font-size:16px;max-width:510px}.promise{background:#130e11;border-color:#533035;box-shadow:inset 3px 0 0 #ed3036;padding:20px 23px;max-width:775px}
-.promise strong{font-size:14px}.promise p{font-size:13px}
-.entry-grid{gap:20px}.entry-grid section{background:linear-gradient(158deg,#1b1b20,#101115 64%);border-color:#373239;min-height:305px;padding:30px;box-shadow:0 18px 45px #0005;position:relative;overflow:hidden}
-.entry-grid section:before{content:"";position:absolute;right:-75px;top:-85px;width:175px;height:175px;border:1px solid #6a323840;border-radius:50%;pointer-events:none}
-.entry-grid section:after{content:"";position:absolute;right:-50px;top:-60px;width:125px;height:125px;border:1px solid #6a32384d;border-radius:50%;pointer-events:none}
-.entry-grid h2{font-size:25px;letter-spacing:-.045em}.card-caption{max-width:350px}
-.card-icon{margin-bottom:15px;background:#271519;border-radius:7px}
-.entry-grid button{min-height:47px}.entry-grid input{min-height:47px}
-.entry-grid section:first-child button{box-shadow:0 6px 24px #ad171c40}
-.entry-grid section:nth-child(2) button{background:#2a2024;border-color:#744044}
-.entry-grid section:nth-child(2) button:hover{background:#4c282d}
-#notice{font-size:13px}
-.site-footer{padding-top:23px}
-#game header{background:#0d0d10;border-bottom:1px solid #352a2e;min-height:76px}
-#game header .top-brand{border-right:1px solid #343038;padding-right:17px}
-#game header .top-brand strong{letter-spacing:.13em;font-size:12px}
-#game #status{border:1px solid #353037;border-radius:6px;background:#18161a;padding:7px 10px}
-#game aside{background:#101114;padding:18px}
-#game aside section{background:#17181c;border:1px solid #2d2d34;border-radius:10px;box-shadow:0 9px 22px #00000014}
-#game aside h3{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#d9c6c9}
-#board{background-color:#0c0c0f;background-image:radial-gradient(#ffffff0c 1px,transparent 1px);background-size:22px 22px}
-#board:after{content:"HIGHLORDS  /  TABLETOP";position:absolute;pointer-events:none;left:21px;bottom:16px;color:#a19a9f6e;font-size:10px;letter-spacing:.18em;font-weight:700}
-.piece{box-shadow:0 6px 18px #0009;transition:box-shadow .15s}.piece:hover{box-shadow:0 0 0 4px #e63a3c45,0 10px 20px #0009}
-#game .row{gap:8px}
-#roomLabel{font-family:ui-monospace,Consolas,monospace;letter-spacing:.04em}
-@media(max-width:800px){.hero{padding-top:42px}.hero h1{font-size:clamp(42px,10vw,60px)}.nav-note{letter-spacing:.04em}.entry-grid section{min-height:unset}.promise{padding:15px}#game header{padding:10px}#board{min-height:350px}}
-@media(prefers-reduced-motion:reduce){button,.piece{transition:none}button:hover{transform:none}}
-#recoveryPanel{margin:16px auto 24px;max-width:810px;padding:20px 22px;background:linear-gradient(120deg,#211a1e,#141316);border:1px solid #77454b;border-left:3px solid #ed3036;border-radius:12px;box-shadow:0 12px 32px #0005}
-#recoveryPanel[hidden]{display:none}#recoveryPanel h2{font-size:17px;margin-bottom:6px}#recoveryPanel p{font-size:12px;color:#c0b5b8;margin:0 0 13px}
-#recoveryPanel .recovery-actions{display:flex;gap:9px;flex-wrap:wrap}#recoveryPanel .recovery-actions button{font-size:12px;padding:9px 13px}#recoveryNew{background:#251d21;border-color:#604045}
-#recoveryPanel select{max-width:100%;width:100%;margin-bottom:12px;font-size:12px}
-.tool-buttons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;width:100%}.tool-buttons button{padding:10px 5px;background:#1d1e23;border-color:#3a3940;color:#b9b7be;font-weight:650;font-size:11px}.tool-buttons button.active{background:#422024;border-color:#f1565a;color:#fff;box-shadow:inset 0 -2px 0 #f1565a}.token-control{background:#202025;border:1px solid #37333a;border-radius:9px;padding:10px;margin-bottom:7px}.token-control strong{font-size:12px;display:block;margin-bottom:7px}.token-actions{display:flex;gap:5px}.token-actions select{min-width:0;flex:1;padding:6px;font-size:11px;min-height:34px}.token-actions button{background:#2b2428;border:1px solid #614049;padding:6px;font-size:11px}.token-actions button.danger{color:#ffb5b6;border-color:#7b333a}.char{border:1px solid #353239}.char strong{letter-spacing:.025em}#leaveGame{background:#1d1e22;border:1px solid #484048}#leaveGame:hover{background:#34252a}#game aside{scrollbar-color:#58363a #141417}#game header{gap:10px}#game header button{white-space:nowrap}@media(max-width:800px){.tool-buttons button{font-size:10px;padding:8px 3px}} 
-.fog-editor{padding:13px;background:#111216;border:1px solid #38323a;border-radius:10px;margin:10px 0 13px}.fog-header{display:flex;justify-content:space-between;align-items:center;gap:10px}.fog-header strong{font-size:10px;letter-spacing:.13em}.fog-header span{font-size:11px;color:#a3a0a9}.fog-editor p{font-size:11px;color:#b6b0b8;line-height:1.6;margin:9px 0}.fog-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.fog-actions button{font-size:11px;padding:9px 5px}.fog-actions #fogEnable{background:#422124;border-color:#84444a}.fog-actions #fogReset{background:#222229;border-color:#46404a}.fog-editor.enabled{border-color:#7a454a}.fog-editor.enabled #fogState{color:#ff9297}.subtle-action{background:#222227!important;border-color:#45414b!important;width:100%;margin-bottom:12px}.tool-choice:disabled{opacity:.5}.fog-preview-rect{fill:#e93f4b22;stroke:#ff626c;stroke-dasharray:8 5;stroke-width:3;pointer-events:none}
-.draw-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px}.draw-actions button{background:#222227;border-color:#45414b;font-size:11px;padding:9px 6px}.draw-actions button:disabled{opacity:.4}
-/* Highlords · Campaign Table identity, v1 — pure CSS; no remote design dependencies */
-:root{--hl-ink:#08090b;--hl-panel:#131418;--hl-accent:#ed3036;--hl-line:#2a2a30;--hl-parchment:#ded6ca;--hl-dim:#a9a4a2}
-body{font-family:"Trebuchet MS","Segoe UI",sans-serif;background:#08090b}
-#home{max-width:1190px;padding:30px 34px 42px;isolation:isolate}
-#home:before{z-index:-1;background:radial-gradient(ellipse at 82% 16%,#481a1c40,transparent 43%),linear-gradient(160deg,#121011 0%,#08090b 60%)}
-#home:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.13;background-image:repeating-linear-gradient(0deg,transparent 0px,transparent 37px,#c0a89913 38px),repeating-linear-gradient(90deg,transparent 0px,transparent 37px,#c0a8990b 38px)}
-.site-nav{padding-bottom:17px;border-bottom:1px solid #4a3536}
-.brand-icon{height:42px;width:42px}
-.brand-word{font-family:Georgia,"Times New Roman",serif;font-size:18px;font-weight:700;letter-spacing:.055em}
-.nav-note{font-family:"Trebuchet MS",sans-serif;letter-spacing:.055em;font-size:10px}
-.version-tag{border-radius:2px;background:#241617;border-color:#62383b;color:#e7cbcb}
-.hero{position:relative;text-align:left;display:grid;grid-template-columns:minmax(0,1fr) 265px;grid-template-areas:"eyebrow seal" "heading seal" "copy seal" "promise promise";column-gap:30px;align-items:center;padding:72px 14px 14px}
-.hero-icon{grid-area:seal;justify-self:center;align-self:center;width:196px;height:196px;opacity:.92;filter:drop-shadow(0 24px 30px #000b) drop-shadow(0 0 24px #bd292522)}
-.eyebrow{grid-area:eyebrow;color:#bba9a4;font-size:11px;font-weight:600;letter-spacing:.11em;margin:0 0 12px}
-.hero h1{grid-area:heading;font-family:Georgia,"Times New Roman",serif;font-size:clamp(48px,6.4vw,82px);font-weight:400;line-height:1.025;letter-spacing:-.044em;max-width:690px;margin:0 0 17px;color:#eee8e1}
-.hero h1 span{color:#eee8e1}
-.hero-copy{grid-area:copy;margin:0;max-width:570px;font-size:16px;line-height:1.7;color:#b9b1ad}
-.promise{grid-area:promise;max-width:none;width:100%;margin:50px 0 26px;border:0;border-top:1px solid #604244;border-bottom:1px solid #483537;border-radius:0;box-shadow:none;padding:17px 3px;background:transparent;align-items:flex-start}
-.promise-icon{font-size:15px;line-height:1.5;color:#e35354}
-.promise strong{font-family:Georgia,"Times New Roman",serif;font-size:16px;font-weight:400;color:#efe4da}
-.promise p{max-width:770px;font-size:12px;color:#a9a1a0;margin-top:4px}
-.release-disclaimer{text-align:left;max-width:none;margin:0 0 18px;padding-left:14px;border-left:2px solid #753b3f;font-size:11px}
-.entry-grid{gap:1px;background:#4b3837;border:1px solid #4b3837}
-.entry-grid section,.entry-grid section:first-child,.entry-grid section:nth-child(2){border:0;border-radius:0;background:#151417;min-height:0;padding:30px 32px 33px;box-shadow:none}
-.entry-grid section:nth-child(2){background:#111215}
-.entry-grid section:before,.entry-grid section:after{display:none}
-.card-icon{height:40px;width:40px;margin-bottom:16px;background:transparent;border:1px solid #614044;border-radius:50%;font-size:19px;color:#e7b0a9}
-.card-kicker{font-size:10px;letter-spacing:.1em;color:#c3a9a4;font-weight:600}
-.entry-grid h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.025em;font-size:29px;color:#efe5db}
-.card-caption{min-height:0;max-width:400px;margin-bottom:18px;color:#ada4a2;font-size:13px}
-.entry-grid .row{gap:9px}
-.entry-grid input:not([type=file]){background:#0c0e10;border-color:#3e3436;border-radius:3px}
-.entry-grid button{border-radius:3px;min-height:47px;box-shadow:none!important;transition:background .12s,border-color .12s;letter-spacing:.015em}
-.entry-grid section:first-child button{background:#b9252d;border-color:#da4346}
-.entry-grid section:nth-child(2) button{background:#242024;border-color:#554044}
-.entry-grid section:first-child button:hover{background:#d6333b}
-.entry-grid section:nth-child(2) button:hover{background:#38282c}
-.file-import{border-top-color:#3e3335}
-.site-footer{border-top-color:#463638;color:#99908d;letter-spacing:.035em}
-#recoveryPanel{border-radius:3px;background:#181517}
-#game{background:#0b0c0e}
-#game header{min-height:64px;padding:8px 17px;gap:10px;background:#111113;border-bottom:1px solid #513538}
-#game header .top-brand{border-right:1px solid #4a3739;padding-right:14px}
-#game header .top-brand img{height:36px;width:36px}
-#game header .top-brand strong{font-family:Georgia,"Times New Roman",serif;letter-spacing:.075em;font-size:15px;font-weight:500}
-#game header .version-tag{font-family:"Trebuchet MS",sans-serif;letter-spacing:.04em;font-size:9px}
-#game header button{border-radius:3px}
-#game #status{border:0;border-left:2px solid #805052;border-radius:0;background:none;padding:5px 9px;max-width:260px}
-#layout{grid-template-columns:minmax(0,1fr) 320px;height:calc(100vh - 64px)}
-#board{background-color:#101113;background-image:linear-gradient(45deg,#ffffff07 25%,transparent 25%,transparent 75%,#ffffff07 75%),linear-gradient(45deg,#ffffff07 25%,transparent 25%,transparent 75%,#ffffff07 75%);background-position:0 0,12px 12px;background-size:24px 24px;box-shadow:inset 0 0 85px #0007}
-#board:after{content:"A MESA";font-family:Georgia,"Times New Roman",serif;font-size:12px;letter-spacing:.18em;font-weight:400;color:#a99c9a65;bottom:17px;left:23px}
-#canvas{box-shadow:0 25px 100px #000b,0 0 0 1px #7e646240;background:#1b1c20}
-#game aside{padding:0;background:#141417;border-left:1px solid #493438;scrollbar-color:#584246 #141417}
-#game aside section{margin:0;border:0;border-bottom:1px solid #3c3032;border-radius:0;box-shadow:none;background:transparent;padding:21px 19px}
-#game aside h3{font-family:Georgia,"Times New Roman",serif;font-size:17px;letter-spacing:0;text-transform:none;font-weight:400;color:#ebded4;margin-bottom:15px}
-#game aside input,#game aside select,#game aside textarea{border-radius:3px;background:#0f1013;border-color:#40363a}
-#game aside button{border-radius:3px}
-#game aside #masterTools{border-top:2px solid #9e2d34}
-#game aside .tool-buttons button{border-radius:3px;background:#222025;color:#c9bfbc}
-#game aside .tool-buttons button.active{background:#62282c;border-color:#b84b4e;box-shadow:inset 0 -2px 0 #d7484d;color:#fff}
-#game aside .fog-editor{border-radius:3px;background:#111215;border-color:#44353a}
-#game aside .fog-header strong{letter-spacing:.035em;font-size:11px;color:#dbcdca}
-#game aside .token-control,#game aside .char{border-radius:3px;background:#1e1d20;border-color:#40373a}
-#game aside #history{border-left:1px solid #543739;padding-left:11px;color:#d7cecb}
-#game aside #saveStatus{margin:0;padding:14px 19px;color:#aaa09d}
-#game .piece{background:#a52931;border:2px solid #ecc2b7;border-radius:50%;box-shadow:0 6px 15px #0009}
-#game button:hover{transform:none}
-@media(max-width:900px){.hero{grid-template-columns:minmax(0,1fr) 165px}.hero-icon{width:145px;height:145px}#layout{grid-template-columns:minmax(0,1fr) 292px}}
-@media(max-width:800px){#home{padding:20px 17px 35px}.hero{grid-template-columns:1fr;grid-template-areas:"seal" "eyebrow" "heading" "copy" "promise";padding:35px 4px 0;gap:0;text-align:left}.hero-icon{justify-self:start;width:92px;height:92px;margin-bottom:22px}.hero h1{font-size:clamp(44px,11vw,68px)}.promise{margin-top:35px}.entry-grid{grid-template-columns:1fr}.entry-grid section{padding:26px 22px!important}.release-disclaimer{margin-bottom:18px}#layout{display:flex;flex-direction:column;height:auto}#board{height:57vh;min-height:330px}#game aside{min-height:40vh}#game header{min-height:70px}}
-@media(prefers-reduced-motion:reduce){.entry-grid button,.hero-icon{transition:none}}
-
-/* Universal tabletop · neutral workspace, no fantasy styling */
-:root{--hl-ink:#08090b;--hl-panel:#131418;--hl-accent:#ed3036;--hl-line:#2a2a30;--hl-parchment:#f4f3f2;--hl-dim:#a5a5ae;font-family:Arial,Helvetica,sans-serif}
-body{font-family:Arial,Helvetica,sans-serif;background:#08090b;letter-spacing:0}
-#home{max-width:1200px;padding:26px 36px 40px}
-#home:before{background:radial-gradient(ellipse at 74% 35%,#2d151a40,transparent 44%),#08090b}
-#home:after{display:none}
-.site-nav{border-bottom:1px solid #292a30;padding-bottom:15px}
-.brand-word,#game header .top-brand strong{font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:800;letter-spacing:.09em}
-.brand-icon{width:42px;height:42px}
-.nav-note{color:#8e8f98;letter-spacing:.02em}
-.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);grid-template-areas:"eyebrow seal" "heading seal" "copy seal" "promise promise";padding:68px 8px 0;gap:0 46px}
-.hero-icon{width:150px;height:150px;opacity:.7;filter:none}
-.eyebrow{font:600 11px Arial,Helvetica,sans-serif;color:#e85b60;letter-spacing:.13em}
-.hero h1{font-family:Arial,Helvetica,sans-serif;font-weight:740;letter-spacing:-.06em;line-height:1.06;font-size:clamp(42px,5.5vw,69px);max-width:640px;color:#f4f3f2}
-.hero h1 span{color:#f4f3f2}
-.hero-copy{font-size:16px;max-width:520px;color:#aaaab3;line-height:1.7}
-.promise{margin:55px 0 26px;padding:16px 18px;background:#141315;border:1px solid #35292c;border-left:3px solid #ed3036;border-radius:4px}
-.promise strong{font:700 13px Arial,Helvetica,sans-serif;color:#ececef}
-.promise p{color:#a1a1aa;font-size:12px}
-.release-disclaimer{border:0;padding-left:0;color:#878792}
-.entry-grid{gap:12px;background:transparent;border:0}
-.entry-grid section,.entry-grid section:first-child,.entry-grid section:nth-child(2){padding:27px 28px;border:1px solid #2d2d35;background:#141519;border-radius:6px;box-shadow:none}
-.entry-grid section:nth-child(2){background:#111216}
-.entry-grid section:before,.entry-grid section:after{display:none}
-.entry-grid h2{font-family:Arial,Helvetica,sans-serif;font-size:23px;letter-spacing:-.035em;font-weight:700;color:#f0eff0}
-.card-icon{background:#242026;border:1px solid #484047;border-radius:5px;width:39px;height:39px;color:#f17c81}
-.card-kicker{color:#888995;letter-spacing:.11em}
-.card-caption{color:#a6a7b0}
-.entry-grid input:not([type=file]){border-radius:5px;background:#0b0c10;border-color:#36363e}
-.entry-grid button{border-radius:5px}
-.entry-grid section:first-child button{background:#d52f37;border-color:#de444b}
-.entry-grid section:nth-child(2) button{background:#28292f;border-color:#494952}
-.site-footer{border-top-color:#27282e;color:#797c85}
-#game header{background:#111215;border-bottom:1px solid #2d2d34;min-height:66px}
-#game header .top-brand{border-right:1px solid #33343b}
-#game #status{border-left:2px solid #d53b43;color:#a7a6af}
-#layout{height:calc(100vh - 66px);grid-template-columns:minmax(0,1fr) 310px}
-#board{background-color:#101114;background-image:radial-gradient(#ffffff0d 1px,transparent 1px);background-size:23px 23px;box-shadow:inset 0 0 50px #0005}
-#board:after{content:"MESA / HIGHLORDS";font:600 10px Arial,Helvetica,sans-serif;letter-spacing:.13em;color:#85859170}
-#canvas{background:#1c1d21;box-shadow:0 15px 50px #000a,0 0 0 1px #ffffff1b}
-#game aside{background:#131418;border-left:1px solid #303038}
-#game aside section{padding:18px 17px;border-bottom:1px solid #292a31}
-#game aside h3{font-family:Arial,Helvetica,sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#c8c6cc}
-#game aside #masterTools{border-top:0}
-#game aside .tool-buttons button{background:#22232a;border-radius:5px}
-#game aside .tool-buttons button.active{background:#402126;border-color:#bd4149}
-#game aside input,#game aside select,#game aside textarea,#game aside button{border-radius:5px}
-#game aside .fog-editor{background:#16171b;border-color:#37313a;border-radius:5px}
-#game aside .token-control,#game aside .char{background:#1c1d23;border-radius:5px;border-color:#35353e}
-#game aside #history{border:0;padding-left:0}
-@media(max-width:800px){#home{padding:18px 17px 35px}.hero{grid-template-columns:1fr;grid-template-areas:"eyebrow" "heading" "copy" "seal" "promise";padding:42px 0 0}.hero-icon{width:75px;height:75px;justify-self:start;margin:24px 0 0}.promise{margin:24px 0}.entry-grid{grid-template-columns:1fr}.entry-grid section{padding:23px!important}#layout{display:flex;flex-direction:column;height:auto}#board{height:56vh;min-height:330px}}
-@media(max-width:800px){#game aside{max-height:none}} .char label input,.char label textarea{display:block;width:100%;margin:5px 0} #editorLayers{display:grid;gap:6px}#editorLayers label{display:flex;gap:8px;align-items:center}#editorLayers input{width:auto;min-height:auto}.editor-inspector{padding:12px;background:#101116;border:1px solid #33343b;border-radius:6px;margin:12px 0}.editor-inspector label{display:block;margin:8px 0}.editor-inspector select,.editor-inspector input[type=number]{width:100%}.editor-inspector input[type=range]{width:100%;min-height:22px}#editorInspector{font-size:12px;color:#aaa}#toolButtons{display:flex;flex-wrap:wrap;gap:4px} 
-/* Landing 2026: system-agnostic creative workspace */
-#home.landing{max-width:1320px;width:100%;padding:0 48px 24px;margin:0 auto;min-height:100vh;background:#0b0d10;color:#eff0f3}
-#home.landing::before,#home.landing::after{display:none!important}
-.landing .site-nav{height:78px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #272b33;padding:0;margin:0;gap:20px}
-.landing .nav-brand{display:flex;gap:13px;align-items:center}
-.landing .brand-icon{width:30px;height:30px}
-.landing .brand-word{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;font-weight:800;letter-spacing:.14em;color:#f5f5f7}
-.landing .brand-word span{color:#a5aab4}
-.landing .nav-note{display:flex;gap:22px;align-items:center}
-.landing .nav-platform{font-size:10px;color:#808792;letter-spacing:.13em;font-weight:650}
-.landing .version-tag{font:650 10px system-ui,-apple-system,sans-serif;letter-spacing:.07em;border:1px solid #353942;border-radius:20px;padding:7px 11px;background:#15181c;color:#a4a9b3}
-.landing-body{max-width:1140px;margin:0 auto}
-.landing .welcome{margin:0;padding:68px 0 50px;border:0;border-radius:0;background:none;box-shadow:none;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:65px;align-items:center}
-.landing .intro{align-self:center;min-width:0}
-.landing .eyebrow{display:flex;align-items:center;gap:9px;color:#bbc0cb;font:650 10px system-ui,-apple-system,sans-serif;letter-spacing:.13em;margin-bottom:25px}
-.landing .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ed3036;box-shadow:0 0 0 4px #ed303618}
-.landing .welcome h1{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:720;font-size:clamp(39px,4.3vw,62px);letter-spacing:-.065em;line-height:1.08;max-width:520px;margin:0 0 23px;color:#f5f5f7}
-.landing .welcome h1 span{color:#a4aab6}
-.landing .hero-copy{font:400 15px/1.8 system-ui,-apple-system,"Segoe UI",sans-serif;max-width:410px;color:#a4aab5;margin:0}
-.landing .quick-facts{display:flex;gap:17px;flex-wrap:wrap;margin-top:27px;font:500 11px system-ui,-apple-system,sans-serif;color:#797f8b}
-.landing .quick-facts span::first-letter{color:#e34850}
-.landing .workspace-preview{background:#14171c;border:1px solid #343943;box-shadow:0 24px 90px #0008;border-radius:11px;overflow:hidden;min-height:300px;transform:translateY(3px)}
-.landing .preview-top,.landing .preview-bottom{height:39px;display:flex;align-items:center;justify-content:space-between;padding:0 15px;color:#7f8794;font:600 9px system-ui,-apple-system,sans-serif;letter-spacing:.09em;background:#16191e}
-.landing .preview-top{border-bottom:1px solid #30353d}
-.landing .preview-bottom{height:30px;border-top:1px solid #30353d}
-.landing .preview-lights{display:flex;gap:5px}
-.landing .preview-lights i{display:block;width:7px;height:7px;border-radius:50%;background:#454b55}
-.landing .preview-lights i:first-child{background:#b04a50}
-.landing .preview-main{display:grid;grid-template-columns:35px minmax(0,1fr) 124px;height:250px}
-.landing .preview-tools{display:flex;align-items:center;flex-direction:column;gap:14px;background:#181c22;border-right:1px solid #353943;padding:13px 0;color:#9da3ae;font-size:13px}
-.landing .preview-tools span:first-child{color:#ed5158}
-.landing .preview-board{position:relative;overflow:hidden;background-color:#1d2229;background-image:linear-gradient(#ffffff0c 1px,transparent 1px),linear-gradient(90deg,#ffffff0c 1px,transparent 1px);background-size:23px 23px}
-.landing .preview-board::before{content:"";position:absolute;inset:26px 36px 40px 25px;border:3px solid #737985;border-radius:4px;clip-path:polygon(0 0,79% 0,79% 20%,100% 20%,100% 100%,20% 100%,20% 72%,0 72%);background:#79808a0c}
-.landing .preview-board::after{content:"";position:absolute;left:29%;top:10%;width:1px;height:76%;background:#a5afbd30;transform:rotate(42deg)}
-.landing .preview-route{position:absolute;left:22%;top:40%;width:52%;height:2px;border-top:2px dashed #df8991;transform:rotate(-12deg)}
-.landing .preview-token{position:absolute;width:28px;height:28px;display:grid;place-items:center;border:2px solid #ccd0d7;border-radius:50%;font:700 10px system-ui,sans-serif;color:white;box-shadow:0 2px 10px #0008}
-.landing .preview-token.one{left:19%;top:37%;background:#b43c47}.landing .preview-token.two{left:56%;top:28%;background:#536d87}.landing .preview-token.three{left:66%;top:64%;background:#59616f}
-.landing .preview-label{position:absolute;bottom:12px;left:13px;color:#868e9b;font:600 9px system-ui,sans-serif;letter-spacing:.08em}
-.landing .preview-label span{color:#d95159}
-.landing .preview-inspector{background:#171a20;border-left:1px solid #343943;padding:15px 9px}
-.landing .mini-heading{color:#969da8;font:700 9px system-ui,sans-serif;letter-spacing:.07em;margin-bottom:13px}
-.landing .mini-heading.subdued{margin-top:23px}
-.landing .mini-rule{background:#313640;height:1px;margin-bottom:13px}
-.landing .mini-row{display:flex;gap:7px;align-items:center;margin:10px 0}.landing .mini-row b{background:#454e5b;height:7px;width:22px;border-radius:2px}.landing .mini-row span{background:#2d333c;height:14px;flex:1;border-radius:2px}
-.landing .mini-layer{font:500 9px system-ui,sans-serif;color:#a4aab4;padding:7px 4px;border-bottom:1px solid #282c33}
-.landing .promise{display:flex;gap:15px;align-items:start;margin:0 0 49px;padding:18px 21px;background:#14171b;border:1px solid #2b3038;border-radius:7px;box-shadow:none}
-.landing .promise-symbol{display:grid;place-items:center;width:25px;height:25px;border-radius:50%;background:#313d34;color:#a4d5b1;font-size:13px;flex:none}
-.landing .promise strong{font:700 13px system-ui,sans-serif;color:#ecedef}
-.landing .promise p{font:400 12px/1.65 system-ui,sans-serif;color:#929aa5;margin:5px 0 0}
-.landing .launch-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:18px}
-.landing .section-kicker{display:block;color:#e65c63;font:700 10px system-ui,sans-serif;letter-spacing:.14em;margin-bottom:9px}
-.landing .launch-heading h2{font:700 25px system-ui,sans-serif;letter-spacing:-.045em;margin:0}
-.landing .launch-heading p{color:#7f8793;font:400 12px system-ui,sans-serif;margin:0}
-.landing .entry-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0;border:0;background:none}
-.landing .entry-grid section,.landing .entry-grid section:first-child,.landing .entry-grid section:nth-child(2){margin:0!important;background:#14171c;border:1px solid #30343d;border-radius:9px;padding:26px 28px!important;box-shadow:none;min-width:0}
-.landing .entry-grid section::before,.landing .entry-grid section::after{display:none}
-.landing .entry-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px}
-.landing .entry-index{color:#959daa;font:650 10px system-ui,sans-serif;letter-spacing:.1em}
-.landing .entry-arrow{font-size:20px;color:#69727e}
-.landing .entry-grid h2{font:700 23px system-ui,sans-serif;letter-spacing:-.045em;color:#eeeef1;margin:0 0 8px}
-.landing .card-caption{font:400 12px/1.7 system-ui,sans-serif;color:#8f97a3;min-height:41px;margin-bottom:19px}
-.landing .entry-grid .row{display:flex;flex-direction:column;gap:9px;margin:0}
-.landing .entry-grid input:not([type=file]){width:100%;min-height:43px;background:#0c0e12;border:1px solid #383d47;border-radius:5px;color:#eceef0;padding:11px 13px;font:400 12px system-ui,sans-serif}
-.landing .entry-grid input:focus{border-color:#a34d53}
-.landing .entry-grid button{display:flex;justify-content:space-between;align-items:center;border:1px solid #d73b44;background:#d72f38;border-radius:5px;min-height:44px;padding:0 15px;color:white;font:650 12px system-ui,sans-serif}
-.landing .entry-grid button span{font-size:15px}
-.landing .entry-grid section:nth-child(2) button{border:1px solid #4d5461;background:#272c34}
-.landing .file-import{display:block;font:500 11px system-ui,sans-serif;color:#9babb9;margin-top:16px}
-.landing #notice{font:500 12px system-ui,sans-serif;color:#d4a7aa;margin:12px 0}
-.landing .release-disclaimer{font:400 11px/1.6 system-ui,sans-serif;color:#7e8793;margin:20px 0 35px;padding:0;border:0}
-.landing .release-disclaimer strong{color:#aab0bb}
-.landing .site-footer{max-width:1140px;margin:0 auto;padding:23px 0;border-top:1px solid #2b3038;font:600 10px system-ui,sans-serif;letter-spacing:.07em;color:#747e8b;display:flex;justify-content:space-between}
-.landing #recoveryPanel{border-radius:8px;margin:0 0 20px;background:#171a21;border-color:#41444d}
-@media(max-width:970px){.landing .welcome{grid-template-columns:1fr;gap:32px;padding:45px 0 35px}.landing .intro{max-width:670px}.landing .workspace-preview{max-width:720px;width:100%}}
-@media(max-width:680px){#home.landing{padding:0 17px 16px}.landing .site-nav{height:68px}.landing .nav-platform{display:none}.landing .brand-word{font-size:12px}.landing .version-tag{font-size:9px;padding:6px 8px}.landing .welcome{padding:35px 0 27px}.landing .welcome h1{font-size:clamp(36px,10vw,53px)}.landing .hero-copy{font-size:14px}.landing .quick-facts{gap:9px}.landing .preview-main{grid-template-columns:28px minmax(0,1fr) 86px;height:210px}.landing .preview-tools{gap:11px;font-size:10px}.landing .preview-inspector{padding:11px 5px}.landing .mini-layer{font-size:7px}.landing .preview-board::before{inset:24px 15px 32px 11px}.landing .promise{margin-bottom:32px}.landing .launch-heading{align-items:start;flex-direction:column;gap:7px}.landing .entry-grid{grid-template-columns:1fr}.landing .entry-grid section,.landing .entry-grid section:first-child,.landing .entry-grid section:nth-child(2){padding:23px!important}.landing .site-footer{flex-direction:column;gap:8px}}
-.sheet-section{font:700 11px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.08em;color:#abb5c2;border-bottom:1px solid #333944;padding-bottom:6px;margin:17px 0 8px}.char label{display:block;margin:5px 0} .layer-policy-row{padding:8px;border:1px solid #343944;border-radius:4px;margin:7px 0}.layer-policy-row legend{font:650 11px system-ui,sans-serif;color:#c3c8d1}.layer-policy-row label{display:inline-flex;align-items:center;gap:5px;margin-right:9px;font-size:11px;color:#a9b0bb}.layer-policy-row input{min-height:0;width:auto} #identityRecovery{margin:12px 0;padding:12px;border:1px solid #343943;border-radius:5px}#identityRecovery summary{cursor:pointer;font-size:12px;color:#d1d4dd}#identityRecovery select{width:100%;margin:6px 0} .piece.selected{outline:3px solid #ef464f;outline-offset:3px}#editorInspector button{width:100%;margin-top:5px} #game header .role-pill{font:700 10px system-ui,sans-serif;letter-spacing:.1em;color:#f1b3b6;border:1px solid #653c43;border-radius:4px;padding:7px 9px;background:#29191d}@media(max-width:780px){#game header .role-pill{font-size:9px;padding:5px 7px}} 
-/* Workspace sidebar: familiar VTT tabs, not a long-scrolling settings column */
-#layout{min-height:0}#game .table-sidebar{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;overflow:hidden;background:#111318}
-#game .table-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;flex:none;gap:0;background:#181b21;border-bottom:1px solid #30343d}
-#game .table-tab{border:0;border-right:1px solid #292d35;border-radius:0;background:transparent;color:#a7acb8;padding:14px 5px;font:650 11px system-ui,sans-serif;white-space:nowrap;min-height:46px;transform:none}
-#game .table-tab[hidden],#game .table-panel[hidden]{display:none!important}
-#game .table-tab.active{background:#252027;color:#f4f3f3;box-shadow:inset 0 -2px #ed3036}
-#game .table-tab:hover:not(.active){background:#242831;color:white}
-#game .table-panel{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0!important;border:0!important;border-radius:0!important;padding:17px 16px 24px!important;background:#111318!important;scrollbar-width:thin;scrollbar-color:#414650 transparent}
-#game .chat-panel{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0!important}
-#game .chat-panel h3{margin:0 0 10px;font-size:12px}
-#game .chat-panel #history{flex:1;min-height:70px;height:auto!important;max-height:none!important;overflow-y:auto;overflow-x:hidden;margin:0!important;padding:6px 3px 16px!important;scrollbar-width:thin}
-#game .chat-compose{flex:none;padding:13px 0 15px;border-top:1px solid #353a44;background:#111318;display:flex;flex-direction:column;gap:9px}
-#game .chat-compose .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin:0}
-#game .chat-compose input{min-width:0;width:100%;min-height:39px;padding:8px 10px}
-#game .chat-compose button{min-height:39px;padding:8px 11px;font-size:12px;white-space:nowrap}
-#game #saveStatus{flex:none;margin:0;padding:8px 14px;background:#15171c;border-top:1px solid #2c3038;font-size:11px;max-height:60px;overflow:auto}
-#game .table-panel#masterTools .row,#game .table-panel#sheetsPanel .row{max-width:100%}
-@media(max-width:800px){#game .table-sidebar{height:min(70vh,630px);min-height:380px;width:100%;border-left:0;border-top:1px solid #343941}#game .table-panel{min-height:0}#game .chat-panel #history{min-height:100px}}
-</style></head><body>
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Highlords RPG — Sua mesa, suas histórias</title><meta name="theme-color" content="#08090b"><meta name="description" content="Uma mesa virtual gratuita de RPG. Sem conta, sem instalação e sem complicação."><link rel="icon" type="image/svg+xml" href="/assets/highlords-mark.svg"><link rel="apple-touch-icon" href="/assets/highlords-mark.svg"><link rel="stylesheet" href="/assets/workspace.css"></head><body>
 <main id="home" class="landing">
 <nav class="site-nav"><div class="nav-brand"><img class="brand-icon" src="/assets/highlords-mark.svg" alt=""><div class="brand-word">HIGHLORDS <span>RPG</span></div></div><div class="nav-note"><span class="nav-platform">MESA VIRTUAL · INDEPENDENTE DE SISTEMAS</span><span class="version-tag">VERSÃO 1.0</span></div></nav>
 <div class="landing-body">
 <section class="welcome" aria-label="Apresentação do Highlords">
 <div class="intro"><div class="eyebrow"><span class="status-dot"></span> SUA MESA VIRTUAL</div><h1>Um espaço para <span>qualquer história.</span></h1><p class="hero-copy">Reúna seu grupo, abra o mapa e jogue do seu jeito. Sem regras impostas, sem cadastro, sem instalação.</p>
 <div class="quick-facts"><span>● Direto no navegador</span><span>● Campanhas sob seu controle</span></div></div>
-<div class="workspace-preview" aria-hidden="true">
- <div class="preview-top"><span class="preview-lights"><i></i><i></i><i></i></span><span>VISUALIZAÇÃO DA MESA</span><span>◇</span></div>
- <div class="preview-main">
-  <div class="preview-tools"><span>↖</span><span>✋</span><span>▦</span><span>╱</span><span>◯</span><span>⋯</span></div>
-  <div class="preview-board"><div class="preview-route"></div><span class="preview-token one">A</span><span class="preview-token two">B</span><span class="preview-token three">C</span><div class="preview-label">CENA 01 <span>·</span> VISÃO DO MESTRE</div></div>
-  <div class="preview-inspector"><div class="mini-heading">PROPRIEDADES</div><div class="mini-rule"></div><div class="mini-row"><b></b><span></span></div><div class="mini-row"><b></b><span></span></div><div class="mini-heading subdued">CAMADAS</div><div class="mini-layer">◉ &nbsp; Personagens</div><div class="mini-layer">◉ &nbsp; Mapa</div><div class="mini-layer">◉ &nbsp; Grid</div></div>
- </div>
- <div class="preview-bottom"><span>MAPA 01</span><span>100% &nbsp; · &nbsp; GRID ATIVO</span></div>
-</div></section>
+</section>
 <div class="promise"><div class="promise-symbol">✓</div><div><strong>Highlords RPG é e sempre será gratuito.</strong><p>A mesa é sua. Os arquivos da campanha também. Sem assinaturas, planos ou recursos essenciais pagos.</p></div></div>
 <div class="launch-heading"><div><span class="section-kicker">COMECE A JOGAR</span><h2>Como você quer entrar?</h2></div><p>Escolha seu papel e comece em instantes.</p></div>
 <section id="recoveryPanel" hidden aria-labelledby="recoveryTitle"><h2 id="recoveryTitle">Campanha encontrada neste navegador</h2><p id="recoveryHelp">Escolha um salvamento para continuar de onde parou.</p><select id="recoveryChoice" aria-label="Salvar campanha recuperável"></select><div class="recovery-actions"><button id="recoveryRestore" type="button">Recuperar campanha</button><button id="recoveryNew" type="button">Começar sem recuperar</button></div></section>
 <div class="entry-grid"><section class="entry-host"><div class="entry-heading"><span class="entry-index">01 / CRIAR</span><span class="entry-arrow">↗</span></div><h2>Preparar uma mesa</h2><p class="card-caption">Organize sua campanha e convide os jogadores. Você tem o controle.</p><div class="row"><input id="campaignName" maxlength="80" aria-label="Nome da campanha" placeholder="Nome da campanha"><input id="hostName" aria-label="Nome do mestre" placeholder="Seu nome na mesa" value="Mestre"><button id="host">Preparar minha mesa <span aria-hidden="true">↗</span></button></div><label class="file-import">Ou importar campanha existente <input id="load" type="file" accept=".highlords,application/json,application/zip" aria-label="Carregar arquivo de campanha"></label></section>
 <section class="entry-guest"><div class="entry-heading"><span class="entry-index">02 / PARTICIPAR</span><span class="entry-arrow">↗</span></div><h2>Entrar em uma mesa</h2><p class="card-caption">Já recebeu um convite? Entre e encontre seu grupo.</p><div class="row"><input id="guestName" aria-label="Apelido" placeholder="Seu nome na mesa"><input id="roomCode" aria-label="Código da sala" placeholder="Código ou link da sala"><button id="join">Sentar à mesa <span aria-hidden="true">↗</span></button></div></section></div>
-<p id="notice" role="status"></p>
+<figure class="product-preview"><img src="/assets/table-preview.png" alt="Mesa Highlords em uso: ferramentas, mapa, tokens e chat" loading="lazy" width="1440" height="900"><figcaption>A mesa em uso · exemplo ilustrativo de campanha</figcaption></figure><p id="notice" role="status"></p>
 <p class="release-disclaimer"><strong>Versão 1.0.</strong> A campanha pertence ao mestre: exporte backups regularmente. Conexões em redes restritivas podem falhar sem TURN.</p>
 </div><footer class="site-footer"><span>© HIGHLORDS RPG · SUA MESA, SUAS REGRAS</span><span>P2P · SEM CADASTRO · SEM ASSINATURA</span></footer></main>
 <div id="game"><header><div class="top-brand"><img src="/assets/highlords-mark.svg" alt=""><strong>HIGHLORDS RPG</strong><span class="version-tag">VERSÃO 1.0</span></div><span id="sessionRole" class="role-pill">MESA</span><small id="roomLabel"></small><input id="gameCampaignName" maxlength="80" aria-label="Nome da campanha" title="Nome da campanha — salvo automaticamente" placeholder="Nome da campanha" style="max-width:190px;min-height:34px;font-size:12px;padding:7px 9px"><span id="status">Preparando…</span><button id="invite">Copiar convite</button><button id="export">Exportar .highlords</button><button id="leaveGame" type="button" title="Voltar ao início">← Menu</button></header><div id="layout"><div id="board"><div id="canvas"><img id="map" alt=""><div id="grid"></div><div id="pieces"></div><svg id="sketchLayer" viewBox="0 0 1200 800" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"></svg><svg id="fogLayer" viewBox="0 0 1200 800" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg></div></div><aside id="tableSidebar" class="table-sidebar"><nav class="table-tabs" role="tablist" aria-label="Painéis da mesa"><button type="button" id="tabChat" class="table-tab active" role="tab" aria-selected="true" aria-controls="chatPanel" data-panel="chat">◉ Chat e dados</button><button type="button" id="tabSheets" class="table-tab" role="tab" aria-selected="false" aria-controls="sheetsPanel" data-panel="sheets">▤ Fichas</button><button type="button" id="tabTools" class="table-tab" role="tab" aria-selected="false" aria-controls="masterTools" data-panel="tools">⚙ Mestre</button></nav><section id="masterTools" class="table-panel" role="tabpanel" aria-labelledby="tabTools" hidden><h3>Ferramentas do mestre</h3><div class="row"><select id="sceneSelect" aria-label="Cena ativa" style="min-width:0;flex:1"></select><button id="newScene" title="Nova cena">+ Cena</button></div><div class="row"><div id="toolButtons" class="tool-buttons" role="group" aria-label="Ferramentas da mesa"><button type="button" class="tool-choice active" data-tool="pan" aria-pressed="true">✥ Mover</button><button type="button" class="tool-choice" data-tool="draw" aria-pressed="false">✎ Pincel</button><button type="button" class="tool-choice" data-tool="line" aria-pressed="false">╱ Linha</button><button type="button" class="tool-choice" data-tool="rectangle" aria-pressed="false">▭ Retângulo</button><button type="button" class="tool-choice" data-tool="ellipse" aria-pressed="false">◯ Elipse</button><button type="button" class="tool-choice" data-tool="eraser" aria-pressed="false">⌫ Apagar</button><button type="button" class="tool-choice" data-tool="ruler" aria-pressed="false">⌁ Régua</button><button type="button" class="tool-choice" data-tool="reveal" aria-pressed="false">◫ Revelar</button></div></div><div class="fog-editor"><div class="fog-header"><strong>NÉVOA DE GUERRA</strong><span id="fogState">Desativada</span></div><p id="fogHelp">Ative a névoa para ocultar o mapa dos jogadores. O mestre continua vendo o cenário.</p><div class="fog-actions"><button id="fogEnable" type="button">Ativar névoa</button><button id="fogReset" type="button" title="Cobrir novamente todas as áreas">Cobrir tudo</button></div><p class="muted">Revelar: ative a névoa, selecione a ferramenta e arraste um retângulo. Com névoa ativa, somente as áreas reveladas do mapa são transmitidas aos jogadores.</p></div><div class="draw-actions"><button id="undoDrawing" type="button">↶ Desfazer traço</button><button id="clearDrawings" type="button">Limpar desenhos</button></div><label>Mapa <input id="upload" type="file" accept="image/png,image/jpeg,image/webp"></label><div class="row"><input id="tokenName" placeholder="Nome do token"><button id="addToken">Adicionar token</button></div><div class="row"><input id="charName" placeholder="Novo personagem"><button id="addChar">Criar ficha</button></div><div id="players"></div><details id='identityRecovery'><summary>Recuperar acesso após trocar de navegador</summary><p class='muted'>O mestre deve confirmar pessoalmente a identidade antes de transferir fichas e tokens para outro navegador. A chave antiga será desvinculada.</p><label>Identidade anterior <select id='previousIdentity' aria-label='Identidade anterior'></select></label><label>Jogador reconectado <select id='newIdentity' aria-label='Novo navegador do jogador'></select></label><button id='transferIdentity' type='button'>Transferir fichas e tokens</button></details><div class='editor-inspector'><h3>Editor do mapa</h3><label>Formato <select id='gridKind' aria-label='Formato do grid'><option value='square'>Quadrado</option><option value='hex'>Hexagonal</option></select></label><label><input id='gridSnap' type='checkbox'> Encaixar tokens no grid</label><label><input id='gridVisible' type='checkbox' checked> Mostrar grid</label><label>Origem X <input id='gridOriginX' type='number' min='0' max='150' value='0'></label><label>Origem Y <input id='gridOriginY' type='number' min='0' max='150' value='0'></label><label>Opacidade <input id='gridOpacity' type='range' min='0' max='100' value='18'></label><h3>Camadas</h3><div id='editorLayers'><label><input type='checkbox' id='layerDrawings' checked> Desenhos</label><label><input type='checkbox' id='layerTokens' checked> Tokens</label><label><input type='checkbox' id='layerGrid' checked> Grade</label></div><h3>Permissões das camadas</h3><div id='layerPermissions'></div><h3>Histórico</h3><div class='row'><button type='button' id='editorUndo'>↶ Desfazer</button><button type='button' id='editorRedo'>↷ Refazer</button></div><h3>Propriedades</h3><div id='editorInspector' aria-live='polite'>Selecione um objeto ou traço.</div></div><label for='gridSize'>Tamanho do grid</label><input id='gridSize' aria-label='Tamanho do grid' type='number' min='20' max='150' step='5' value='60'><h3>Tokens da cena</h3><div id="tokenManager"></div></section><section id="sheetsPanel" class="table-panel" role="tabpanel" aria-labelledby="tabSheets" hidden><h3>Fichas</h3><div id="characters"></div></section><section id="chatPanel" class="table-panel chat-panel" role="tabpanel" aria-labelledby="tabChat"><h3>Conversa e rolagens</h3><div id="history"></div><div class="chat-compose"><div class="row"><input id="message" aria-label="Mensagem da mesa" placeholder="Escreva uma mensagem..."><button id="send">Enviar</button></div><div class="row"><input id="dice" aria-label="Expressão dos dados" value="1d20"><button id="roll">Rolar dados</button></div></div></section><p id="saveStatus" class="muted"></p></aside></div></div>
-<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script>
+<script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script><script src="/assets/sheets.js"></script><script src="/assets/workspace.js"></script><script>
 const APP_VERSION='1.0.0';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID(),now=()=>Date.now();
-const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{},gridSize:60,gridKind:'square',gridSnap:false,gridVisible:true,gridOriginX:0,gridOriginY:0,gridOpacity:18,layerVisibility:{drawings:true,tokens:true,grid:true},layerPolicy:{map:{locked:false,private:false},drawings:{locked:false,private:false},tokens:{locked:false,private:false}}};
+const state={title:'Mesa sem título',tokens:[],characters:[],chat:[],participants:[],map:'',updated:now(),schema:1,scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{},gridSize:60,gridKind:'square',gridSnap:false,gridVisible:true,gridOriginX:0,gridOriginY:0,gridOpacity:18,layerVisibility:{drawings:true,tokens:true,grid:true},layerPolicy:{map:{locked:false,private:false},drawings:{locked:false,private:false},tokens:{locked:false,private:false}}};
 const contacts=new Map(),pendingGuests=new Set();let saveInFlight=null,hostMode=false,peer,hostLink=null,roomId='',myId='',nickname='',revision=0,drag=null,zoom=.8,offset={x:40,y:30},saveTimer,saveDb,sketch=null,retryTimer=null,retryCount=0,manualClose=false,lastSavedRevision=-1,guestSynced=false,connectionTimer=null,identityKeys=null,recoveryCandidates=[],activeTool='pan';
 function replaceCampaignState(data){
- const defaults={schema:1,title:'Mesa sem título',tokens:[],characters:[],chat:[],map:'',updated:now(),scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{},gridSize:60,gridKind:'square',gridSnap:false,gridVisible:true,gridOriginX:0,gridOriginY:0,gridOpacity:18,layerVisibility:{drawings:true,tokens:true,grid:true},layerPolicy:{map:{locked:false,private:false},drawings:{locked:false,private:false},tokens:{locked:false,private:false}}};
+ const defaults={schema:1,title:'Mesa sem título',tokens:[],characters:[],chat:[],participants:[],map:'',updated:now(),scenes:[],activeSceneId:null,drawings:[],fog:{enabled:false,reveals:[]},trustedKeys:{},gridSize:60,gridKind:'square',gridSnap:false,gridVisible:true,gridOriginX:0,gridOriginY:0,gridOpacity:18,layerVisibility:{drawings:true,tokens:true,grid:true},layerPolicy:{map:{locked:false,private:false},drawings:{locked:false,private:false},tokens:{locked:false,private:false}}};
  for(const [key,fallback] of Object.entries(defaults))state[key]=structuredClone(data[key]??fallback);
 }
 function ensureSceneData(){
@@ -393,7 +118,8 @@ function playerView(playerId){
   drawings:state.fog?.enabled||state.layerPolicy?.drawings?.private||state.layerVisibility?.drawings===false?[]:structuredClone(state.drawings||[]),
   fog:structuredClone(state.fog),
   chat:structuredClone(state.chat||[]),
-  characters:(state.characters||[]).map(c=>({id:c.id,name:c.name,owner:c.owner,text:c.owner===playerId?c.text:'',fields:c.owner===playerId?structuredClone((c.fields||[]).filter(f=>f.visibility!=='master')):[]}))
+  participants:[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))],
+  characters:(state.characters||[]).filter(c=>c.owner===playerId).map(c=>({id:c.id,name:c.name,owner:c.owner,text:c.owner===playerId?c.text:'',textVersion:c.owner===playerId?(c.textVersion||0):0,fields:c.owner===playerId?structuredClone((c.fields||[]).filter(f=>f.visibility!=='master')):[]}))
  };
 }
 let maskedMapCache={key:null,promise:null};
@@ -468,6 +194,7 @@ function isValidState(s){
  if(!validTokens(s.tokens)||new Set(s.tokens.map(t=>t.id)).size!==s.tokens.length||!Array.isArray(s.characters)||s.characters.length>50||!Array.isArray(s.chat)||s.chat.length>250||!validMap(s.map))return false;
  if(new Set(s.characters.map(c=>c.id)).size!==s.characters.length)return false;
  if(!s.characters.every(c=>c&&typeof c.id==='string'&&c.id.length<=100&&typeof c.name==='string'&&typeof c.text==='string'&&c.name.length<=100&&c.text.length<=30000&&(!c.owner||typeof c.owner==='string'&&c.owner.length<=100)))return false;
+ if(s.participants!==undefined&&(!Array.isArray(s.participants)||s.participants.length>101||!s.participants.every(p=>p&&typeof p.id==='string'&&p.id.length<=100&&typeof p.name==='string'&&p.name.length<=100)))return false;
  if(!s.chat.every(c=>c&&typeof c.name==='string'&&c.name.length<=100&&typeof c.text==='string'&&c.text.length<=800))return false;
  if(s.drawings!==undefined&&!validDraws(s.drawings))return false;
  if(s.gridSize!==undefined&&(!Number.isInteger(s.gridSize)||s.gridSize<20||s.gridSize>150))return false;
@@ -479,7 +206,8 @@ function isValidState(s){
  if(s.gridVisible!==undefined&&typeof s.gridVisible!=='boolean')return false;
  if(s.gridOpacity!==undefined&&(!Number.isInteger(s.gridOpacity)||s.gridOpacity<0||s.gridOpacity>100))return false;
  if(['gridOriginX','gridOriginY'].some(k=>s[k]!==undefined&&(!Number.isInteger(s[k])||s[k]<0||s[k]>150)))return false;
- if(!s.characters.every(c=>c.fields===undefined||(Array.isArray(c.fields)&&c.fields.length<=40&&c.fields.every(f=>f&&typeof f.id==='string'&&typeof f.name==='string'&&f.name.length<=50&&['text','number','notes','inventory'].includes(f.type)&&typeof f.value==='string'&&f.value.length<=5000&&(f.section===undefined||(typeof f.section==='string'&&f.section.length<=40))&&(f.visibility===undefined||['owner','master'].includes(f.visibility))&&(f.editableByOwner===undefined||typeof f.editableByOwner==='boolean')))))return false;
+ if(!s.characters.every(c=>c.fields===undefined||(Array.isArray(c.fields)&&new Set(c.fields.map(f=>f?.id)).size===c.fields.length&&c.fields.length<=40&&c.fields.every(f=>f&&typeof f.id==='string'&&typeof f.name==='string'&&f.name.length<=50&&['text','number','notes','inventory','resource','list','portrait'].includes(f.type)&&typeof f.value==='string'&&f.value.length<=5000&&(f.section===undefined||(typeof f.section==='string'&&f.section.length<=40))&&(f.visibility===undefined||['owner','master'].includes(f.visibility))&&(f.editableByOwner===undefined||typeof f.editableByOwner==='boolean')))))return false;
+ if(!s.characters.every(c=>(c.textVersion===undefined||Number.isSafeInteger(c.textVersion)&&c.textVersion>=0)&&(!c.fields||c.fields.every(f=>(f.version===undefined||Number.isSafeInteger(f.version)&&f.version>=0)&&(f.format===undefined||['inventory','list'].includes(f.type)&&f.format==='items')&&(f.type==='number'&&f.version===undefined||validSheetValue(f.type,f.value,f.format))))))return false;
  if(s.fog!==undefined&&!validFog(s.fog))return false;
  if(s.trustedKeys!==undefined){if(!s.trustedKeys||typeof s.trustedKeys!=='object'||Array.isArray(s.trustedKeys)||Object.keys(s.trustedKeys).length>100)return false;for(const [id,key] of Object.entries(s.trustedKeys)){if(!/^[0-9a-f-]{36}$/.test(id)||!key||key.kty!=='EC'||key.crv!=='P-256'||typeof key.x!=='string'||typeof key.y!=='string'||key.x.length>100||key.y.length>100)return false}}
  if(s.scenes!==undefined){
@@ -691,7 +419,7 @@ function attach(c,guest=false){
       c.playerId=pending.identity;c.playerName=pending.name;c.authPending=null;
       pendingGuests.delete(c);clearTimeout(c.authTimer);
       for(const [key,old] of contacts){if(old!==c&&old.playerId===c.playerId){contacts.delete(key);old.close()}}
-      contacts.set(c.peer,c);sendView(c);render();
+      contacts.set(c.peer,c);for(const member of contacts.values())sendView(member);render();
     })().catch(()=>c.close()).finally(()=>{c.authVerifying=false});
    }else if(m.kind==='action'&&c.playerId){
     const time=Date.now();if(time-(c.rateStarted||0)>1000){c.rateStarted=time;c.rateCount=0}if(++c.rateCount>15)return;
@@ -699,20 +427,21 @@ function attach(c,guest=false){
     let payloadLength;try{payloadLength=JSON.stringify(m.payload).length}catch{return}if(payloadLength>10000)return;
     apply(m.action,m.payload,c.playerId,c.playerName);
    }
+  }else if(guest&&m.kind==='sheet-result'&&c===hostLink){receiveSheetReply(m);
   }else if(guest&&m.kind==='challenge'&&typeof m.nonce==='string'&&/^[0-9a-f-]{36}$/.test(m.nonce)){
     signChallenge(m.nonce,myId).then(proof=>{if(c.open)c.send({kind:'proof',...proof})}).catch(e=>announce('Falha na identidade: '+e.message));
    }else if(m.kind==='state'&&isValidState(m.state)&&Number.isInteger(m.revision)&&( !guestSynced || m.revision>=revision)){
    if(c!==hostLink)return;
-   guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;replaceCampaignState(m.state);ensureSceneData();showGame();announce('Conectado ao mestre · mesa sincronizada');
+   const firstSync=!guestSynced;guestSynced=true;retryCount=0;clearTimeout(connectionTimer);connectionTimer=null;revision=m.revision;replaceCampaignState(m.state);ensureSceneData();if(firstSync)resumeSheetDrafts();if($('game').style.display!=='block')showGame();else render();announce('Conectado ao mestre · mesa sincronizada');
   }
  });
  c.on('close',()=>{
   pendingGuests.delete(c);clearTimeout(c.authTimer);
   if(contacts.get(c.peer)===c)contacts.delete(c.peer);
-  if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}
-  else {announce('Jogador desconectado');render()}
+  if(guest&&hostLink===c){hostLink=null;guestSynced=false;suspendSheetDrafts();clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}
+  else {announce('Jogador desconectado');for(const member of contacts.values())sendView(member);render()}
  });
- c.on('error',e=>{pendingGuests.delete(c);clearTimeout(c.authTimer);announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
+ c.on('error',e=>{pendingGuests.delete(c);clearTimeout(c.authTimer);announce('Erro P2P: '+e.message);if(guest&&hostLink===c){hostLink=null;guestSynced=false;suspendSheetDrafts();clearTimeout(connectionTimer);connectionTimer=null;scheduleReconnect()}});
 }
 function dispatch(action,payload){if(hostMode)apply(action,payload,myId,nickname);else if(hostLink?.open)hostLink.send({kind:'action',action,payload});else announce('Sem conexão com o mestre')}
 const actionRates=new Map();
@@ -744,9 +473,14 @@ case 'grid:configure':{if(id!==myId||typeof p.key!=='string')return;const allowe
 case 'grid:size':{if(id!==myId||!Number.isInteger(p.size)||p.size<20||p.size>150)return;return update(()=>{state.gridSize=p.size})}
 case 'move':{if(state.layerPolicy?.tokens?.locked)return;const moved=state.tokens.find(t=>t.id===p.id);if(!moved||!Number.isFinite(p.x)||!Number.isFinite(p.y))return;if(id!==myId&&(!tokenInRevealedArea(moved,state.fog)||moved.owner!==id))return;return update(()=>{let t=state.tokens.find(t=>t.id===p.id);const snapped=snapBoard(p.x,p.y);t.x=Math.max(0,Math.min(1140,snapped.x));t.y=Math.max(0,Math.min(740,snapped.y))})}
 case 'identity:transfer':{if(id!==myId||typeof p.oldId!=='string'||typeof p.newId!=='string'||!/^[0-9a-f-]{36}$/.test(p.oldId)||!/^[0-9a-f-]{36}$/.test(p.newId)||p.oldId===p.newId||!state.trustedKeys?.[p.oldId]||!state.trustedKeys?.[p.newId]||!Array.from(contacts.values()).some(c=>c.open&&c.playerId===p.newId))return;return update(()=>{for(const ch of state.characters)if(ch.owner===p.oldId)ch.owner=p.newId;for(const scene of state.scenes||[])for(const token of scene.tokens||[])if(token.owner===p.oldId)token.owner=p.newId;for(const token of state.tokens)if(token.owner===p.oldId)token.owner=p.newId;delete state.trustedKeys[p.oldId]})}
-case 'character:field:add':{if(id!==myId||!owner||typeof p.name!=='string'||p.name.length>50||!['text','number','notes','inventory'].includes(p.type)||((owner.fields||[]).length>=40)||typeof p.section!=='string'||p.section.length>40||!['owner','master'].includes(p.visibility)||typeof p.editableByOwner!=='boolean')return;return update(()=>{owner.fields||=[];owner.fields.push({id:uid(),name:p.name.trim()||'Campo',type:p.type,value:'',section:p.section,visibility:p.visibility,editableByOwner:p.editableByOwner})})}
-case 'character:field':{if(!owner||(id!==myId&&owner.owner!==id)||typeof p.value!=='string'||p.value.length>5000)return;const f=(owner.fields||[]).find(x=>x.id===p.fieldId);if(!f||(id!==myId&&(f.visibility==='master'||f.editableByOwner===false)))return;return update(()=>{f.value=p.value})}
-case 'character:update':{if(!owner||(id!==myId&&owner.owner!==id)||typeof p.text!=='string')return;return update(()=>{owner.text=p.text.slice(0,5000)})}
+case 'character:field:add':{if(id!==myId||!owner||typeof p.name!=='string'||p.name.length>50||!['text','number','notes','inventory','resource','list','portrait'].includes(p.type)||((owner.fields||[]).length>=40)||typeof p.section!=='string'||p.section.length>40||!['owner','master'].includes(p.visibility)||typeof p.editableByOwner!=='boolean')return;return update(()=>{owner.fields||=[];owner.fields.push({id:uid(),name:p.name.trim()||'Campo',type:p.type,value:p.type==='resource'?'[0,0]':['inventory','list'].includes(p.type)?'[]':'',version:0,format:['inventory','list'].includes(p.type)?'items':undefined,section:p.section,visibility:p.visibility,editableByOwner:p.editableByOwner})})}
+case 'character:field':{if(!owner||(id!==myId&&owner.owner!==id)||typeof p.value!=='string'||p.value.length>5000)return;const f=(owner.fields||[]).find(x=>x.id===p.fieldId);if(!f||(id!==myId&&(f.visibility==='master'||f.editableByOwner===false)))return;if(p.format!==undefined&&(p.format!=='items'||!['inventory','list'].includes(f.type)))return sheetReply(id,p,'invalid');if(!validSheetValue(f.type,p.value,p.format||f.format))return sheetReply(id,p,'invalid');if(p.baseVersion!==undefined&&p.baseVersion!==(f.version||0))return sheetReply(id,p,'conflict');update(()=>{f.value=p.value;if(p.format)f.format=p.format;f.version=(f.version||0)+1});return sheetReply(id,p,'saved')}
+case 'character:update':{if(!owner||(id!==myId&&owner.owner!==id)||typeof p.text!=='string')return;if(p.baseVersion!==undefined&&p.baseVersion!==(owner.textVersion||0))return sheetReply(id,p,'conflict');update(()=>{owner.text=p.text.slice(0,5000);owner.textVersion=(owner.textVersion||0)+1});return sheetReply(id,p,'saved')}
+case 'character:field:configure':{if(id!==myId||!owner)return;const f=(owner.fields||[]).find(f=>f.id===p.fieldId);if(!f||typeof p.name!=='string'||!p.name.trim()||p.name.length>50||typeof p.section!=='string'||p.section.length>40||!['owner','master'].includes(p.visibility)||typeof p.editableByOwner!=='boolean')return;return update(()=>{f.name=p.name.trim();f.section=p.section;f.visibility=p.visibility;f.editableByOwner=p.editableByOwner})}
+case 'character:rename':{if(id!==myId||!owner||typeof p.name!=='string'||!p.name.trim()||p.name.length>50)return;return update(()=>{owner.name=p.name.trim()})}
+case 'character:duplicate':{if(id!==myId||!owner||state.characters.length>=40)return;return update(()=>{const copy=structuredClone(owner);copy.id=uid();copy.name=(owner.name+' · cópia').slice(0,50);copy.owner='';copy.textVersion=0;for(const f of copy.fields||[]){f.id=uid();f.version=0}state.characters.push(copy)})}
+case 'character:field:remove':{if(id!==myId||!owner)return;return update(()=>{owner.fields=(owner.fields||[]).filter(f=>f.id!==p.fieldId)})}
+case 'character:field:order':{if(id!==myId||!owner||![-1,1].includes(p.direction))return;const fields=owner.fields||[],i=fields.findIndex(f=>f.id===p.fieldId),j=i+p.direction;if(i<0||j<0||j>=fields.length)return;return update(()=>{[fields[i],fields[j]]=[fields[j],fields[i]]})}
 case 'character:assign':{if(id!==myId||!owner)return;return update(()=>{owner.owner=String(p.playerId||'').slice(0,64)})}
 case 'character:add':{if(id!==myId||state.characters.length>=40)return;return update(()=>{state.characters.push({id:uid(),name:String(p.name||'Personagem').slice(0,50),text:'',owner:'',fields:[]})})}
 case 'token:bulk':{if(state.layerPolicy?.tokens?.locked||id!==myId||!Array.isArray(p.ids)||p.ids.length<2||p.ids.length>120||new Set(p.ids).size!==p.ids.length||!['delete','align-x','align-y','spread-x'].includes(p.operation))return;const group=p.ids.map(k=>state.tokens.find(t=>t.id===k));if(group.some(t=>!t))return;return update(()=>{if(p.operation==='delete'){state.tokens=state.tokens.filter(t=>!p.ids.includes(t.id));selectedTokens.clear();selectedToken=null}else if(p.operation==='align-x'){for(const t of group)t.x=group[0].x}else if(p.operation==='align-y'){for(const t of group)t.y=group[0].y}else{const sorted=[...group].sort((a,b)=>a.x-b.x),min=sorted[0].x,max=sorted.at(-1).x;for(let i=0;i<sorted.length;i++)sorted[i].x=min+(max-min)*i/(sorted.length-1)}})}
@@ -755,23 +489,25 @@ case 'token:owner':{if(state.layerPolicy?.tokens?.locked||id!==myId)return;const
 case 'token:add':{if(state.layerPolicy?.tokens?.locked||id!==myId||state.tokens.length>=120)return;return update(()=>{state.tokens.push({id:uid(),name:String(p.name||'Token').slice(0,35),x:200,y:180,owner:''})})}
 case 'map':{if(state.layerPolicy?.map?.locked||id!==myId||typeof p.data!=='string'||p.data.length>8500000||!/^data:image\/(png|jpeg|webp);base64,/.test(p.data))return;return update(()=>state.map=p.data)}
 }}
-function activateTablePanel(panel){if(panel==='tools'&&!hostMode)panel='chat';for(const [name,id] of [['chat','chatPanel'],['sheets','sheetsPanel'],['tools','masterTools']]){const chosen=panel===name;$(id).hidden=!chosen;const tab=$('tab'+name[0].toUpperCase()+name.slice(1));tab.classList.toggle('active',chosen);tab.setAttribute('aria-selected',String(chosen));tab.tabIndex=chosen?0:-1}const active=$('tab'+panel[0].toUpperCase()+panel.slice(1));if(active)active.setAttribute('aria-label',panel==='chat'?'Chat e dados':panel==='sheets'?'Fichas':'Ferramentas do mestre')}
+function activateTablePanel(panel){if(panel==='tools'&&!hostMode)panel='chat';for(const [name,id] of [['chat','chatPanel'],['sheets','sheetsPanel'],['tools','masterTools']]){const chosen=panel===name;$(id).hidden=!chosen;const tab=$('tab'+name[0].toUpperCase()+name.slice(1));tab.classList.toggle('active',chosen);tab.setAttribute('aria-selected',String(chosen));tab.tabIndex=chosen?0:-1}$('layout').dataset.panel=panel;const active=$('tab'+panel[0].toUpperCase()+panel.slice(1));if(active)active.setAttribute('aria-label',panel==='chat'?'Chat e dados':panel==='sheets'?'Fichas':'Ferramentas do mestre');renderWorkspace()}
 $('tableSidebar').querySelectorAll('.table-tab').forEach(button=>button.addEventListener('click',()=>activateTablePanel(button.dataset.panel)));
 $('tableSidebar').querySelector('.table-tabs').addEventListener('keydown',event=>{if(!['ArrowRight','ArrowLeft','Home','End'].includes(event.key))return;const tabs=[...$('tableSidebar').querySelectorAll('.table-tab')].filter(x=>!x.hidden);const index=tabs.indexOf(document.activeElement);if(index<0)return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?tabs.length-1:(index+(event.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length;tabs[next].click();tabs[next].focus()});
-function showGame(){ensureSceneData();$('sessionRole').textContent=hostMode?'MESTRE':'JOGADOR';$('gameCampaignName').value=state.title||'Mesa sem título';$('gameCampaignName').style.display=hostMode?'block':'none';$('home').style.display='none';$('game').style.display='block';$('tabTools').hidden=!hostMode;activateTablePanel('chat');$('export').style.display=hostMode?'block':'none';$('roomLabel').textContent='Sala '+roomId;render()}
+function showGame(){ensureSceneData();$('sessionRole').textContent=hostMode?'MESTRE':'JOGADOR';$('gameCampaignName').value=state.title||'Mesa sem título';$('gameCampaignName').style.display=hostMode?'block':'none';$('home').style.display='none';$('game').style.display='block';$('tabTools').hidden=!hostMode;activateTablePanel('chat');configureWorkspace();$('export').style.display=hostMode?'block':'none';$('roomLabel').textContent='Sala '+roomId;render()}
 function renderIdentityTransfer(){if(!hostMode)return;const prior=$('previousIdentity'),next=$('newIdentity'),oldSelection=prior.value,newSelection=next.value;prior.replaceChildren();next.replaceChildren();for(const id of Object.keys(state.trustedKeys||{})){const option=document.createElement('option');option.value=id;option.textContent=id.slice(0,8)+' · '+state.characters.filter(c=>c.owner===id).length+' ficha(s)';prior.append(option)}for(const conn of contacts.values()){if(!conn.open||!conn.playerId)continue;const option=document.createElement('option');option.value=conn.playerId;option.textContent=conn.playerName||conn.playerId.slice(0,8);next.append(option)}if([...prior.options].some(x=>x.value===oldSelection))prior.value=oldSelection;if([...next.options].some(x=>x.value===newSelection))next.value=newSelection;$('transferIdentity').disabled=!prior.value||!next.value||prior.value===next.value}
-function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();if(hostMode){$('gridSize').value=state.gridSize||60;for(const key of ['gridKind','gridOpacity','gridOriginX','gridOriginY'])if(document.activeElement!==$(key))$(key).value=state[key]??({gridKind:'square',gridOpacity:18,gridOriginX:0,gridOriginY:0})[key];for(const key of ['gridSnap','gridVisible'])$(key).checked=state[key]!==false&&!!state[key];for(const key of ['layerDrawings','layerTokens','layerGrid'])$(key).checked=state.layerVisibility?.[key.slice(5).toLowerCase()]!==false;renderInspector();renderLayerPermissions();renderIdentityTransfer();}if($('map').getAttribute('src')!==(state.map||''))$('map').src=state.map||'';const pieces=$('pieces');for(const id of selectedTokens)if(!state.tokens.some(t=>t.id===id))selectedTokens.delete(id);pieces.hidden=state.layerVisibility?.tokens===false;pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.dataset.tokenId=t.id;el.classList.toggle('selected',selectedTokens.has(t.id));el.style.width=(t.size||56)+'px';el.style.height=(t.size||56)+'px';el.onpointerdown=e=>{if(hostMode&&activeTool==='pan'){if(e.shiftKey){if(selectedTokens.has(t.id))selectedTokens.delete(t.id);else selectedTokens.add(t.id);selectedToken=selectedTokens.size===1?[...selectedTokens][0]:null;for(const item of pieces.children)item.classList.toggle('selected',selectedTokens.has(item.dataset.tokenId));renderInspector();e.preventDefault();e.stopPropagation();return}selectedTokens.clear();selectedTokens.add(t.id);selectedToken=t.id;for(const item of pieces.children)item.classList.toggle('selected',selectedTokens.has(item.dataset.tokenId));renderInspector()}if(hostMode&&activeTool!=='pan')return;if(!hostMode&&((state.fog?.enabled&&!tokenInRevealedArea(t,state.fog))||t.owner!==myId))return;e.stopPropagation();drag={token:t.id,pointerId:e.pointerId,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
+function render(){if($('game').style.display==='none')return;ensureSceneData();renderLayers();if(hostMode){$('gridSize').value=state.gridSize||60;for(const key of ['gridKind','gridOpacity','gridOriginX','gridOriginY'])if(document.activeElement!==$(key))$(key).value=state[key]??({gridKind:'square',gridOpacity:18,gridOriginX:0,gridOriginY:0})[key];for(const key of ['gridSnap','gridVisible'])$(key).checked=state[key]!==false&&!!state[key];for(const key of ['layerDrawings','layerTokens','layerGrid'])$(key).checked=state.layerVisibility?.[key.slice(5).toLowerCase()]!==false;renderInspector();renderWorkspace();renderLayerPermissions();renderIdentityTransfer();}$('map').hidden=!state.map;if($('map').getAttribute('src')!==(state.map||''))$('map').src=state.map||'';const pieces=$('pieces');for(const id of selectedTokens)if(!state.tokens.some(t=>t.id===id))selectedTokens.delete(id);pieces.hidden=state.layerVisibility?.tokens===false;pieces.replaceChildren();for(const t of state.tokens){let el=document.createElement('div');el.className='piece';el.textContent=t.name;el.style.left=t.x+'px';el.style.top=t.y+'px';el.style.background='#b8272f';el.dataset.tokenId=t.id;el.classList.toggle('selected',selectedTokens.has(t.id));el.style.width=(t.size||56)+'px';el.style.height=(t.size||56)+'px';el.onpointerdown=e=>{if(hostMode&&activeTool==='pan'){if(e.shiftKey){if(selectedTokens.has(t.id))selectedTokens.delete(t.id);else selectedTokens.add(t.id);selectedToken=selectedTokens.size===1?[...selectedTokens][0]:null;for(const item of pieces.children)item.classList.toggle('selected',selectedTokens.has(item.dataset.tokenId));renderInspector();renderWorkspace();e.preventDefault();e.stopPropagation();return}selectedTokens.clear();selectedTokens.add(t.id);selectedToken=t.id;for(const item of pieces.children)item.classList.toggle('selected',selectedTokens.has(item.dataset.tokenId));renderInspector()}if(hostMode&&activeTool!=='pan')return;if(!hostMode&&((state.fog?.enabled&&!tokenInRevealedArea(t,state.fog))||t.owner!==myId))return;e.stopPropagation();drag={token:t.id,pointerId:e.pointerId,start:[e.clientX,e.clientY],x:t.x,y:t.y};el.setPointerCapture(e.pointerId)};pieces.append(el)}
 if(hostMode){$('undoDrawing').disabled=!state.drawings.length;$('clearDrawings').disabled=!state.drawings.length;const manager=$('tokenManager');manager.replaceChildren();for(const t of state.tokens){const card=document.createElement('div');card.className='token-control';const title=document.createElement('strong');title.textContent=t.name;card.append(title);const actions=document.createElement('div');actions.className='token-actions';const select=document.createElement('select');const placeholder=document.createElement('option');placeholder.textContent='Enviar para cena…';placeholder.value='';select.append(placeholder);for(const scene of state.scenes){if(scene.id===state.activeSceneId)continue;const option=document.createElement('option');option.value=scene.id;option.textContent=scene.title;select.append(option)}select.onchange=()=>{if(select.value)dispatch('token:transfer',{id:t.id,sceneId:select.value})};const del=document.createElement('button');del.className='danger';del.textContent='Excluir';del.title='Excluir token da cena';del.onclick=()=>{if(confirm('Excluir token '+t.name+'?'))dispatch('token:delete',{id:t.id})};const own=document.createElement('select');own.setAttribute('aria-label','Controlador do token');for(const [pid,label] of [['','Só mestre'],...Array.from(contacts.values()).filter(x=>x.playerId).map(x=>[x.playerId,x.playerName])]){const op=document.createElement('option');op.value=pid;op.textContent=label;own.append(op)}own.value=t.owner||'';own.onchange=()=>dispatch('token:owner',{id:t.id,playerId:own.value});actions.append(select,del);card.append(actions,own);manager.append(card)}}
-const h=$('history');h.replaceChildren();for(let line of state.chat){const p=document.createElement('p');p.textContent=line.name+': '+line.text;h.append(p)}h.scrollTop=h.scrollHeight;
-const players=hostMode?[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))]:[{id:myId,name:nickname}];$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
-const ch=$('characters');ch.replaceChildren();for(const c of state.characters){let section=document.createElement('div');section.className='char',strong=document.createElement('strong');strong.textContent=c.name;section.append(strong);if(hostMode){let selector=document.createElement('select');let empty=document.createElement('option');empty.value='';empty.textContent='Sem dono';selector.append(empty);for(let x of players){let op=document.createElement('option');op.value=x.id;op.textContent=x.name;selector.append(op)}selector.value=c.owner;selector.onchange=()=>dispatch('character:assign',{id:c.id,playerId:selector.value});section.append(selector)}
-let field=document.createElement('textarea');field.value=c.text;field.disabled=!hostMode&&c.owner!==myId;section.append(field);let currentSection='';for(const f of c.fields||[]){if(!hostMode&&f.visibility==='master')continue;if(f.section&&f.section!==currentSection){currentSection=f.section;const heading=document.createElement('h4');heading.textContent=currentSection;heading.className='sheet-section';section.append(heading)}const label=document.createElement('label');label.textContent=f.name;label.style.display='block';const input=f.type==='notes'||f.type==='inventory'?document.createElement('textarea'):document.createElement('input');if(input.tagName==='INPUT')input.type=f.type==='number'?'number':'text';input.value=f.value;input.disabled=field.disabled||(!hostMode&&f.editableByOwner===false);input.setAttribute('aria-label',f.name);label.append(input);if(!input.disabled){const b=document.createElement('button');b.textContent='Salvar '+f.name;b.onclick=()=>dispatch('character:field',{id:c.id,fieldId:f.id,value:input.value});label.append(b)}section.append(label)}if(hostMode){const name=document.createElement('input');name.placeholder='Novo campo';name.setAttribute('aria-label','Novo campo da ficha');const typ=document.createElement('select');typ.setAttribute('aria-label','Tipo de campo');for(const t of ['text','number','notes','inventory']){const op=document.createElement('option');op.value=t;op.textContent=t;typ.append(op)}const group=document.createElement('input');group.placeholder='Seção (opcional)';group.setAttribute('aria-label','Seção do campo');const visibility=document.createElement('select');visibility.setAttribute('aria-label','Visibilidade do campo');for(const [value,text] of [['owner','Jogador e mestre'],['master','Apenas mestre']]){const option=document.createElement('option');option.value=value;option.textContent=text;visibility.append(option)}const editable=document.createElement('label');const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=true;editable.append(checkbox,' Jogador pode editar');const add=document.createElement('button');add.textContent='+ Campo';add.onclick=()=>dispatch('character:field:add',{id:c.id,name:name.value,type:typ.value,section:group.value,visibility:visibility.value,editableByOwner:checkbox.checked});section.append(name,typ,group,visibility,editable,add)}if(!field.disabled){let b=document.createElement('button');b.textContent='Salvar ficha';b.onclick=()=>dispatch('character:update',{id:c.id,text:field.value});section.append(b)}ch.append(section)}
+const h=$('history'),chatKey=JSON.stringify(state.chat);if(h.dataset.revision!==chatKey){const stick=h.scrollHeight-h.scrollTop-h.clientHeight<50;h.replaceChildren();for(let line of state.chat){const p=document.createElement('p');p.textContent=line.name+': '+line.text;h.append(p)}h.dataset.revision=chatKey;if(stick)h.scrollTop=h.scrollHeight;}
+const players=hostMode?[{id:myId,name:nickname},...Array.from(contacts.values()).filter(c=>c.playerId).map(c=>({id:c.playerId,name:c.playerName}))]:(state.participants||[{id:myId,name:nickname}]);$('players').textContent='Conectados: '+players.map(x=>x.name).join(', ');
+renderSheets(players);
+renderWorkspace();
 }
 for(const key of ['gridKind','gridOpacity','gridOriginX','gridOriginY','gridSnap','gridVisible'])$(key).onchange=e=>dispatch('grid:configure',{key,value:e.target.type==='checkbox'?e.target.checked:e.target.type==='number'||e.target.type==='range'?Number(e.target.value):e.target.value});for(const key of ['layerTokens','layerDrawings','layerGrid'])$(key).onchange=e=>dispatch('layer:visibility',{layer:key.slice(5).toLowerCase(),visible:e.target.checked});$('transferIdentity').onclick=()=>{const oldId=$('previousIdentity').value,newId=$('newIdentity').value;if(!oldId||!newId||oldId===newId)return;if(confirm('Você verificou a identidade do jogador fora da plataforma? Transferir todas as fichas/tokens e revogar a chave anterior?'))dispatch('identity:transfer',{oldId,newId})};$('editorUndo').onclick=()=>travelEditor('undo');$('editorRedo').onclick=()=>travelEditor('redo');document.addEventListener('keydown',e=>{if(!hostMode||!e.ctrlKey||e.altKey||e.metaKey||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;if(e.key.toLowerCase()==='z'){e.preventDefault();travelEditor(e.shiftKey?'redo':'undo')}else if(e.key.toLowerCase()==='y'){e.preventDefault();travelEditor('redo')}});$('gridSize').onchange=e=>dispatch('grid:size',{size:Number(e.target.value)});$('gameCampaignName').onchange=e=>setCampaignName(e.target.value);$('campaignName').onchange=e=>{if(!hostMode)state.title=cleanCampaignName(e.target.value)};$('newScene').onclick=()=>{const title=prompt('Nome da cena:','Nova cena');if(title)dispatch('scene:add',{title})};$('sceneSelect').onchange=e=>dispatch('scene:switch',{id:e.target.value});$('fogEnable').onclick=()=>{dispatch('fog:toggle',{enabled:!state.fog.enabled});if(!state.fog.enabled&&activeTool==='reveal')selectBoardTool('pan')};$('fogReset').onclick=()=>{if(state.fog.enabled&&confirm('Cobrir novamente todas as áreas reveladas desta cena?'))dispatch('fog:reset',{})};$('undoDrawing').onclick=()=>dispatch('draw:undo',{});$('clearDrawings').onclick=()=>{if(state.drawings.length&&confirm('Apagar todos os desenhos desta cena?'))dispatch('draw:clear',{})};$('host').onclick=startHost;$('join').onclick=startGuest;$('load').onchange=e=>restore(e.target.files[0]);$('export').onclick=saveFile;$('invite').onclick=()=>navigator.clipboard.writeText(location.origin+location.pathname+'?room='+roomId).then(()=>announce('Convite copiado')).catch(()=>prompt('Convite:',location.origin+location.pathname+'?room='+roomId));$('addChar').onclick=()=>dispatch('character:add',{name:$('charName').value});$('addToken').onclick=()=>dispatch('token:add',{name:$('tokenName').value});$('send').onclick=()=>{dispatch('chat',{text:$('message').value});$('message').value=''};$('roll').onclick=()=>dispatch('roll',{expr:$('dice').value});
 $('upload').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>6000000)return announce('Mapa excede 6MB');const reader=new FileReader();reader.onload=()=>dispatch('map',{data:reader.result});reader.readAsDataURL(f)};
 function selectBoardTool(tool){activeTool=tool;for(const item of $('toolButtons').querySelectorAll('[data-tool]')){const on=item.dataset.tool===tool;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on))}}
 $('toolButtons').querySelectorAll('[data-tool]').forEach(btn=>btn.onclick=()=>{if(btn.dataset.tool==='reveal'&&!state.fog.enabled){$('fogHelp').textContent='Primeiro clique em Ativar névoa; depois escolha Revelar e arraste sobre o mapa.';$('fogEnable').focus();return}selectBoardTool(btn.dataset.tool)});
 $('leaveGame').onclick=async()=>{
+ for(const d of sheetDrafts.values())if(!d.conflict)saveSheetDraft(d.id,d.fieldId);
+ if(sheetDrafts.size&&!confirm('Há rascunhos ainda não sincronizados. Voltar ao menu e descartá-los?'))return;
  if(hostMode){
   clearTimeout(saveTimer);
   if(revision!==lastSavedRevision){
@@ -784,7 +520,7 @@ $('leaveGame').onclick=async()=>{
  manualClose=true;clearTimeout(retryTimer);clearTimeout(connectionTimer);
  for(const c of contacts.values())c.close();contacts.clear();for(const c of pendingGuests)c.close();pendingGuests.clear();
  hostLink?.close();peer?.destroy();peer=null;hostLink=null;hostMode=false;guestSynced=false;roomId='';
- $('game').style.display='none';$('home').style.display='block';
+ resetSheetDrafts();$('game').style.display='none';$('home').style.display='block';
  $('status').textContent='Preparando…';$('notice').textContent='Você voltou ao menu. A sessão P2P foi encerrada.';
 };
 const board=$('board');const preview=svgNode('polyline',{fill:'none',stroke:'#ff777b','stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'});function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}function updateSketchPreview(){
@@ -820,7 +556,7 @@ function finishPointer(e,cancel=false){
 board.onpointerdown=e=>{
  if(e.button!==0||sketch||drag)return;
  const tool=hostMode?activeTool:'pan';
- if(tool==='eraser'){const p=boardPoint(e),index=drawingNear(p.x,p.y,state.drawings);selectedDrawing=index;if(index>=0)dispatch('draw:remove',{index});else renderInspector();return}
+ if(tool==='eraser'){const p=boardPoint(e),index=drawingNear(p.x,p.y,state.drawings);selectedDrawing=index;if(index>=0)dispatch('draw:remove',{index});else renderInspector();renderWorkspace();return}
  if(['draw','reveal','line','rectangle','ellipse','ruler'].includes(tool)){
   const p=boardPoint(e);
   sketch={pointerId:e.pointerId,tool,start:p,points:[[Math.max(0,Math.min(1200,p.x)),Math.max(0,Math.min(800,p.y))]]};
@@ -863,5 +599,5 @@ openDb().then(async db=>{
  }
 }).catch(e=>{$('notice').textContent='Não foi possível consultar autosaves: '+e.message});
 setInterval(()=>{if(hostMode&&revision!==lastSavedRevision)saveLocal()},30000);
-window.addEventListener('beforeunload',e=>{if(hostMode&&revision!==lastSavedRevision){e.preventDefault();e.returnValue=''}});
+window.addEventListener('beforeunload',e=>{if(sheetDrafts.size||hostMode&&revision!==lastSavedRevision){e.preventDefault();e.returnValue=''}});
 </script></body></html>

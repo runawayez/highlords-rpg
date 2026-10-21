@@ -59,3 +59,13 @@ Ações recebidas de convidados são limitadas em frequência e tamanho antes da
 ## Lançamento oficial 1.0
 
 O projeto passou diretamente da Beta para o lançamento 1.0 por decisão de produto, sem etapa formal de Release Candidate. TURN permanece totalmente desativado, inclusive em produção, até segunda ordem. O pacote oficial usa os testes automatizados existentes e testes adicionais de integridade/segurança; a disponibilidade entre operadoras físicas diferentes, auditoria externa de segurança e acessibilidade assistiva não estão certificadas. O acompanhamento de bugs continua via issues e commits pontuais. A Vercel publica apenas a aplicação P2P estática.
+
+## Refinamento pós-1.0 — mesa e fichas
+
+A interface separa ferramentas do mapa, cenas, biblioteca, propriedades, fichas e participantes. Painéis podem ser recolhidos e ter sua largura ajustada. O editor de ficha usa uma única área de rolagem e blocos de texto, número, notas, recurso atual/máximo, listas e inventário com quantidade e observações. Fichas podem ser duplicadas como modelos, com novos IDs e sem transferir o proprietário. Campos podem ser reordenados e removidos pelo mestre.
+
+As alterações da ficha são enviadas por campo após 700 ms sem digitação, ou pelo botão Salvar. Cada campo possui versão independente; o host compara a versão esperada e rejeita alterações obsoletas. Edições em campos diferentes são combinadas. Quando o mesmo campo muda, o rascunho permanece na interface e o usuário escolhe entre reaplicá-lo ao valor atual ou receber o valor remoto. Uma nova mudança durante a resolução pode gerar outro conflito. A confirmação de sincronização não significa backup em disco: o autosave do mestre continua independente.
+
+Rascunhos são mantidos em memória durante a sessão, inclusive durante atualizações e reconexão. Recarregar ou encerrar a página pode descartá-los, com aviso do navegador quando suportado. Não há coedição de texto por caractere, histórico persistente de fichas nem recuperação de rascunhos após fechamento. Campos privados e permissões continuam validados no host. O cliente atual envia versões; chamadas legadas sem versão seguem compatíveis.
+
+Os blocos estruturados usam strings JSON no esquema existente e mantêm importação de campos antigos em texto. A conversão de inventários/listas antigas em itens é explícita. ZIP v3, assinatura local e TURN desativado foram preservados. Os módulos de ficha, composição da interface e estilos ficam em `assets/sheets.js`, `assets/workspace.js` e `assets/workspace.css`; o núcleo de transporte e persistência segue em `index.html`.

@@ -3,3 +3,7 @@ data/rooms/
 data/uploads/
 .env
 .DS_Store
+
+# Local browser diagnostics
+test-results/
+playwright-report/
