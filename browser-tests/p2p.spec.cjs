@@ -275,3 +275,15 @@ test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
  await page.evaluate(()=>apply('draw',{points:[[20,20],[80,80]]},'malicious-guest','X'));
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
 });
+
+test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({page})=>{
+ await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());
+ await expect(page.getByRole('heading',{name:/Um espaço para qualquer história/})).toBeVisible();
+ await expect(page.getByText('Highlords RPG é e sempre será gratuito.')).toBeVisible();
+ await expect(page.locator('.workspace-preview')).toBeVisible();
+ await expect(page.getByRole('button',{name:/Preparar minha mesa/})).toBeVisible();
+ await expect(page.getByRole('button',{name:/Sentar à mesa/})).toBeVisible();
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
+ expect(overflow).toBe(false);
+ await page.locator('#host').click();await expect(page.locator('#board')).toBeVisible();
+});
