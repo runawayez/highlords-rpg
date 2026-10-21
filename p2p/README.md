@@ -31,3 +31,9 @@ TURN está **100% desativado** nesta versão, por decisão explícita do projeto
 O código histórico de integração TURN permanece apenas como referência, inacessível durante as partidas. Não habilitar TURN, contratar serviços ou configurar credenciais sem uma nova decisão explícita do responsável pelo projeto.
 
 Limitação aceita: em redes restritivas em que a conexão P2P direta não for viável, o jogador pode não conseguir entrar. Testes positivos em navegadores e redes conhecidas não eliminam essa restrição.
+
+## Editor da Beta
+
+O mestre dispõe de pincel, linha, retângulo, elipse, borracha de traços, régua (em unidades de grid), seleção contextual simples, grid quadrado/hexagonal, magnetismo de tokens e controle de visibilidade local do grid, tokens e desenhos. O alinhamento do grid, tamanho, opacidade e encaixe são configurações da campanha; alternar a visibilidade das camadas no painel afeta apenas a renderização local.
+
+**Limites:** ainda não há paredes, iluminação dinâmica, ordenação/bloqueio persistente de camadas, seleção múltipla de objetos, macros, plugins ou histórico completo de ações. Essas ferramentas exigem evolução de modelo e validações P2P antes de serem anunciadas como implementadas. TURN continua desativado.
