@@ -102,16 +102,16 @@ function playerView(playerId){
   // Never include the original map in a player's payload while fog is active.
   map:state.fog?.enabled?'':state.map,
   tokens:(state.tokens||[]).filter(t=>tokenInRevealedArea(t,state.fog)).map(t=>({...t})),
-  drawings:structuredClone(state.drawings||[]),
+  drawings:state.fog?.enabled?[]:structuredClone(state.drawings||[]),
   fog:structuredClone(state.fog),
   chat:structuredClone(state.chat||[]),
   characters:(state.characters||[]).map(c=>({id:c.id,name:c.name,owner:c.owner,text:c.owner===playerId?c.text:''}))
  };
 }
 let maskedMapCache={key:null,promise:null};
-async function maskedPlayerMap(map,reveals){
+async function maskedPlayerMap(map,reveals,drawings=[]){
  if(!map)return '';
- const key=map+'|'+JSON.stringify(reveals);
+ const key=map+'|'+JSON.stringify(reveals)+'|'+JSON.stringify(drawings);
  if(maskedMapCache.key===key&&maskedMapCache.promise)return maskedMapCache.promise;
  const promise=(async()=>{
   const img=new Image();img.src=map;await img.decode();
@@ -124,7 +124,14 @@ async function maskedPlayerMap(map,reveals){
   const left=(1200-width)/2,top=(800-height)/2;
   ctx.save();ctx.beginPath();
   for(const r of reveals||[]){ctx.rect(r.x,r.y,r.width,r.height)}
-  ctx.clip();ctx.drawImage(img,left,top,width,height);ctx.restore();
+  ctx.clip();ctx.drawImage(img,left,top,width,height);
+  ctx.strokeStyle='#f16a6e';ctx.lineWidth=4;ctx.lineCap='round';ctx.lineJoin='round';
+  for(const drawing of drawings){if(!Array.isArray(drawing.points)||drawing.points.length<2)continue;
+   ctx.beginPath();ctx.moveTo(drawing.points[0][0],drawing.points[0][1]);
+   for(const point of drawing.points.slice(1))ctx.lineTo(point[0],point[1]);
+   ctx.stroke();
+  }
+  ctx.restore();
   return canvas.toDataURL('image/webp',.85);
  })();
  maskedMapCache={key,promise};
@@ -134,7 +141,7 @@ async function sendView(conn){
  if(!conn.open||!conn.playerId)return;
  const version=revision,view=playerView(conn.playerId);
  if(state.fog?.enabled&&state.map){
-  try{view.map=await maskedPlayerMap(state.map,state.fog.reveals)}catch(e){view.map='';console.warn('Mapa oculto: falha de rasterização',e)}
+  try{view.map=await maskedPlayerMap(state.map,state.fog.reveals,state.drawings||[])}catch(e){view.map='';console.warn('Mapa oculto: falha de rasterização',e)}
  }
  if(!conn.open||!conn.playerId||version!==revision)return;
  try{conn.send({kind:'state',state:view,revision:version})}catch(e){announce('Falha ao sincronizar jogador: '+e.message)}
