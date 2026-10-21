@@ -1,3 +1,12 @@
+function fitBoard() {
+  const rect = document.getElementById('board').getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const left = hostMode ? 74 : 22, right = 22, top = 62, bottom = 50;
+  const width = Math.max(30, rect.width - left - right), height = Math.max(30, rect.height - top - bottom);
+  zoom = Math.max(.03, Math.min(width / boardWidth(), height / boardHeight(), 1));
+  offset = {x:left+(width-boardWidth()*zoom)/2,y:top+(height-boardHeight()*zoom)/2};
+  transform();
+}
 var configureWorkspace = () => {},
   renderWorkspace = () => {};
 addEventListener("DOMContentLoaded", () => {
@@ -63,15 +72,10 @@ addEventListener("DOMContentLoaded", () => {
   zoomControls.id = "zoomControls";
   zoomControls.append(
     sheetButton("−", () => {
-      zoom = Math.max(0.3, zoom / 1.2);
+      zoom = Math.max(0.03, zoom / 1.2);
       transform();
     }),
-    sheetButton("Enquadrar", () => {
-      const rect = $("board").getBoundingClientRect();
-      zoom = Math.min((rect.width - 140) / boardWidth(), (rect.height - 100) / boardHeight(), 1);
-      offset = { x: 90, y: 70 };
-      transform();
-    }),
+    sheetButton("Enquadrar", fitBoard),
     sheetButton("+", () => {
       zoom = Math.min(3, zoom * 1.2);
       transform();
@@ -168,30 +172,26 @@ addEventListener("DOMContentLoaded", () => {
     });
   }
   openWorkspaceSection("map");
-  for (const el of [workspaceToolbar, sceneBar, zoomControls])
+  for (const el of [workspaceToolbar, sceneBar, zoomControls, boardEmpty])
     for (const event of ["pointerdown", "pointerup", "wheel"])
       el.addEventListener(event, (e) => e.stopPropagation());
-  // Campaign commands use a single menu, keeping the header readable on smaller screens.
-  const campaignMenu = document.createElement("details");
-  campaignMenu.id = "campaignMenu";
-  campaignMenu.append(sheetElement("summary", "Campanha"));
-  const menuBody = sheetElement("div", undefined, "campaign-menu-body");
-  menuBody.append($("export"), $("leaveGame"));
-  campaignMenu.append(menuBody);
-  $("game").querySelector("header").append(campaignMenu);
-  const collapse = sheetButton("Recolher painel", () => {
+  // Primary session commands stay visible in the header.
+  const collapse = sheetButton("", () => {
     $("layout").classList.toggle("sidebar-collapsed");
-    collapse.textContent = $("layout").classList.contains("sidebar-collapsed")
-      ? "Abrir painel"
-      : "Recolher painel";
+    const label = $("layout").classList.contains("sidebar-collapsed") ? "Abrir painel" : "Recolher painel";
+    collapse.title = label;
+    collapse.setAttribute("aria-label", label);
     collapse.setAttribute(
       "aria-expanded",
       String(!$("layout").classList.contains("sidebar-collapsed")),
     );
   });
   collapse.id = "collapseSidebar";
+  collapse.title = "Recolher painel";
+  collapse.setAttribute("aria-label", "Recolher painel");
+  collapse.append(workspaceIcon("rectangle"));
   collapse.setAttribute("aria-expanded", "true");
-  $("game").querySelector("header").append(collapse);
+  $("game").querySelector(".session-actions").append(collapse);
   const resize = document.createElement("input");
   resize.id = "panelWidth";
   resize.type = "range";
@@ -215,14 +215,16 @@ addEventListener("DOMContentLoaded", () => {
     charCreation.hidden = !hostMode;
     $("identityRecovery").hidden = !hostMode;
     mapStart.hidden = !hostMode;
-    campaignMenu.hidden = false;
     for (const b of $("toolButtons").children) b.disabled = !hostMode;
     participants.hidden = true;
   };
+  let fittedScene = "";
   renderWorkspace = function () {
     if (!$("boardEmpty")) return;
     boardEmpty.hidden =
       !!state.map || !!state.tokens.length || !!state.drawings.length;
+    const sceneKey = [state.activeSceneId,boardWidth(),boardHeight()].join(":");
+    if (sceneKey !== fittedScene && $("game").style.display === "block") { fittedScene = sceneKey; fitBoard(); }
     mapStart.hidden = !hostMode;
     $("sheetConnection").textContent = hostMode
       ? "Mestre · alterações compartilhadas com os jogadores autorizados"
@@ -234,6 +236,9 @@ addEventListener("DOMContentLoaded", () => {
     }
     renderSheetsStatus();
   };
+  new ResizeObserver(() => { if ($("game").style.display === "block") fitBoard(); }).observe($("board"));
+  for (const [ids,button] of [[["guestName","roomCode"],"join"],[["campaignName","hostName"],"host"]])
+    for (const id of ids) $(id).addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();$(button).click()}});
   // Resource views are local UI state; no campaign or private player data is stored here.
   $("message").addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {

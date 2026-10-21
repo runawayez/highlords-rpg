@@ -322,3 +322,8 @@ Implementação descrita nas [notas de lançamento](../RELEASE_1.1.md). A biblio
 ### Direção visual da 1.1
 
 A revisão visual posterior ao lançamento adota a linguagem de atlas/caderno de campanha, com preto quente, vermelho terroso e títulos em serifa. Entrada, mesa e fichas compartilham a mesma hierarquia. Detalhes e prévia em [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
+
+
+### Usabilidade da entrada e do quadro
+
+Após o feedback da interface, a home foi reduzida aos formulários de jogador/mestre, com os salvamentos abaixo. O cabeçalho oferece Exportar e Início diretamente. Adicionar mapa abre o seletor sem iniciar arraste do quadro, e o viewport enquadra a cena conforme a área disponível. Regressões cobrem seletor real de arquivos, convite completo/Enter, ingresso acima da dobra com autosaves e limites do quadro em desktop e celular.

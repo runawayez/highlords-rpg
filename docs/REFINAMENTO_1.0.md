@@ -4,11 +4,11 @@ Data: 21/10/2026. Complemento técnico ao Documento Mestre de lançamento 1.0.
 
 ## Decisões implementadas
 
-- A home foi posteriormente redesenhada na 1.1: apresentação editorial, ilustração vetorial de mapa e acesso de mestre/jogador em uma área própria. Veja [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
+- A home foi posteriormente redesenhada na 1.1: entrada compacta com formulários de jogador/mestre e salvamentos abaixo; a ilustração foi retirada da home para priorizar o ingresso. Veja [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
 - Ferramentas SVG consistentes ao lado do mapa; navegação de cenas independente do painel.
 - Biblioteca do mestre organizada em Mapa, Tokens e Propriedades contextuais.
 - Fichas e criação de personagens no mesmo local; participantes e recuperação de acesso em Grupo.
-- Menu de campanha para exportação e saída. Importação e recuperação continuam na home.
+- Exportar e Início ficam diretamente no cabeçalho, sem menu de campanha. Importação e recuperação continuam na home.
 - Painel recolhível e largura ajustável; ficha ocupa uma área maior, sem rolagem interna adicional.
 - Layout para desktop e telas pequenas, foco visível e composição do chat fixa.
 - Chat mantém a posição de leitura quando o usuário está consultando mensagens antigas.

@@ -18,7 +18,7 @@ class Peer {
 }
 window.Peer=Peer;`}))}
 test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.1/)});
-test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Goblin');await openHostSection(page,'tokens');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabSheets').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabSheets').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#campaignMenu > summary').click();await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
+test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Goblin');await openHostSection(page,'tokens');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabSheets').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabSheets').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
 test('mestre salva ficha e conserva dados ao alternar de cena',async({page})=>{
@@ -58,7 +58,7 @@ test('nome da campanha aparece no save e no download',async({page})=>{
  await page.locator('#host').click();
  await expect(page.locator('#gameCampaignName')).toHaveValue('Crônicas do Norte');
  const downloadPromise=page.waitForEvent('download');
- await page.locator('#campaignMenu > summary').click();await page.locator('#export').click();
+ await page.locator('#export').click();
  const download=await downloadPromise;
  expect(download.suggestedFilename()).toMatch(/^cronicas-do-norte-.*\.highlords$/);
  await page.locator('#gameCampaignName').fill('A Torre Vermelha');
@@ -79,7 +79,7 @@ test('mestre transfere token, exclui e volta ao menu',async({page})=>{
  await openHostSection(page,'tokens');await expect(page.locator('#tokenManager .token-actions select')).toHaveCount(1);
  page.once('dialog',d=>d.accept());await openHostSection(page,'tokens');await page.locator('#tokenManager button.danger').click();
  await openHostSection(page,'tokens');await expect(page.locator('#tokenManager .token-control')).toHaveCount(0);
- page.on('dialog',d=>d.accept());await page.locator('#campaignMenu > summary').click();await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
+ page.on('dialog',d=>d.accept());await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
 });
 test('ferramentas são botões e podem alternar',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
@@ -134,11 +134,11 @@ test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visíve
  await expect(page.locator('[data-tool="reveal"]')).toHaveAttribute('aria-pressed','true');
 });
 
-test('mestre aguarda autosave ao sair pelo menu',async({page})=>{
+test('mestre aguarda autosave ao voltar ao início',async({page})=>{
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();
  await expect(page.locator('#game')).toBeVisible();
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Guardião');await page.locator('#tabSheets').click();await page.locator('#addChar').click();
- await page.locator('#campaignMenu > summary').click();await page.locator('#leaveGame').click();
+ await page.locator('#leaveGame').click();
  await expect(page.locator('#home')).toBeVisible();
  const saved=await page.evaluate(async()=>{const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction('saves');const r=tx.objectStore('saves').get('latest');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})});
  expect(saved.characters.some(c=>c.name==='Guardião')).toBe(true);
@@ -605,7 +605,7 @@ test('1.1 token arrasta com prévia, Esc cancela e zoom mantém âncora',async({
  await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(()=>dispatch('token:add',{name:'Herói'}));const token=page.locator('.piece');const box=await token.boundingBox();
  await page.mouse.move(box.x+20,box.y+20);await page.mouse.down();await page.mouse.move(box.x+130,box.y+70,{steps:5});
- expect(await page.evaluate(()=>({saved:state.tokens[0].x,preview:parseFloat($('pieces').firstChild.style.left)}))).toMatchObject({saved:200,preview:337.5});
+ const preview=await page.evaluate(()=>({saved:state.tokens[0].x,x:parseFloat($('pieces').firstChild.style.left),expected:200+110/zoom}));expect(preview.saved).toBe(200);expect(preview.x).toBeCloseTo(preview.expected,1);
  await page.keyboard.press('Escape');await page.mouse.up();expect(await page.evaluate(()=>state.tokens[0].x)).toBe(200);
  const before=await page.evaluate(()=>{const r=board.getBoundingClientRect();return {x:r.left+420,y:r.top+310,p:boardPoint({clientX:r.left+420,clientY:r.top+310})}});
  await page.mouse.move(before.x,before.y);await page.mouse.wheel(0,-100);expect(await page.evaluate(({x,y})=>boardPoint({clientX:x,clientY:y}),before)).toEqual(before.p);
@@ -643,4 +643,35 @@ test('1.1 máscara de névoa usa dimensões da cena e esconde pixels',async({pag
   const output=document.createElement('canvas');output.width=image.naturalWidth;output.height=image.naturalHeight;const ctx=output.getContext('2d');ctx.drawImage(image,0,0);
   return {width:image.naturalWidth,height:image.naturalHeight,revealed:ctx.getImageData(1600,200,1,1).data[0]>150,hidden:ctx.getImageData(300,200,1,1).data[0]<35};
  });expect(result).toEqual({width:2000,height:1000,revealed:true,hidden:true});
+});
+
+test('entrada de jogador fica na primeira tela e aceita link de convite',async({page})=>{
+ await mockPeer(page);
+ for(const viewport of [{width:1280,height:720},{width:390,height:844}]){
+  await page.setViewportSize(viewport);await page.goto(url());await page.evaluate(()=>document.fonts.ready);
+  await expect(page.locator('#guestName')).toBeInViewport({ratio:1});await expect(page.locator('#roomCode')).toBeInViewport({ratio:1});await expect(page.locator('#join')).toBeInViewport({ratio:1});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+ }
+ await page.evaluate(async()=>{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readwrite');tx.objectStore('saves').put(structuredClone(state),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})});await page.reload();await expect(page.locator('#recoveryPanel')).toBeVisible();await expect(page.locator('#join')).toBeInViewport({ratio:1});
+ await page.locator('#roomCode').fill('https://highlords-vtt.vercel.app/?room=hl-12345678-1234-1234-1234-123456789abc');
+ await page.locator('#guestName').fill('Explorador');await page.locator('#guestName').press('Enter');await expect(page.locator('#game')).toBeVisible();
+ await expect(page.locator('#leaveGame')).toBeInViewport({ratio:1});await expect(page.locator('#export')).toBeHidden();
+});
+test('Adicionar mapa abre seletor e carrega imagem sem iniciar gesto no quadro',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#boardEmpty')).toBeVisible();
+ const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Adicionar mapa',exact:true}).click();
+ await (await chooser).setFiles({name:'mapa.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')});
+ await expect(page.locator('#map')).toHaveAttribute('src',/^data:image\/png;base64,/);await expect.poll(()=>page.locator('#map').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);await expect(page.locator('#boardEmpty')).toBeHidden();
+ expect(await page.evaluate(()=>({drag:drag===null,sketch:sketch===null,map:!!state.map}))).toEqual({drag:true,sketch:true,map:true});
+ await expect(page.locator('#export')).toBeVisible();await expect(page.locator('#leaveGame')).toBeVisible();await expect(page.locator('#campaignMenu')).toHaveCount(0);
+});
+test('cena inicia enquadrada e acompanha viewport, painel e dimensões',async({page})=>{
+ await mockPeer(page);await page.setViewportSize({width:1280,height:720});await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ const fits=()=>page.evaluate(()=>{const b=board.getBoundingClientRect(),c=$('canvas').getBoundingClientRect();return c.left>=b.left-1&&c.right<=b.right+1&&c.top>=b.top-1&&c.bottom<=b.bottom+1});
+ await expect.poll(fits).toBe(true);
+ for(const id of ['invite','export','leaveGame'])await expect(page.locator('#'+id)).toBeInViewport({ratio:1});
+ await page.locator('#tabSheets').click();await expect.poll(fits).toBe(true);
+ await page.setViewportSize({width:390,height:844});await expect.poll(fits).toBe(true);
+ await page.evaluate(()=>dispatch('scene:dimensions',{width:4096,height:4096}));await expect.poll(fits).toBe(true);
+ await expect(page.locator('#export')).toBeInViewport({ratio:1});await expect(page.locator('#leaveGame')).toBeInViewport({ratio:1});
 });
