@@ -238,7 +238,22 @@ $('gameCampaignName').onchange=e=>setCampaignName(e.target.value);$('campaignNam
 $('upload').onchange=e=>{const f=e.target.files[0];if(!f)return;if(f.size>6000000)return announce('Mapa excede 6MB');const reader=new FileReader();reader.onload=()=>dispatch('map',{data:reader.result});reader.readAsDataURL(f)};
 function selectBoardTool(tool){activeTool=tool;for(const item of $('toolButtons').querySelectorAll('[data-tool]')){const on=item.dataset.tool===tool;item.classList.toggle('active',on);item.setAttribute('aria-pressed',String(on))}}
 $('toolButtons').querySelectorAll('[data-tool]').forEach(btn=>btn.onclick=()=>{if(btn.dataset.tool==='reveal'&&!state.fog.enabled){$('fogHelp').textContent='Primeiro clique em Ativar névoa; depois escolha Revelar e arraste sobre o mapa.';$('fogEnable').focus();return}selectBoardTool(btn.dataset.tool)});
-$('leaveGame').onclick=()=>{if(hostMode&&revision!==lastSavedRevision&&!confirm('Há alterações ainda não confirmadas no autosave. Sair da mesa mesmo assim?'))return;if(hostMode){saveLocal()}manualClose=true;clearTimeout(retryTimer);clearTimeout(connectionTimer);for(const c of contacts.values())c.close();contacts.clear();hostLink?.close();peer?.destroy();peer=null;hostLink=null;hostMode=false;guestSynced=false;roomId='';$('game').style.display='none';$('home').style.display='block';$('status').textContent='Preparando…';$('notice').textContent='Você voltou ao menu. A sessão P2P foi encerrada.'};
+$('leaveGame').onclick=async()=>{
+ if(hostMode){
+  clearTimeout(saveTimer);
+  if(revision!==lastSavedRevision){
+   $('leaveGame').disabled=true;
+   $('leaveGame').textContent='Salvando…';
+   try{await saveLocal()}finally{$('leaveGame').disabled=false;$('leaveGame').textContent='← Menu'}
+   if(revision!==lastSavedRevision&&!confirm('O autosave não foi confirmado. Sair mesmo assim? Exporte a campanha para evitar perda de dados.'))return;
+  }
+ }
+ manualClose=true;clearTimeout(retryTimer);clearTimeout(connectionTimer);
+ for(const c of contacts.values())c.close();contacts.clear();
+ hostLink?.close();peer?.destroy();peer=null;hostLink=null;hostMode=false;guestSynced=false;roomId='';
+ $('game').style.display='none';$('home').style.display='block';
+ $('status').textContent='Preparando…';$('notice').textContent='Você voltou ao menu. A sessão P2P foi encerrada.';
+};
 const board=$('board');const preview=svgNode('polyline',{fill:'none',stroke:'#ff777b','stroke-width':4,'stroke-linecap':'round','stroke-linejoin':'round'});function transform(){$('canvas').style.transform='translate('+offset.x+'px,'+offset.y+'px) scale('+zoom+')'}function updateSketchPreview(){
  const layer=$('sketchLayer');
  if(sketch?.tool==='draw'){
