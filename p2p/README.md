@@ -32,3 +32,10 @@ Antes de chamar de Beta: testes E2E em duas redes, TURN fallback, reconexão, au
 - Conexões antigas do mesmo navegador são encerradas pelo mestre quando uma nova sessão entra.
 - Autosave periódico não regrava o mesmo estado sem alterações; alerta de saída condicionado a alterações ainda não salvas.
 - **Não validado** em navegadores diferentes ou NATs restritivos. TURN e autenticação criptográfica ainda pendentes.
+
+## Ferramentas visuais P2P (Alpha)
+- O mestre pode adicionar cenas e alterná-las pelo seletor; cada cena armazena mapa, tokens, desenhos e névoa. Saves antigos sem `scenes` são convertidos em memória na abertura.
+- Ferramenta **Desenhar**: mantenha pressionado e arraste sobre a mesa para criar traços; **Limpar desenhos** remove os traços da cena ativa.
+- **Névoa de guerra**: marque a opção e selecione **Revelar névoa**; arraste um retângulo sobre a região a revelar.
+- **Aviso de privacidade:** fog é apenas visual nesta Alpha. O estado completo e a imagem original são enviados a todos os participantes; não use a névoa para informações secretas. A separação de estado do mestre será necessária antes da Beta.
+- Não foi executado teste real de navegadores multiusuário nesta rodada; o JavaScript foi validado quanto à sintaxe.
