@@ -32,3 +32,19 @@ test('mestre salva ficha e conserva dados ao alternar de cena',async({page})=>{
  await page.locator('#sceneSelect').selectOption({index:0});
  await expect(page.locator('.char textarea')).toHaveValue('Pontos de vida 22');
 });
+
+test('recuperação local aparece integrada à home sem diálogo nativo',async({page})=>{
+ await mockPeer(page);await page.goto(url());
+ const result=await page.evaluate(async()=>{
+  const db=await openDb();
+  await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readwrite');tx.objectStore('saves').put({schema:1,title:'Aventura de teste',updated:Date.now(),tokens:[],characters:[],chat:[],map:''},'latest');tx.oncomplete=resolve;tx.onerror=reject});
+  return true;
+ });
+ expect(result).toBe(true);
+ await page.reload();
+ await expect(page.locator('#recoveryPanel')).toBeVisible();
+ await expect(page.locator('#recoveryChoice')).toContainText('Aventura de teste');
+ await page.locator('#recoveryRestore').click();
+ await expect(page.locator('#recoveryPanel')).toBeHidden();
+ await expect(page.locator('#notice')).toContainText('Campanha recuperada');
+});
