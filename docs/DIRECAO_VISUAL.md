@@ -15,3 +15,6 @@ Exportar e Início continuam como ações diretas no cabeçalho. O botão de pai
 Esta revisão mantém a versão 1.1 e os formatos existentes. `assets/terminal.js` cuida apenas das abas de entrada e preferência CRT; `assets/terminal.css` define a apresentação. Nenhum transporte simulado, contador inventado ou persistência de demonstração do HTML de referência foi incorporado. A autoridade do mestre, permissões, sincronização P2P, fichas e backups continuam nos componentes reais.
 
 Prévia da entrada: [interface-home.png](interface-home.png). A captura da mesa em `p2p/assets/table-preview.png` mostra uma campanha demonstrativa dentro da aplicação real.
+
+
+A evolução de sessão acrescenta a biblioteca visual em uma janela de preparação, propriedades contextuais de token (painel inferior no celular) e combate recolhível sobre o mapa. A barra inferior oferece acesso a notas, marcadores, grade, prévia e busca, com rolagem horizontal em telas estreitas. **Mestre** identifica os controles detalhados da cena. Os novos controles isolam gestos de ponteiro para não iniciar pan no mapa. Veja [interface-library.png](interface-library.png) e [SESSAO_E_PREPARACAO.md](SESSAO_E_PREPARACAO.md).

@@ -19,3 +19,8 @@ O mestre permanece autoridade da sessão P2P. TURN continua desativado. Testes c
 A suíte cobre arquivos antigos e atuais, projeções privadas, autosave, falhas de armazenamento, identidade, ferramentas, edição concorrente e reconexão. Regressões da 1.1 incluem dimensões por cena e round-trip ZIP, arraste cancelável e âncora do zoom, campanhas/checkpoints independentes, rascunho após recarga, resolução de conflito e token vinculado com recurso privado. O fluxo com dois contextos também verifica dimensões remotas e rascunho do jogador após recarga e nova autenticação.
 
 Validação local do lançamento: 50 testes de navegador da aplicação e 10 testes Node aprovados. O teste WebRTC DataChannel real permanece no workflow Chromium do GitHub; o ambiente local não completa a coleta de ICE.
+
+
+## Evolução de preparação e sessão
+
+A versão 1.1 recebeu biblioteca visual com busca/tags, modelos de token e encontros, notas e marcadores por cena, iniciativa/rodadas sem sistema obrigatório, prévia por jogador, alinhamento guiado do grid, propriedades rápidas e busca de comandos. As extensões são preservadas no autosave e no `.highlords` ZIP v3. O transporte negocia deltas por destinatário, sem reenviar mapas/retratos inalterados nos eventos cobertos, com recuperação por snapshot e compatibilidade com clientes legados. Veja [SESSAO_E_PREPARACAO.md](docs/SESSAO_E_PREPARACAO.md) para detalhes e limites.

@@ -18,11 +18,12 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   page.on('console',msg=>{if(msg.type()==='error')console.log('CONSOLE ERROR '+name+': '+msg.text())});
  }
 
- const peers=new Map();
+ const peers=new Map(),packets=[];let dropDelta=false,dropped=0;
  async function wire(page){
   await page.exposeFunction('__p2pBridge',async message=>{
    if(message.kind==='register'){peers.set(message.id,page);return true}
    if(message.kind==='relay'){
+    if(message.packet?.type==='data'){packets.push(message.packet.data);if(dropDelta&&message.packet.data?.kind==='state-delta'){dropDelta=false;dropped++;return true}}
     const dest=peers.get(message.to);
     if(!dest||dest.isClosed())return false;
     // The bridge never blocks waiting for a response on the destination page.
@@ -84,6 +85,31 @@ test('dois navegadores isolados autenticam e sincronizam ficha e chat',async({br
   await expect(player.getByLabel('Vida',{exact:true})).toHaveValue('11');
   await expect(player.getByText('Este campo mudou em outro navegador.',{exact:false})).toBeVisible();
   await player.getByRole('button',{name:'Aplicar meu rascunho'}).click();await expect(host.getByLabel('Vida',{exact:true})).toHaveValue('11');
+
+
+  // New session data, private projection, delta recovery and legacy fallback use the same clients.
+  await host.evaluate(()=>{
+   dispatch('token:add',{name:'Explorador'});dispatch('token:add',{name:'Emboscada secreta'});
+   state.tokens[0].x=40;state.tokens[0].y=40;state.tokens[1].x=1000;state.tokens[1].y=700;
+   dispatch('table:notes',{text:'SEGREDO_NOTAS'});dispatch('table:pin:save',{title:'SEGREDO_PIN',text:'Segredo',x:500,y:500,shared:false});
+   dispatch('table:pin:save',{title:'Porta pública',text:'Conhecida',x:50,y:50,shared:true});
+   dispatch('fog:toggle',{enabled:true});dispatch('fog:reveal',{x:0,y:0,width:200,height:200});
+   for(const t of state.tokens)dispatch('table:combat:include',{id:t.id});dispatch('table:combat:start',{});
+  });
+  await expect.poll(()=>player.evaluate(()=>state.tokens.length)).toBe(1);
+  await expect(player.locator('#scenePins')).toContainText('◆');
+  expect(await player.evaluate(()=>JSON.stringify(state).includes('SEGREDO'))).toBe(false);
+  await player.locator('#sessionDock').getByRole('button',{name:'Combate',exact:true}).click();await expect(player.locator('#combatBody')).toContainText('Explorador');await expect(player.locator('#combatBody')).not.toContainText('Emboscada');
+  await player.evaluate(()=>hostLink.send({kind:'action',action:'table:notes',payload:{text:'Intruso'}}));await host.waitForTimeout(100);expect(await host.evaluate(()=>tableForScene(state,false).notes)).toBe('SEGREDO_NOTAS');
+  const beforeMove=packets.length;
+  await host.evaluate(()=>dispatch('move',{id:state.tokens[0].id,x:80,y:80}));await expect.poll(()=>player.evaluate(()=>state.tokens[0].x)).toBe(80);
+  const movement=packets.slice(beforeMove).find(p=>p.kind==='state-delta');expect(movement).toBeTruthy();expect(movement.tokens.put).toHaveLength(1);expect(movement.changes).not.toHaveProperty('map');
+  dropDelta=true;
+  await host.evaluate(()=>dispatch('move',{id:state.tokens[0].id,x:90,y:80}));await expect.poll(()=>dropped).toBe(1);
+  await host.evaluate(()=>dispatch('move',{id:state.tokens[0].id,x:100,y:80}));await expect.poll(()=>player.evaluate(()=>state.tokens[0].x)).toBe(100);expect(packets.some(p=>p.kind==='sync-request')).toBe(true);
+  // Revoked fields cannot linger in a reconstructed recipient state.
+  await host.evaluate(()=>dispatch('character:assign',{id:state.characters[0].id,playerId:''}));await expect.poll(()=>player.evaluate(()=>state.characters.length)).toBe(0);
+  await host.evaluate(()=>{const c=[...contacts.values()][0];c.syncSupported=false;dispatch('move',{id:state.tokens[0].id,x:110,y:80})});await expect.poll(()=>player.evaluate(()=>state.tokens[0].x)).toBe(110);
 
  }finally{
   await Promise.allSettled([hostContext.close(),playerContext.close()]);

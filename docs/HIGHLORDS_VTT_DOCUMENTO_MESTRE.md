@@ -337,3 +337,8 @@ Por orientação explícita, a paleta da interface deve permanecer em preto neut
 ## Refinamento visual 1.1 — terminal Highlords
 
 Por decisão do projeto, a home e a mesa adotam a mesma linguagem de terminal preto/vermelho, com Orbitron e JetBrains Mono hospedadas localmente. As scanlines CRT permanecem ativas por padrão, com controle em ambas as áreas e preferência persistida no navegador. A home usa abas Jogador/Mestre, botões principais equivalentes e instruções iniciais recolhíveis. Campos, criação, importação e recuperação continuam conectados aos fluxos reais; nenhum comportamento simulado da referência substitui o motor. O layout permite rolagem natural em telas curtas e trata a mesa em retrato e paisagem. Veja [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
+
+
+## Preparação e sessão — evolução 1.1
+
+A biblioteca visual separa a preparação da condução da mesa. Modelos de token, encontros reutilizáveis, notas e marcadores por cena, combate independente de sistema, alinhamento guiado da grade, propriedades rápidas, busca de comandos e prévia por jogador são integrados à campanha e ao backup existente. A biblioteca e as notas privadas ficam fora das projeções P2P. O protocolo pode enviar diferenças por destinatário, incluindo campos de ficha, com sequência por conexão e recuperação por snapshot; clientes legados continuam compatíveis. Veja [SESSAO_E_PREPARACAO.md](SESSAO_E_PREPARACAO.md) para uso, limites, persistência e validação. A identidade terminal, gratuidade e TURN desativado permanecem.

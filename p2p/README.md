@@ -79,3 +79,8 @@ Veja [RELEASE_1.1.md](../RELEASE_1.1.md) para interação do mapa, vínculo de f
 ## Apresentação do terminal
 
 `assets/terminal.css` padroniza home e mesa com a paleta preta/vermelha e fontes locais Orbitron/JetBrains Mono. `assets/terminal.js` controla as abas de entrada e o efeito CRT, cuja preferência usa `hl-scanlines` no navegador. Não altera o protocolo, o esquema de campanha ou a autoridade do mestre. A direção visual atual está em [DIRECAO_VISUAL.md](../docs/DIRECAO_VISUAL.md).
+
+
+## Ferramentas de preparação e sessão
+
+Biblioteca visual, modelos/encontros, notas, marcadores, combate, propriedades rápidas, alinhamento de grade e prévia por jogador são documentados em [SESSAO_E_PREPARACAO.md](../docs/SESSAO_E_PREPARACAO.md). Os módulos `session-model.js`, `session-actions.js`, `session.js` e `session.css` integram essas ferramentas ao motor existente; `sync.js` implementa deltas negociados por conexão, calculados somente sobre projeções autorizadas, e fallback para snapshots completos.

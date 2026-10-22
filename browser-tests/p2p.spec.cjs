@@ -711,3 +711,68 @@ test('terminal cabe no desktop e permite rolagem natural em telas curtas',async(
   await page.locator('#entryTabJoin').click();await page.locator('.home-guide summary').click();
  }
 });
+
+test('sessão: biblioteca, encontros, notas e grid sobrevivem a backup e cenas',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ const result=await page.evaluate(async()=>{
+  dispatch('token:add',{name:'Guarda A'});dispatch('token:add',{name:'Guarda B'});state.tokens[1].x=320;
+  const ids=state.tokens.map(t=>t.id);dispatch('table:encounter:save',{name:'Patrulha',ids,tags:'guardas cidade'});dispatch('table:token:save',{id:ids[0],tags:'guarda'});
+  dispatch('table:notes',{text:'Segredo da primeira cena'});dispatch('table:pin:save',{title:'Alçapão',text:'Armadilha',x:120,y:100,shared:false});
+  dispatch('table:grid',{size:80,originX:7,originY:9});const scene=state.activeSceneId;
+  dispatch('scene:add',{title:'Outra cena'});const independent=tableForScene(state,false).notes==='';dispatch('table:notes',{text:'Outra nota'});dispatch('scene:switch',{id:scene});
+  const restored=tableForScene(state,false).notes==='Segredo da primeira cena'&&state.gridSize===80;
+  dispatch('table:spawn',{kind:'encounters',id:state.tabletop.library.encounters[0].id,x:400,y:200});
+  const unique=new Set(state.tokens.map(t=>t.id)).size===4&&state.tokens[3].x===560;
+  const copy=await unzipCampaign(zipCampaign(state));return {independent,restored,unique,valid:isValidState(copy),notes:copy.tabletop.scenes[scene].notes,pins:copy.tabletop.scenes[scene].pins.length,templates:copy.tabletop.library.tokens.length};
+ });expect(result).toEqual({independent:true,restored:true,unique:true,valid:true,notes:'Segredo da primeira cena',pins:1,templates:1});
+ await page.locator('#sessionDock').getByRole('button',{name:'Preparar',exact:true}).click();await page.locator('#assetTabs').getByRole('button',{name:'Encontros',exact:true}).click();await expect(page.locator('#assetCards')).toContainText('Patrulha');
+ await page.locator('#assetSearch').fill('cidade');await expect(page.locator('.asset-card')).toHaveCount(1);await page.locator('#assetSearch').fill('inexistente');await expect(page.locator('.asset-card')).toHaveCount(0);
+});
+
+test('sessão: operações privadas são negadas a convidados e projeção exclui preparação',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ const result=await page.evaluate(()=>{
+  dispatch('token:add',{name:'Herói'});dispatch('token:add',{name:'Monstro oculto'});state.tokens[0].x=30;state.tokens[0].y=30;state.tokens[1].x=900;state.tokens[1].y=700;
+  dispatch('table:notes',{text:'SEGREDO_DO_MESTRE'});dispatch('table:pin:save',{title:'SEGREDO_PIN',text:'SEGREDO_DO_MESTRE',x:500,y:500,shared:false});dispatch('table:pin:save',{title:'Portão',text:'Aberto',x:50,y:50,shared:true});
+  dispatch('table:encounter:save',{ids:[state.tokens[1].id],name:'SEGREDO_ENCONTRO'});for(const t of state.tokens)dispatch('table:combat:include',{id:t.id});dispatch('table:combat:start',{});
+  dispatch('fog:toggle',{enabled:true});dispatch('fog:reveal',{x:0,y:0,width:200,height:200});
+  const before=JSON.stringify(state);for(const action of ['table:notes','table:combat:step','table:pin:remove','table:asset:remove'])apply(action,{text:'hacked',direction:1},'intruder','X');
+  const view=playerView('viewer');return {unchanged:before===JSON.stringify(state),secret:JSON.stringify(view).includes('SEGREDO'),tokens:view.tokens.length,pins:tableForScene(view,false).pins.length,combat:tableForScene(view,false).combat.entries.length,valid:isValidState(view)};
+ });expect(result).toEqual({unchanged:true,secret:false,tokens:1,pins:1,combat:1,valid:true});
+});
+
+test('sessão: combate aceita ordem manual, rodada, exclusão e desfazer',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ await page.evaluate(()=>{dispatch('token:add',{name:'Lyra'});dispatch('token:add',{name:'Kael'});for(const t of state.tokens)dispatch('table:combat:include',{id:t.id})});
+ await page.locator('#sessionDock').getByRole('button',{name:'Combate',exact:true}).click();await page.getByLabel('Iniciativa de Lyra',{exact:true}).fill('18');await page.getByLabel('Iniciativa de Lyra',{exact:true}).press('Tab');
+ await page.getByRole('button',{name:'Iniciar combate',exact:true}).click();await expect(page.locator('#combatRound')).toHaveText('Rodada 1');
+ await page.getByRole('button',{name:'Próximo turno',exact:true}).click();await expect(page.locator('.combat-entry.current')).toContainText('Kael');await page.getByRole('button',{name:'Próximo turno',exact:true}).click();await expect(page.locator('#combatRound')).toHaveText('Rodada 2');
+ await page.getByRole('button',{name:'Turno anterior',exact:true}).click();await expect(page.locator('#combatRound')).toHaveText('Rodada 1');
+ await page.evaluate(()=>{dispatch('token:delete',{id:state.tokens[1].id});travelEditor('undo')});await expect(page.locator('.combat-entry')).toHaveCount(2);
+});
+
+test('sessão: marcador usa coordenadas do mapa e grade tem prévia cancelável',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ const point=await page.evaluate(()=>{const r=board.getBoundingClientRect();return {x:r.left+offset.x+300*zoom,y:r.top+offset.y+250*zoom}});
+ await page.locator('#sessionDock').getByRole('button',{name:'Marcador',exact:true}).click();await page.mouse.click(point.x,point.y);await expect(page.locator('#pinEditor')).toBeVisible();await page.getByLabel('Título do marcador',{exact:true}).fill('Entrada');await page.getByLabel('Nota do marcador',{exact:true}).fill('Porta pesada');await page.getByRole('button',{name:'Salvar marcador',exact:true}).click();await expect(page.getByRole('button',{name:'Marcador: Entrada',exact:true})).toBeVisible();
+ await page.locator('#sessionDock').getByRole('button',{name:'Grade',exact:true}).click();await page.getByRole('button',{name:'Marcar no mapa',exact:true}).click();const points=await page.evaluate(()=>{const r=board.getBoundingClientRect();return [200,320].map(x=>({x:r.left+offset.x+x*zoom,y:r.top+offset.y+220*zoom}))});for(const p of points)await page.mouse.click(p.x,p.y);
+ await expect(page.locator('#gridConfirm')).toBeVisible();await page.getByRole('button',{name:'Cancelar alinhamento',exact:true}).click();expect(await page.evaluate(()=>state.gridSize)).toBe(60);
+ await page.locator('#sessionDock').getByRole('button',{name:'Grade',exact:true}).click();await page.getByRole('button',{name:'Marcar no mapa',exact:true}).click();for(const p of points)await page.mouse.click(p.x,p.y);await page.getByRole('button',{name:'Aplicar grade',exact:true}).click();expect(await page.evaluate(()=>state.gridSize)).toBe(120);
+});
+
+test('sessão: propriedades rápidas, comandos, notas e prévia usam fluxos reais no celular',async({page})=>{
+ await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ await page.evaluate(()=>{dispatch('token:add',{name:'Lyra'});selectedToken=state.tokens[0].id;selectedTokens.add(selectedToken);renderSession()});await expect(page.locator('#quickInspector')).toBeVisible();await page.getByLabel('Nome rápido',{exact:true}).fill('Lyra nova');await page.getByLabel('Nome rápido',{exact:true}).press('Tab');expect(await page.evaluate(()=>state.tokens[0].name)).toBe('Lyra nova');
+ await page.getByRole('button',{name:'Fechar propriedades rápidas',exact:true}).click();await page.keyboard.press('Control+k');await expect(page.locator('#commandSearch')).toBeVisible();await page.locator('#commandQuery').fill('notas');await page.locator('#commandQuery').press('Enter');await page.getByLabel('Anotações privadas do mestre',{exact:true}).fill('NÃO COMPARTILHAR');await page.getByRole('button',{name:'Salvar notas',exact:true}).click();
+ await page.locator('#sessionDock').getByRole('button',{name:'Visão',exact:true}).click();await expect(page.locator('#playerPreview')).toBeVisible();await expect(page.locator('#playerPreview')).not.toContainText('NÃO COMPARTILHAR');await expect(page.locator('#playerPreview')).toContainText('Lyra nova');expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+});
+
+test('sessão: importar mapa na biblioteca preserva imagem no ZIP e no autosave',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();await page.locator('#sessionDock').getByRole('button',{name:'Preparar',exact:true}).click();
+ const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j0ncAAAAASUVORK5CYII=','base64');
+ await page.locator('#libraryMapUpload').setInputFiles({name:'Masmorra.png',mimeType:'image/png',buffer:png});await expect(page.locator('.asset-card')).toContainText('Masmorra');await page.getByRole('button',{name:'Usar mapa',exact:true}).click();
+ await expect(page.locator('#map')).toHaveAttribute('src',/^data:image\/png;base64,/);
+ expect(await page.evaluate(async()=>{const restored=await unzipCampaign(zipCampaign(state));return restored.map===state.map&&restored.tabletop.library.maps[0].data===state.map&&isValidState(restored)&&!JSON.stringify(editorSnapshot()).includes('data:image')})).toBe(true);
+ await page.evaluate(async()=>{dispatch('table:notes',{text:'Nota persistente'});await saveLocal()});await page.reload();await page.locator('#entryTabHost').click();await expect(page.locator('#recoveryPanel')).toBeVisible();await page.locator('#recoveryRestore').click();await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ expect(await page.evaluate(()=>state.tabletop.library.maps.length===1&&tableForScene(state,false).notes==='Nota persistente')).toBe(true);
+});
