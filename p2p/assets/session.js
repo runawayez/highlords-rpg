@@ -1,5 +1,5 @@
 /* Session tools use the campaign model and existing host-authoritative actions. */
-let sessionReady=false,libraryKind='maps',libraryQuery='',pinPlacement=false,gridAlignment=null,inspectorDismissed='';
+let sessionReady=false,libraryKind='maps',libraryQuery='',pinPlacement=false,pinPlacementScene='',gridAlignment=null,inspectorDismissed='';
 function sessionNode(tag,text,cls){return sheetElement(tag,text,cls)}
 function sessionButton(text,fn){const b=sheetButton(text,fn);b.type='button';return b}
 function sessionField(label,type='text',value=''){const wrap=sessionNode('label',label),input=document.createElement(type==='textarea'?'textarea':'input');if(type!=='textarea')input.type=type;input.value=value;input.setAttribute('aria-label',label);wrap.append(input);return {wrap,input}}
@@ -25,8 +25,9 @@ function saveSelectedEncounter(){
  body.append(sessionNode('p',ids.length+' token(s). A formação será preservada.'),name.wrap,tags.wrap,sessionButton('Salvar encontro',()=>{if(!name.input.value.trim())return name.input.focus();if(applyTableAction('table:encounter:save',{ids,name:name.input.value,tags:tags.input.value},myId)){dialog.close();sessionNotice('Encontro salvo na biblioteca.')}else sessionNotice('Não foi possível salvar. O limite é 25 tokens por encontro e 30 encontros.')}));
  dialog.addEventListener('close',()=>dialog.remove(),{once:true});showSessionDialog(dialog);
 }
-function startPinPlacement(){if(!hostMode)return;pinPlacement=true;gridAlignment=null;renderSession();sessionNotice('Clique no mapa para colocar o marcador. Esc cancela.')}
+function startPinPlacement(){if(!hostMode)return;pinPlacement=true;pinPlacementScene=state.activeSceneId;gridAlignment=null;$('sessionNotice').textContent='';renderSession()}
 function openPinEditor(pin){
+ cancelTablePlacement();
  const {dialog,body}=sessionDialog('pinEditor','Marcador da cena');
  const title=sessionField('Título do marcador','text',pin.title||''),text=sessionField('Nota do marcador','textarea',pin.text||'');title.input.maxLength=100;text.input.maxLength=10000;
  body.append(title.wrap,text.wrap);
@@ -49,7 +50,7 @@ function startGridAlignment(){
  body.append(count.wrap,sessionButton('Marcar no mapa',()=>{const cells=Number(count.input.value);if(!Number.isInteger(cells)||cells<1||cells>20)return count.input.focus();gridAlignment={cells,points:[],sceneId:state.activeSceneId};dialog.close();renderSession()}));
  dialog.addEventListener('close',()=>dialog.remove(),{once:true});showSessionDialog(dialog);
 }
-function cancelTablePlacement(){pinPlacement=false;gridAlignment=null;renderEditorGrid();$('gridPreview')?.replaceChildren();renderSession()}
+function cancelTablePlacement(){pinPlacement=false;pinPlacementScene='';gridAlignment=null;$('sessionNotice').textContent='';renderEditorGrid();$('gridPreview')?.replaceChildren();renderSession()}
 function finishGridAlignment(){
  const alignment=gridAlignment,result=calculateGridAlignment(...alignment.points,alignment.cells);
  if(!result){cancelTablePlacement();return sessionNotice('A célula deve medir entre 20 e 150 px. Marque mais células ou aproxime os pontos.')}
@@ -151,9 +152,9 @@ function renderSession(){
  if(!sessionReady)return;
  for(const el of document.querySelectorAll('[data-host-session]'))el.hidden=!hostMode;
  $('placementHelp').hidden=!pinPlacement&&!gridAlignment;
- $('placementHelpText').textContent=pinPlacement?'Clique para colocar o marcador':gridAlignment?'Grade: marque '+(gridAlignment.points.length?'o segundo':'o primeiro')+' ponto':'';
+ $('placementHelpText').textContent=pinPlacement?'Clique no mapa para colocar o marcador. Esc cancela.':gridAlignment?'Grade: marque '+(gridAlignment.points.length?'o segundo':'o primeiro')+' ponto':'';
  $('board').classList.toggle('placing-marker',pinPlacement||!!gridAlignment);
- if(gridAlignment&&gridAlignment.sceneId!==state.activeSceneId){cancelTablePlacement();return}
+ if(pinPlacement&&pinPlacementScene!==state.activeSceneId||gridAlignment&&gridAlignment.sceneId!==state.activeSceneId){cancelTablePlacement();return}
  const pins=$('scenePins');pins.replaceChildren();for(const pin of tableForScene(state,false).pins){const b=sessionButton('◆',()=>openPinEditor(pin));b.className='scene-pin';b.title=pin.title;b.setAttribute('aria-label','Marcador: '+pin.title);b.style.left=pin.x+'px';b.style.top=pin.y+'px';b.dataset.shared=pin.shared;for(const event of ['pointerdown','pointerup'])b.addEventListener(event,e=>e.stopPropagation());pins.append(b)}
  renderQuickInspector();renderCombatTracker();renderVisualLibrary();
  if($('game').style.display!=='block'){$('combatTracker').hidden=true;$('quickInspector').hidden=true}
@@ -162,7 +163,8 @@ addEventListener('DOMContentLoaded',()=>{
  const dock=sessionNode('nav',undefined,'session-dock');dock.id='sessionDock';dock.setAttribute('aria-label','Recursos da sessão');
  for(const [label,fn,hostOnly] of [['Preparar',()=>{openVisualLibrary()},true],['Notas',openSceneNotes,true],['Marcador',startPinPlacement,true],['Grade',startGridAlignment,true],['Combate',()=>{$('combatTracker').hidden=!$('combatTracker').hidden;renderCombatTracker()},false],['Visão',openPlayerPreview,true],['Comandos',openCommandSearch,false]]){const b=sessionButton(label,fn);if(hostOnly)b.dataset.hostSession='';if(label==='Comandos'){b.title='Buscar comandos (Ctrl+K / ⌘K)';b.setAttribute('aria-keyshortcuts','Control+k Meta+k')}dock.append(b)}
  $('board').append(dock);
- const notice=sessionNode('p',undefined,'session-notice');notice.id='sessionNotice';notice.setAttribute('role','status');$('board').append(notice);
+ const notice=sessionNode('p',undefined,'session-notice');notice.id='sessionNotice';notice.setAttribute('role','status');const controls=sessionNode('section',undefined,'board-controls');controls.id='boardControls';controls.setAttribute('aria-label','Navegação e recursos do mapa');const row=sessionNode('div',undefined,'board-control-row');row.append($('zoomControls'),dock);controls.append(notice,row);$('board').append(controls);
+ new ResizeObserver(()=>{$('board').style.setProperty('--board-controls-height',controls.getBoundingClientRect().height+'px');if($('game').style.display==='block')fitBoard()}).observe(controls);
  const help=sessionNode('div',undefined,'placement-help');help.id='placementHelp';help.hidden=true;const helpText=sessionNode('span');helpText.id='placementHelpText';help.append(helpText,sessionButton('Cancelar',cancelTablePlacement));$('board').append(help);
  const pins=sessionNode('div');pins.id='scenePins';$('canvas').append(pins);
  const inspector=sessionNode('section',undefined,'quick-inspector');inspector.id='quickInspector';inspector.setAttribute('aria-label','Propriedades rápidas do token');inspector.hidden=true;$('board').append(inspector);inspector.addEventListener('focusout',()=>setTimeout(renderQuickInspector,0));
@@ -178,7 +180,7 @@ addEventListener('DOMContentLoaded',()=>{
  const command=sessionDialog('commandSearch','Buscar comandos');const query=sessionField('O que deseja fazer?');query.input.id='commandQuery';query.input.oninput=renderCommandResults;const results=sessionNode('div');results.id='commandResults';command.body.append(query.wrap,results);
  command.dialog.addEventListener('keydown',e=>{const buttons=[...results.querySelectorAll('button')];if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();const i=buttons.indexOf(document.activeElement);buttons[(i+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus()}if(e.key==='Enter'&&document.activeElement===query.input){e.preventDefault();buttons[0]?.click()}});
  $('board').addEventListener('pointerdown',e=>{
-  if(!hostMode||!pinPlacement&&!gridAlignment||e.target.closest('button,input,select,textarea,nav,#quickInspector,#combatTracker'))return;
+  if(!hostMode||!pinPlacement&&!gridAlignment||e.target.closest('button,input,select,textarea,nav,#boardControls,#quickInspector,#combatTracker'))return;
   e.preventDefault();e.stopImmediatePropagation();const point=boardPoint(e);if(point.x<0||point.y<0||point.x>boardWidth()||point.y>boardHeight())return;
   if(pinPlacement){pinPlacement=false;renderSession();openPinEditor({...point,shared:false});return}
   gridAlignment.points.push(point);if(gridAlignment.points.length===2)finishGridAlignment();else renderSession();
@@ -191,7 +193,8 @@ addEventListener('DOMContentLoaded',()=>{
   if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();e.stopImmediatePropagation();openCommandSearch()}
  },true);
- for(const surface of [dock,inspector,tracker,help])for(const type of ['pointerdown','pointerup','wheel'])surface.addEventListener(type,e=>e.stopPropagation());
+ $('leaveGame').addEventListener('click',cancelTablePlacement);
+ for(const surface of [controls,inspector,tracker,help])for(const type of ['pointerdown','pointerup','wheel'])surface.addEventListener(type,e=>e.stopPropagation());
  $('tabTools').textContent='Mestre';$('masterTools').querySelector('h3').textContent='Ferramentas da cena';$('masterTools').querySelector('h3').after(sessionButton('Abrir biblioteca visual',openVisualLibrary));
  sessionReady=true;renderSession();
 });

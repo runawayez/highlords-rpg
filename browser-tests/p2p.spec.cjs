@@ -776,3 +776,27 @@ test('sessão: importar mapa na biblioteca preserva imagem no ZIP e no autosave'
  await page.evaluate(async()=>{dispatch('table:notes',{text:'Nota persistente'});await saveLocal()});await page.reload();await page.locator('#entryTabHost').click();await expect(page.locator('#recoveryPanel')).toBeVisible();await page.locator('#recoveryRestore').click();await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
  expect(await page.evaluate(()=>state.tabletop.library.maps.length===1&&tableForScene(state,false).notes==='Nota persistente')).toBe(true);
 });
+
+test('marcador encerra a instrução ao cancelar, salvar, fechar editor e trocar cena',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ const marker=page.locator('#sessionDock').getByRole('button',{name:'Marcador',exact:true});
+ await marker.click();await expect(page.locator('#placementHelp')).toContainText('Clique no mapa');await expect(page.locator('#sessionNotice')).toBeEmpty();await page.keyboard.press('Escape');await expect(page.locator('#placementHelp')).toBeHidden();await expect(page.locator('#board')).not.toHaveClass(/placing-marker/);
+ await marker.click();await page.locator('#placementHelp').getByRole('button',{name:'Cancelar',exact:true}).click();await expect(page.locator('#placementHelp')).toBeHidden();
+ const point=await page.evaluate(()=>{const r=board.getBoundingClientRect();return {x:r.left+offset.x+300*zoom,y:r.top+offset.y+250*zoom}});
+ await marker.click();await page.mouse.click(point.x,point.y);await expect(page.locator('#pinEditor')).toBeVisible();await expect(page.locator('#placementHelp')).toBeHidden();await page.getByRole('button',{name:'Fechar Marcador da cena',exact:true}).click();await expect(page.locator('#sessionNotice')).toBeEmpty();
+ await marker.click();await page.mouse.click(point.x,point.y);await page.getByLabel('Título do marcador',{exact:true}).fill('Porta');await page.getByRole('button',{name:'Salvar marcador',exact:true}).click();await expect(page.locator('#placementHelp')).toBeHidden();await expect(page.locator('#sessionNotice')).toBeEmpty();
+ await marker.click();await page.evaluate(()=>dispatch('scene:add',{title:'Outra cena'}));await expect(page.locator('#placementHelp')).toBeHidden();await expect(page.locator('#board')).not.toHaveClass(/placing-marker/);
+});
+
+test('controles inferiores compartilham alinhamento e cliques não iniciam pan',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ for(const size of [{width:1440,height:900},{width:390,height:844},{width:740,height:390},{width:320,height:640}]){
+  await page.setViewportSize(size);
+  const rects=await page.evaluate(()=>{const rect=id=>{const r=$(id).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right}};return {controls:rect('boardControls'),zoom:rect('zoomControls'),dock:rect('sessionDock'),board:rect('board')}});
+  if(size.width>800){expect(Math.abs(rects.zoom.y-rects.dock.y)).toBeLessThan(1);expect(Math.abs(rects.zoom.height-rects.dock.height)).toBeLessThan(1)}else{expect(Math.abs(rects.zoom.x-rects.dock.x)).toBeLessThan(1);expect(Math.abs(rects.zoom.width-rects.dock.width)).toBeLessThan(1);expect(rects.dock.bottom).toBeLessThanOrEqual(rects.zoom.y)}
+  expect(rects.controls.x).toBeGreaterThanOrEqual(rects.board.x);expect(rects.controls.right).toBeLessThanOrEqual(rects.board.right);expect(rects.controls.bottom).toBeLessThanOrEqual(rects.board.bottom);
+  await page.locator('#zoomControls').getByRole('button',{name:'Enquadrar',exact:true}).click();expect(await page.evaluate(()=>drag)).toBeNull();
+  await expect.poll(()=>page.evaluate(()=>$('canvas').getBoundingClientRect().bottom<=$('boardControls').getBoundingClientRect().top-8)).toBe(true);
+  await page.locator('#sessionDock').getByRole('button',{name:'Marcador',exact:true}).click();await expect(page.locator('#placementHelp')).toBeVisible();expect(await page.evaluate(()=>drag)).toBeNull();await page.keyboard.press('Escape');
+ }
+});

@@ -1,7 +1,8 @@
 function fitBoard() {
   const rect = document.getElementById('board').getBoundingClientRect();
   if (!rect.width || !rect.height) return;
-  const left = hostMode ? 74 : 22, right = 22, top = 62, bottom = 50;
+  const left = hostMode ? 74 : 22, right = 22, top = 62;
+  const bottom = Math.max(50, (document.getElementById('boardControls')?.getBoundingClientRect().height || 0) + 28);
   const width = Math.max(30, rect.width - left - right), height = Math.max(30, rect.height - top - bottom);
   zoom = Math.max(.03, Math.min(width / boardWidth(), height / boardHeight(), 1));
   offset = {x:left+(width-boardWidth()*zoom)/2,y:top+(height-boardHeight()*zoom)/2};

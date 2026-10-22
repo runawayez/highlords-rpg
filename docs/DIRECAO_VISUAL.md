@@ -18,3 +18,6 @@ Prévia da entrada: [interface-home.png](interface-home.png). A captura da mesa 
 
 
 A evolução de sessão acrescenta a biblioteca visual em uma janela de preparação, propriedades contextuais de token (painel inferior no celular) e combate recolhível sobre o mapa. A barra inferior oferece acesso a notas, marcadores, grade, prévia e busca, com rolagem horizontal em telas estreitas. **Mestre** identifica os controles detalhados da cena. Os novos controles isolam gestos de ponteiro para não iniciar pan no mapa. Veja [interface-library.png](interface-library.png) e [SESSAO_E_PREPARACAO.md](SESSAO_E_PREPARACAO.md).
+
+
+Os comandos de zoom/enquadramento e os recursos da sessão compartilham uma barra inferior centralizada, com borda e espaçamento comuns. No desktop ficam lado a lado; em telas até 800 px, o menu usa a primeira linha e o zoom ocupa a segunda com a mesma largura. Instruções de colocação de marcador existem somente enquanto o modo está ativo, encerrando ao marcar, cancelar, fechar o editor, trocar de cena ou sair da mesa.
