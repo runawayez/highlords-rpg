@@ -800,3 +800,42 @@ test('controles inferiores compartilham alinhamento e cliques não iniciam pan',
   await page.locator('#sessionDock').getByRole('button',{name:'Marcador',exact:true}).click();await expect(page.locator('#placementHelp')).toBeVisible();expect(await page.evaluate(()=>drag)).toBeNull();await page.keyboard.press('Escape');
  }
 });
+
+test('mover: clique seguido de arrastes repetidos não seleciona texto nem inicia drag nativo',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ await page.evaluate(()=>{window.nativeBoardDrags=0;board.addEventListener('dragstart',()=>window.nativeBoardDrags++)});
+ const text=await page.locator('#boardEmpty strong').boundingBox(),x=text.x+text.width/2,y=text.y+text.height/2;
+ await page.locator('#message').fill('Rascunho');await page.mouse.click(x,y);await expect(page.locator('#board')).toBeFocused();
+ for(let i=0;i<3;i++){
+  const before=await page.evaluate(()=>({...offset}));await page.mouse.move(x,y);await page.mouse.down({clickCount:2});await page.mouse.move(x+80,y+40,{steps:8});await page.mouse.up({clickCount:2});
+  const after=await page.evaluate(()=>({x:offset.x,y:offset.y,drag,selection:getSelection().toString(),native:window.nativeBoardDrags}));
+  expect(after.x).toBeCloseTo(before.x+80,1);expect(after.y).toBeCloseTo(before.y+40,1);expect(after.drag).toBeNull();expect(after.selection).toBe('');expect(after.native).toBe(0);
+ }
+ await page.keyboard.press('b');await expect(page.locator('#board')).toHaveAttribute('data-active-tool','draw');await expect(page.locator('#message')).toHaveValue('Rascunho');
+});
+
+test('mover: seleção de texto anterior não se transforma em arraste nativo do navegador',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ await page.evaluate(()=>{window.nativeBoardDrags=0;board.addEventListener('dragstart',()=>window.nativeBoardDrags++);getSelection().selectAllChildren($('boardEmpty').querySelector('strong'))});
+ const text=await page.locator('#boardEmpty strong').boundingBox(),x=text.x+text.width/2,y=text.y+text.height/2;
+ await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+100,y+50,{steps:10});await page.mouse.up();
+ expect(await page.evaluate(()=>window.nativeBoardDrags)).toBe(0);expect(await page.evaluate(()=>drag)).toBeNull();
+});
+
+test('mover: perda de captura e foco limpam o gesto e permitem outro arraste',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ const point=await page.evaluate(()=>{const r=board.getBoundingClientRect();return {x:r.left+350,y:r.top+260}});
+ await page.mouse.move(point.x,point.y);await page.mouse.down();await page.mouse.move(point.x+40,point.y+20);
+ await page.evaluate(()=>board.releasePointerCapture(drag.pointerId));await page.mouse.move(point.x+45,point.y+25);expect(await page.evaluate(()=>drag)).toBeNull();await expect(page.locator('#board')).toHaveAttribute('data-gesture','');await page.mouse.up();
+ await page.mouse.move(point.x,point.y);await page.mouse.down();await page.evaluate(()=>dispatchEvent(new Event('blur')));expect(await page.evaluate(()=>drag)).toBeNull();await page.mouse.up();
+ const before=await page.evaluate(()=>({...offset}));await page.mouse.move(point.x,point.y);await page.mouse.down();await page.mouse.move(point.x+70,point.y+30,{steps:5});await page.mouse.up();expect(await page.evaluate(()=>offset.x)).toBeCloseTo(before.x+70,1);
+});
+
+test('mover: token bloqueado permite pan sem alterar o token e botão direito não prende o gesto',async({page})=>{
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
+ await page.evaluate(()=>{dispatch('token:add',{name:'Guardião'});dispatch('layer:policy',{layer:'tokens',property:'locked',enabled:true})});
+ const token=page.locator('.piece');await expect(token).toHaveCSS('cursor','move');const box=await token.boundingBox(),x=box.x+box.width/2,y=box.y+box.height/2,before=await page.evaluate(()=>({offset:{...offset},token:structuredClone(state.tokens[0])}));
+ await page.mouse.move(x,y);await page.mouse.down({button:'right'});expect(await page.evaluate(()=>drag)).toBeNull();await page.mouse.up({button:'right'});await page.keyboard.press('Escape');
+ await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+50,y+25,{steps:5});await page.mouse.up();
+ expect(await page.evaluate(()=>state.tokens[0])).toEqual(before.token);expect(await page.evaluate(()=>offset.x)).toBeCloseTo(before.offset.x+50,1);expect(await page.evaluate(()=>drag)).toBeNull();
+});

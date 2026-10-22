@@ -47,10 +47,10 @@ function renderTokenBinding(node, token) {
 }
 function decorateToken(el,token) {
   const c=state.characters.find(c=>c.id===token.characterId);
-  el.title=token.name+' · '+(hostMode||token.owner===myId?'Você pode mover':'Controlado por outro participante')+(c?' · Duplo clique para abrir a ficha':'');
+  el.title=token.name+' · '+(!state.layerPolicy?.tokens?.locked&&(hostMode||token.owner===myId)?'Você pode mover o token':'Arraste para mover o mapa · token sem permissão de movimento')+(c?' · Duplo clique para abrir a ficha':'');
   if(!c)return;
   const portrait=(c.fields||[]).find(f=>f.type==='portrait'&&f.value&&(hostMode||f.visibility!=='master'));
-  if(portrait){const img=document.createElement('img');img.src=portrait.value;img.alt='';img.className='token-portrait';el.prepend(img)}
+  if(portrait){const img=document.createElement('img');img.src=portrait.value;img.alt='';img.draggable=false;img.className='token-portrait';el.prepend(img)}
   const field=(c.fields||[]).find(f=>f.id===token.resourceFieldId&&f.type==='resource'&&(hostMode||f.visibility!=='master'));
   if(field){try{const [value,max]=JSON.parse(field.value);if(Number.isFinite(value)&&Number.isFinite(max)&&max>0){const bar=document.createElement('span');bar.className='token-resource';bar.setAttribute('role','meter');bar.setAttribute('aria-label',field.name);bar.setAttribute('aria-valuenow',value);bar.setAttribute('aria-valuemin','0');bar.setAttribute('aria-valuemax',max);bar.title=field.name+': '+value+'/'+max;const fill=document.createElement('i');fill.style.width=Math.max(0,Math.min(100,value/max*100))+'%';bar.append(fill);el.append(bar)}}catch{}}
   el.ondblclick=e=>{e.stopPropagation();$('tabSheets').click();[...$('characters').children].find(el=>el.dataset.character===c.id)?.scrollIntoView({block:'nearest',behavior:'smooth'})};

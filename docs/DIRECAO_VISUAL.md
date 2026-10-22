@@ -21,3 +21,6 @@ A evolução de sessão acrescenta a biblioteca visual em uma janela de prepara�
 
 
 Os comandos de zoom/enquadramento e os recursos da sessão compartilham uma barra inferior centralizada, com borda e espaçamento comuns. No desktop ficam lado a lado; em telas até 800 px, o menu usa a primeira linha e o zoom ocupa a segunda com a mesma largura. Instruções de colocação de marcador existem somente enquanto o modo está ativo, encerrando ao marcar, cancelar, fechar o editor, trocar de cena ou sair da mesa.
+
+
+A navegação do mapa bloqueia seleção e arraste nativo de imagens/textos na superfície, preservando edição e seleção nos campos. Perda da captura do ponteiro, foco, visibilidade ou troca de ferramenta/cena encerra o gesto em andamento. Arrastar sobre um token sem permissão de movimento desloca a câmera, mantendo o token inalterado; o cursor e a dica explicam esse comportamento. Botões auxiliares não iniciam movimento de token.

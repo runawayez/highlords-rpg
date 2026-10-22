@@ -177,7 +177,7 @@ header .version-tag {
   display: none;
 }
 #board {
-  position:relative;overflow:hidden;touch-action:none;background:#0f0f0f;cursor:move;
+  position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#0f0f0f;cursor:move;
 }
 #canvas {
   position:absolute;left:0;top:0;width:1200px;height:800px;transform-origin:0 0;background:#1a1a1a;box-shadow:0 0 0 1px #353535,0 12px 70px #0004;
@@ -751,7 +751,7 @@ header .version-tag {
 #board[data-active-tool="rectangle"], #board[data-active-tool="ellipse"], #board[data-active-tool="reveal"], #board[data-active-tool="ruler"] { cursor: crosshair; }
 #board[data-active-tool="eraser"] { cursor: url("/assets/cursor-eraser.svg") 5 24, crosshair; }
 #board[data-active-tool] .piece { cursor: inherit; }
-#board[data-active-tool="pan"] .piece[data-movable="false"] { cursor: not-allowed; }
+#board[data-active-tool="pan"] .piece[data-movable="false"] { cursor: move; }
 #board[data-active-tool="pan"][data-gesture="panning"] { cursor: grabbing; }
 
 /* Scene and linked-token controls, v1.1 */
@@ -847,3 +847,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 #canvas {background:#121212}
 #board {background:#080808}
 #boardToolbar,#sceneBar,#zoomControls {background:#121212;border-color:#383838}
+
+/* The board owns pointer gestures; keep ordinary text editing available in its controls. */
+#board input,#board textarea,#board [contenteditable="true"]{user-select:text;-webkit-user-select:text}
+#canvas img{-webkit-user-drag:none}
