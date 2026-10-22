@@ -74,3 +74,8 @@ Os blocos estruturados usam strings JSON no esquema existente e mantêm importa�
 ## Versão 1.1
 
 Veja [RELEASE_1.1.md](../RELEASE_1.1.md) para interação do mapa, vínculo de fichas, dimensões por cena, biblioteca e recuperação de rascunhos. O módulo `assets/release11.js` integra os novos controles e a persistência de rascunhos; `sheets.js` e a autoridade principal continuam responsáveis pelas permissões e versões dos campos.
+
+
+## Apresentação do terminal
+
+`assets/terminal.css` padroniza home e mesa com a paleta preta/vermelha e fontes locais Orbitron/JetBrains Mono. `assets/terminal.js` controla as abas de entrada e o efeito CRT, cuja preferência usa `hl-scanlines` no navegador. Não altera o protocolo, o esquema de campanha ou a autoridade do mestre. A direção visual atual está em [DIRECAO_VISUAL.md](../docs/DIRECAO_VISUAL.md).

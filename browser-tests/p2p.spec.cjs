@@ -1,10 +1,11 @@
+async function createHost(page){await page.locator("#entryTabHost").click();await page.locator("#host").click()}
 async function openHostSection(page,name){await page.locator('#tabTools').click();await page.locator('.workspace-sections').getByRole('button',{name:name==='tokens'?'Tokens':name==='properties'?'Propriedades':'Mapa',exact:true}).click()}
 // Browser smoke tests for the published P2P frontend (no external signaling required).
 const {test,expect}=require('@playwright/test');
 test.setTimeout(45000);
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 let server;
-test.beforeAll(async()=>{server=http.createServer((req,res)=>{const file=path.join(process.cwd(),'p2p',req.url.startsWith('/assets/')?req.url.slice(1):'index.html');if(!file.startsWith(path.join(process.cwd(),'p2p'))){res.writeHead(403);return res.end()}fs.readFile(file,(err,data)=>{res.setHeader('Content-Type',file.endsWith('.woff')?'font/woff':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(err?'missing':data)})}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r))});
+test.beforeAll(async()=>{server=http.createServer((req,res)=>{const file=path.join(process.cwd(),'p2p',req.url.startsWith('/assets/')?req.url.slice(1):'index.html');if(!file.startsWith(path.join(process.cwd(),'p2p'))){res.writeHead(403);return res.end()}fs.readFile(file,(err,data)=>{res.setHeader('Content-Type',file.endsWith('.ttf')?'font/ttf':file.endsWith('.woff')?'font/woff':file.endsWith('.svg')?'image/svg+xml':file.endsWith('.js')?'application/javascript':file.endsWith('.css')?'text/css':'text/html');res.end(err?'missing':data)})}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r))});
 test.afterAll(async()=>{await new Promise(r=>server.close(r))});
 const url=()=>`http://127.0.0.1:${server.address().port}/`;
 async function mockPeer(page){await page.route('https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js',route=>route.fulfill({status:200,contentType:'application/javascript',body:`
@@ -17,12 +18,12 @@ class Peer {
  destroy(){this.destroyed=true;this.open=false;this.emit('close')}
 }
 window.Peer=Peer;`}))}
-test('home mostra compromisso de gratuidade e identidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#host')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.1/)});
-test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Goblin');await openHostSection(page,'tokens');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabSheets').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabSheets').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
+test('home mostra compromisso de gratuidade e acesso por papel',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.locator('#join')).toBeVisible();await expect(page.locator('#host')).toBeHidden();await page.locator('#entryTabHost').click();await expect(page.locator('#host')).toBeVisible();await page.locator('#entryTabJoin').click();await expect(page.locator('.version-tag').first()).toContainText(/VERSÃO 1\.1/)});
+test('mestre cria mesa, cena, ficha, token e exporta',async({page})=>{await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Goblin');await openHostSection(page,'tokens');await page.locator('#addToken').click();await expect(page.locator('.piece').getByText('Goblin')).toBeVisible();await page.locator('#tabSheets').click();await page.locator('#charName').fill('Thorin');await page.locator('#tabSheets').click();await page.locator('#addChar').click();await page.locator('#tabSheets').click();await expect(page.locator('.char strong').getByText('Thorin')).toBeVisible();page.once('dialog',d=>d.accept('Masmorra'));await page.locator('#tabTools').click();await page.locator('#newScene').click();await expect(page.locator('#sceneSelect option')).toHaveCount(2);const download=page.waitForEvent('download');await page.locator('#export').click();const file=await download;expect(file.suggestedFilename()).toMatch(/\.highlords$/);await expect(page.locator('#saveStatus')).toContainText(/Salvo|salvamento/,{timeout:10000})});
 test('jogador só abre mesa depois de sincronização',async({page})=>{await mockPeer(page);await page.goto(url());await page.locator('#roomCode').fill('hl-12345678-1234-1234-1234-123456789abc');await page.locator('#guestName').fill('Jogador');await page.locator('#join').click();await expect(page.locator('#game')).toBeVisible();await expect(page.locator('#status')).toContainText('sincronizada');await expect(page.locator('#masterTools')).toBeHidden()});
 
 test('mestre salva ficha e conserva dados ao alternar de cena',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Arcanista');
  await page.locator('#tabSheets').click();await page.locator('#addChar').click();
@@ -45,17 +46,17 @@ test('recuperação local aparece integrada à home sem diálogo nativo',async({
  });
  expect(result).toBe(true);
  await page.reload();
- await expect(page.locator('#recoveryPanel')).toBeVisible();
+ await page.locator('#entryTabHost').click();await expect(page.locator('#recoveryPanel')).toBeVisible();
  await expect(page.locator('#recoveryChoice')).toContainText('Aventura de teste');
- await page.locator('#recoveryRestore').click();
+ await page.locator('#entryTabHost').click();await page.locator('#recoveryRestore').click();
  await expect(page.locator('#recoveryPanel')).toBeHidden();
  await expect(page.locator('#notice')).toContainText('Campanha recuperada');
 });
 
 test('nome da campanha aparece no save e no download',async({page})=>{
  await mockPeer(page);await page.goto(url());
- await page.locator('#campaignName').fill('Crônicas do Norte');
- await page.locator('#host').click();
+ await page.locator('#entryTabHost').click();await page.locator('#campaignName').fill('Crônicas do Norte');
+ await createHost(page);
  await expect(page.locator('#gameCampaignName')).toHaveValue('Crônicas do Norte');
  const downloadPromise=page.waitForEvent('download');
  await page.locator('#export').click();
@@ -67,7 +68,7 @@ test('nome da campanha aparece no save e no download',async({page})=>{
 });
 
 test('mestre transfere token, exclui e volta ao menu',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Sentinela');await openHostSection(page,'tokens');await page.locator('#addToken').click();
  page.once('dialog',d=>d.accept('Outra cena'));await page.locator('#tabTools').click();await page.locator('#newScene').click();
@@ -82,7 +83,7 @@ test('mestre transfere token, exclui e volta ao menu',async({page})=>{
  page.on('dialog',d=>d.accept());await page.locator('#leaveGame').click();await expect(page.locator('#home')).toBeVisible();
 });
 test('ferramentas são botões e podem alternar',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#toolButtons button')).toHaveCount(8);
  await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  await expect(page.locator('[data-tool="draw"]')).toHaveAttribute('aria-pressed','true');
@@ -101,7 +102,7 @@ test('ferramentas são botões e podem alternar',async({page})=>{
 });
 
 test('desenho aceita traços consecutivos e revelação ativa névoa',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  const board=page.locator('#board'),rect=await board.boundingBox();
@@ -119,7 +120,7 @@ test('desenho aceita traços consecutivos e revelação ativa névoa',async({pag
 });
 
 test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visível',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabTools').click();await page.locator('[data-tool="reveal"]').click();
  await expect(page.locator('#fogState')).toContainText('Desativada');
  await expect(page.locator('[data-tool="pan"]')).toHaveAttribute('aria-pressed','true');
@@ -135,7 +136,7 @@ test('ferramenta revelar não ativa névoa sozinha e mestre mantém mapa visíve
 });
 
 test('mestre aguarda autosave ao voltar ao início',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Guardião');await page.locator('#tabSheets').click();await page.locator('#addChar').click();
  await page.locator('#leaveGame').click();
@@ -145,7 +146,7 @@ test('mestre aguarda autosave ao voltar ao início',async({page})=>{
 });
 
 test('desfazer remove apenas último traço e limpar pede confirmação',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabTools').click();await page.locator('[data-tool="draw"]').click();
  const r=await page.locator('#board').boundingBox();
  for(let i=0;i<2;i++){await page.mouse.move(r.x+220,r.y+100+i*40);await page.mouse.down();await page.mouse.move(r.x+350,r.y+110+i*40,{steps:5});await page.mouse.up()}
@@ -184,7 +185,7 @@ test('importação rejeita cena com coordenadas fora do mapa',async({page})=>{
 });
 
 test('fog protege os pixels ocultos no payload da mesa',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const result=await page.evaluate(async()=>{
   const canvas=document.createElement('canvas');canvas.width=1200;canvas.height=800;
   const ctx=canvas.getContext('2d');ctx.fillStyle='red';ctx.fillRect(0,0,1200,800);
@@ -213,13 +214,13 @@ test('WebRTC usa apenas STUN e nunca consulta endpoint TURN',async({page})=>{
  expect(result.urls.length).toBeGreaterThan(0);
  expect(result.urls.every(url=>url.startsWith('stun:'))).toBe(true);
  expect(result.isAsync).toBe(false);
- await page.locator('#host').click();
+ await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  expect(turnRequests).toBe(0);
 });
 
 test('fechamento abrupto preserva cenas e fichas no autosave',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Cartógrafa');await page.locator('#tabSheets').click();await page.locator('#addChar').click();
  await page.locator('#tabSheets').click();await page.locator('.char textarea').fill('PV 17');await page.locator('#tabSheets').click();await page.getByRole('button',{name:'Salvar ficha'}).click();
  await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Exploradora');await openHostSection(page,'tokens');await page.locator('#addToken').click();
@@ -227,9 +228,9 @@ test('fechamento abrupto preserva cenas e fichas no autosave',async({page})=>{
  await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Guardião');await openHostSection(page,'tokens');await page.locator('#addToken').click();
  await page.evaluate(()=>saveLocal());
  await page.reload();
- await expect(page.locator('#recoveryPanel')).toBeVisible();
- await page.locator('#recoveryRestore').click();
- await page.locator('#host').click();
+ await page.locator('#entryTabHost').click();await expect(page.locator('#recoveryPanel')).toBeVisible();
+ await page.locator('#entryTabHost').click();await page.locator('#recoveryRestore').click();
+ await createHost(page);
  await expect(page.locator('#sceneSelect option')).toHaveCount(2);
  await expect(page.locator('.char textarea')).toHaveValue('PV 17');
  await openHostSection(page,'tokens');await expect(page.locator('#tokenManager .token-control')).toHaveCount(1);
@@ -247,10 +248,10 @@ test('importação de campanha antiga não herda chaves de outra campanha',async
  expect(result).toEqual({title:'Campanha legada',trustedKeys:{},scenes:1});
 });
 
-test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.getByRole('button',{name:'Preparar minha mesa'}).click();await expect(page.locator('#board')).toBeVisible()});
+test('home apresenta a mesa e gratuidade',async({page})=>{await mockPeer(page);await page.goto(url());await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();await expect(page.getByRole('button',{name:'Sentar à mesa'})).toBeVisible();await page.locator('#entryTabHost').click();await expect(page.getByRole('button',{name:'Preparar minha mesa'})).toBeVisible();await createHost(page);await expect(page.locator('#board')).toBeVisible()});
 
 test('Beta: ZIP e editor universal e grid',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Investigador');await page.locator('#tabSheets').click();await page.locator('#addChar').click();
  await page.locator('#tabSheets').click();await page.getByLabel('Novo campo da ficha').fill('Sanidade');
  await page.locator('#tabSheets').click();await page.getByLabel('Tipo de campo').selectOption('number');
@@ -262,7 +263,7 @@ test('Beta: ZIP e editor universal e grid',async({page})=>{
 });
 
 test('Beta editor: grid hexagonal, magnetismo, camadas e formato persistido',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabTools').click();await page.locator('#gridKind').selectOption('hex');
  await page.locator('#tabTools').click();await page.locator('#gridSnap').check();
  await page.locator('#tabTools').click();await page.locator('#gridOriginX').fill('12');await page.locator('#tabTools').click();await page.locator('#gridOriginX').dispatchEvent('change');
@@ -276,7 +277,7 @@ test('Beta editor: grid hexagonal, magnetismo, camadas e formato persistido',asy
  await expect(page.locator('#sketchLayer')).toBeVisible();
 });
 test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  for(const tool of ['line','rectangle','ellipse','eraser','ruler','pan']){
   await page.locator('#tabTools').click();await page.locator('[data-tool="'+tool+'"]').click();
   await expect(page.locator('[data-tool="'+tool+'"]')).toHaveAttribute('aria-pressed','true');
@@ -291,20 +292,16 @@ test('Beta editor: formas, régua, borracha e permissões',async({page})=>{
  await expect(page.locator('#sketchLayer polyline')).toHaveCount(0);
 });
 
-test('home moderna mantém fluxo de mestre, jogador e layout responsivo',async({page})=>{
+test('home mantém fluxo de mestre, jogador e layout responsivo',async({page})=>{
  await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());
  await expect(page.getByRole('heading',{name:/A aventura.*começa à mesa/})).toBeVisible();
- await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();
- await expect(page.locator('#host')).toBeVisible();
- await expect(page.getByRole('button',{name:/Preparar minha mesa/})).toBeVisible();
- await expect(page.getByRole('button',{name:/Sentar à mesa/})).toBeVisible();
- const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+2);
- expect(overflow).toBe(false);
- await page.locator('#host').click();await expect(page.locator('#board')).toBeVisible();
+ await expect(page.locator('#join')).toBeInViewport({ratio:1});await page.locator('#entryTabHost').click();await expect(page.locator('#host')).toBeInViewport({ratio:1});
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2)).toBe(false);
+ await createHost(page);await expect(page.locator('#board')).toBeVisible();
 });
 
 test('Beta camadas: persistência, autorização e sincronização',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabTools').click();await page.locator('#layerDrawings').uncheck();
  const result=await page.evaluate(()=>{
   const before=structuredClone(state.layerVisibility);
@@ -321,7 +318,7 @@ test('Beta camadas: persistência, autorização e sincronização',async({page}
 });
 
 test('Beta editor: desfazer e refazer alterações, propriedades autorizadas',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await openHostSection(page,'tokens');await page.locator('#tokenName').fill('Pioneiro');await openHostSection(page,'tokens');await page.locator('#addToken').click();
  await expect(page.locator('.piece')).toHaveCount(1);
  await openHostSection(page,'map');await page.locator('#editorUndo').click();await expect(page.locator('.piece')).toHaveCount(0);
@@ -339,7 +336,7 @@ test('Beta editor: desfazer e refazer alterações, propriedades autorizadas',as
 });
 
 test('Beta fichas: seções e campos privados respeitam permissões no host',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Observador');await page.locator('#tabSheets').click();await page.locator('#addChar').click();
  await page.locator('#tabSheets').click();await page.getByLabel('Novo campo da ficha').fill('Segredo');
  await page.locator('#tabSheets').click();await page.getByLabel('Seção do campo').fill('Notas');
@@ -355,7 +352,7 @@ test('Beta fichas: seções e campos privados respeitam permissões no host',asy
 });
 
 test('Beta ZIP v3: estrutura separada, validação CRC e compatibilidade v2',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const value=await page.evaluate(async()=>{
   ensureSceneData();const image='data:image/png;base64,'+btoa('small-image');
   state.map=image;state.scenes[0].map=image;rememberScene();
@@ -378,7 +375,7 @@ test('Beta ZIP v3: estrutura separada, validação CRC e compatibilidade v2',asy
 });
 
 test('Beta camadas: sigilo, bloqueio e persistência por cena',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const result=await page.evaluate(()=>{
   apply('token:add',{name:'Oculto'},myId,nickname);
   apply('draw',{points:[[0,0],[40,50]]},myId,nickname);
@@ -396,7 +393,7 @@ test('Beta camadas: sigilo, bloqueio e persistência por cena',async({page})=>{
 });
 
 test('Beta identidade: mestre reassocia fichas e tokens e revoga vínculo anterior',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const result=await page.evaluate(()=>{
   const oldId='11111111-1111-4111-8111-111111111111',newId='22222222-2222-4222-8222-222222222222';
   state.trustedKeys[oldId]={kty:'EC',crv:'P-256',x:'a',y:'b'};
@@ -417,7 +414,7 @@ test('Beta identidade: mestre reassocia fichas e tokens e revoga vínculo anteri
 });
 
 test('Beta seleção múltipla: alinhamento e rejeição de ação remota',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.evaluate(()=>{
   ensureSceneData();
   apply('token:add',{name:'A'},myId,nickname);apply('token:add',{name:'B'},myId,nickname);
@@ -437,14 +434,14 @@ test('Beta seleção múltipla: alinhamento e rejeição de ação remota',async
 });
 
 test('Beta: papel de mestre é visível na mesa',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#game')).toBeVisible();
  await expect(page.locator('#sessionRole')).toHaveText('MESTRE');
  await expect(page.locator('#game .version-tag')).toContainText('VERSÃO 1.1');
 });
 
 test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await expect(page.locator('#tabChat')).toHaveAttribute('aria-selected','true');
  await expect(page.locator('#message')).toBeVisible();
  await expect(page.locator('#dice')).toBeVisible();
@@ -460,7 +457,7 @@ test('mesa oferece chat e dados imediatamente sem rolagem do mestre',async({page
 });
 
 test('Beta hardening: valida IDs duplicados e impede payloads malformados',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const result=await page.evaluate(()=>{
   const base={schema:1,title:'Mesa',tokens:[],characters:[],chat:[],map:''};
   const duplicate={...base,tokens:[{id:'x',name:'A',x:1,y:1},{id:'x',name:'B',x:2,y:2}]};
@@ -478,7 +475,7 @@ test('Beta hardening: valida IDs duplicados e impede payloads malformados',async
  expect(result.accepted).toBe(25);
 });
 test('Beta hardening: falha de armazenamento sinaliza backup sem falso sucesso',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(async()=>{
   clearTimeout(saveTimer);await saveLocal();
   lastSavedRevision=-1;revision++;
@@ -492,7 +489,7 @@ test('Beta hardening: falha de armazenamento sinaliza backup sem falso sucesso',
  await expect(page.locator('#saveStatus')).toHaveAttribute('role','alert');
 });
 test('Beta hardening: aba de chat acessível em mobile e sem rolagem geral do painel',async({page})=>{
- await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.setViewportSize({width:390,height:844});await page.goto(url());await createHost(page);
  await expect(page.locator('#tabChat')).toHaveAttribute('aria-selected','true');
  await expect(page.locator('#dice')).toBeVisible();
  await page.locator('#tabTools').click();await expect(page.locator('#tabTools')).toHaveAttribute('aria-selected','true');
@@ -506,7 +503,7 @@ test('1.0 mostra identificação oficial e mantém TURN desativado',async({page}
  await mockPeer(page);await page.goto(url());
  await expect(page.locator('.version-tag').first()).toContainText('VERSÃO 1.1');
  await expect(page.getByText('Highlords VTT é e sempre será gratuito.')).toBeVisible();
- await page.locator('#host').click();
+ await createHost(page);
  await expect(page.locator('#game .version-tag')).toContainText('VERSÃO 1.1');
  expect(await page.evaluate(()=>({version:APP_VERSION,ice:peerOptions().config.iceServers.flatMap(s=>[s.urls])}))).toEqual({version:'1.1.0',ice:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']});
 });
@@ -525,7 +522,7 @@ test('1.0 rejeita estado importado com nomes de chat e proprietários excessivos
 });
 
 test('pós-1.0: chat preserva rascunho e fichas salvam por campo automaticamente',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  await page.locator('#tabSheets').click();await page.locator('#charName').fill('Cronista');await page.locator('#addChar').click();
  await page.getByLabel('Descrição de Cronista').fill('Um rascunho importante');
  await page.locator('#tabChat').click();await page.locator('#message').fill('Atualização concorrente');await page.locator('#send').click();
@@ -534,7 +531,7 @@ test('pós-1.0: chat preserva rascunho e fichas salvam por campo automaticamente
  await expect(page.locator('[data-sheet-status]').first()).toHaveText('Sincronizado');
 });
 test('pós-1.0: versões rejeitam escrita obsoleta e mesclam campos diferentes',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const r=await page.evaluate(()=>{
   apply('character:add',{name:'Heroína'},myId,'Mestre');const c=state.characters[0];
   for(const name of ['Vida','Ouro'])apply('character:field:add',{id:c.id,name,type:'number',section:'Atributos',visibility:'owner',editableByOwner:true},myId,'Mestre');
@@ -546,7 +543,7 @@ test('pós-1.0: versões rejeitam escrita obsoleta e mesclam campos diferentes',
  });expect(r).toEqual([{value:'20',version:1},{value:'30',version:1}]);
 });
 test('pós-1.0: blocos estruturados, modelos e ZIP preservam dados e permissões',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const r=await page.evaluate(async()=>{
   apply('character:add',{name:'Modelo universal'},myId,'Mestre');const c=state.characters[0];
   for(const [name,type] of [['Vida','resource'],['Mochila','inventory'],['Objetivos','list']])apply('character:field:add',{id:c.id,name,type,section:'Aventura',visibility:'owner',editableByOwner:true},myId,'Mestre');
@@ -558,14 +555,14 @@ test('pós-1.0: blocos estruturados, modelos e ZIP preservam dados e permissões
  });expect(r.valid).toBe(true);expect(r.unauthorized).toBe(1);expect(r.count).toBe(2);expect(r.newId).toBe(true);expect(r.owner).toBe('');expect(JSON.parse(r.value)[0].quantity).toBe(2);
 });
 test('pós-1.0: controles da mesa são acessíveis e painel pode recolher',async({page})=>{
- await mockPeer(page);await page.goto(url());await expect(page.locator('#host')).toBeInViewport();await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await page.locator('#entryTabHost').click();await expect(page.locator('#host')).toBeInViewport();await createHost(page);
  await expect(page.locator('#boardToolbar')).toBeVisible();await expect(page.locator('#sceneBar')).toBeVisible();
  await page.locator('#collapseSidebar').click();await expect(page.locator('#tableSidebar')).toBeHidden();await page.locator('#collapseSidebar').click();
  await page.locator('#tabParticipants').click();await expect(page.locator('#participantsPanel')).toBeVisible();
  await page.locator('#tabSheets').click();await expect(page.locator('#participantsPanel')).toBeHidden();
 });
 test('pós-1.0: retrato, configuração e revogação de acesso não vazam fichas',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();
+ await mockPeer(page);await page.goto(url());await createHost(page);
  const result=await page.evaluate(()=>{
   apply('character:add',{name:'Personagem reservado'},myId,'Mestre');const c=state.characters[0];
   apply('character:assign',{id:c.id,playerId:'dono'},myId,'Mestre');
@@ -578,7 +575,7 @@ test('pós-1.0: retrato, configuração e revogação de acesso não vazam ficha
  });expect(result).toEqual({unsafe:'',ownerBefore:1,other:0,denied:'Retrato',ownerAfter:0,valid:true});
 });
 test('pós-1.0: inventário antigo iniciado por colchete continua legível e portátil',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(()=>{state.characters=[{id:'legacy',name:'Legado',text:'',owner:'',fields:[{id:'old',name:'Bagagem',type:'inventory',value:'[Mochila]\nCorda e tochas'}]}];changed()});
  await page.locator('#tabSheets').click();await expect(page.getByLabel('Bagagem',{exact:true})).toHaveValue('[Mochila]\nCorda e tochas');
  const imported=await page.evaluate(async()=>unzipCampaign(new File([zipCampaign(state)],'legado.highlords')));expect(imported.characters[0].fields[0].value).toBe('[Mochila]\nCorda e tochas');
@@ -587,7 +584,7 @@ test('pós-1.0: inventário antigo iniciado por colchete continua legível e por
 });
 
 test('1.1 dimensões por cena preservam desenhos, fog, undo e backup',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  const result=await page.evaluate(async()=>{
   dispatch('token:add',{name:'Sentinela'});dispatch('draw',{points:[[100,100],[1100,700]]});dispatch('fog:toggle',{enabled:true});dispatch('fog:reveal',{x:100,y:100,width:500,height:400});
   const scene=state.activeSceneId;dispatch('scene:dimensions',{width:2400,height:1600});
@@ -602,7 +599,7 @@ test('1.1 dimensões por cena preservam desenhos, fog, undo e backup',async({pag
  await expect(page.locator('#canvas')).toHaveCSS('width','2400px');
 });
 test('1.1 token arrasta com prévia, Esc cancela e zoom mantém âncora',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(()=>dispatch('token:add',{name:'Herói'}));const token=page.locator('.piece');const box=await token.boundingBox();
  await page.mouse.move(box.x+20,box.y+20);await page.mouse.down();await page.mouse.move(box.x+130,box.y+70,{steps:5});
  const preview=await page.evaluate(()=>({saved:state.tokens[0].x,x:parseFloat($('pieces').firstChild.style.left),expected:200+110/zoom}));expect(preview.saved).toBe(200);expect(preview.x).toBeCloseTo(preview.expected,1);
@@ -612,7 +609,7 @@ test('1.1 token arrasta com prévia, Esc cancela e zoom mantém âncora',async({
  await page.keyboard.press('l');await expect(page.locator('#board')).toHaveAttribute('data-active-tool','line');
 });
 test('1.1 biblioteca conserva campanhas e cinco checkpoints independentes',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  const result=await page.evaluate(async()=>{
   state.title='Primeira';const first=state.campaignId;for(let i=0;i<7;i++){state.updated=100+i;revision++;await saveLocal();await new Promise(r=>setTimeout(r,2))}
   replaceCampaignState({title:'Segunda'});ensureSceneData();state.updated=200;revision++;await saveLocal();
@@ -621,21 +618,21 @@ test('1.1 biblioteca conserva campanhas e cinco checkpoints independentes',async
  });expect(result.first&&result.second).toBe(true);expect(result.checkpoints).toBe(5);expect(result.titles.some(t=>t.includes('Primeira'))).toBe(true);expect(result.titles.some(t=>t.includes('Segunda'))).toBe(true);
 });
 test('1.1 rascunho sobrevive recarga e conflito exige resolução',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(async()=>{dispatch('character:add',{name:'Recuperável'});await saveLocal();const c=state.characters[0];editSheetDraft(c.id,null,'Anotação ainda não enviada');clearTimeout(sheetDrafts.get(sheetKey(c.id)).timer);persistSheetDrafts()});
- await page.reload();await page.locator('#recoveryRestore').click();await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await page.reload();await page.locator('#entryTabHost').click();await page.locator('#recoveryRestore').click();await createHost(page);await expect(page.locator('#game')).toBeVisible();
  expect(await page.evaluate(()=>[...sheetDrafts.values()][0]?.value)).toBe('Anotação ainda não enviada');
  const result=await page.evaluate(()=>{const c=state.characters[0],d=sheetDrafts.get(sheetKey(c.id));clearTimeout(d.timer);c.text='Alteração recebida';c.textVersion=1;resumeSheetDrafts();return {conflict:d.conflict,text:c.text,draft:d.value}});
  expect(result).toEqual({conflict:true,text:'Alteração recebida',draft:'Anotação ainda não enviada'});
 });
 test('1.1 vínculo abre ficha e recurso privado não aparece para convidado',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  await page.evaluate(()=>{dispatch('character:add',{name:'Aventureira'});const c=state.characters[0];c.fields=[{id:'vida',name:'Vida',type:'resource',value:'[8,10]',visibility:'master'}];dispatch('token:add',{name:'Aventureira'});dispatch('token:bind',{id:state.tokens[0].id,characterId:c.id,resourceFieldId:'vida'})});
  await expect(page.locator('.token-resource')).toHaveAttribute('aria-valuenow','8');await page.locator('.piece').dblclick();await expect(page.locator('#sheetsPanel')).toBeVisible();
  expect(await page.evaluate(()=>{const c=state.characters[0];c.owner='guest';const view=playerView('guest');hostMode=false;myId='guest';replaceCampaignState(view);render();return {fields:state.characters[0].fields.length,bars:document.querySelectorAll('.token-resource').length}})).toEqual({fields:0,bars:0});
 });
 test('1.1 máscara de névoa usa dimensões da cena e esconde pixels',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  const result=await page.evaluate(async()=>{
   dispatch('scene:dimensions',{width:2000,height:1000});
   const source=document.createElement('canvas');source.width=2000;source.height=1000;const c=source.getContext('2d');c.fillStyle='red';c.fillRect(0,0,2000,1000);
@@ -652,13 +649,13 @@ test('entrada de jogador fica na primeira tela e aceita link de convite',async({
   await expect(page.locator('#guestName')).toBeInViewport({ratio:1});await expect(page.locator('#roomCode')).toBeInViewport({ratio:1});await expect(page.locator('#join')).toBeInViewport({ratio:1});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
  }
- await page.evaluate(async()=>{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readwrite');tx.objectStore('saves').put(structuredClone(state),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})});await page.reload();await expect(page.locator('#recoveryPanel')).toBeVisible();await expect(page.locator('#join')).toBeInViewport({ratio:1});
+ await page.evaluate(async()=>{const db=await openDb();await new Promise((resolve,reject)=>{const tx=db.transaction('saves','readwrite');tx.objectStore('saves').put(structuredClone(state),'latest');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})});await page.reload();await page.locator('#entryTabHost').click();await expect(page.locator('#recoveryPanel')).toBeVisible();await page.locator('#entryTabJoin').click();await expect(page.locator('#join')).toBeInViewport({ratio:1});
  await page.locator('#roomCode').fill('https://highlords-vtt.vercel.app/?room=hl-12345678-1234-1234-1234-123456789abc');
  await page.locator('#guestName').fill('Explorador');await page.locator('#guestName').press('Enter');await expect(page.locator('#game')).toBeVisible();
  await expect(page.locator('#leaveGame')).toBeInViewport({ratio:1});await expect(page.locator('#export')).toBeHidden();
 });
 test('Adicionar mapa abre seletor e carrega imagem sem iniciar gesto no quadro',async({page})=>{
- await mockPeer(page);await page.goto(url());await page.locator('#host').click();await expect(page.locator('#boardEmpty')).toBeVisible();
+ await mockPeer(page);await page.goto(url());await createHost(page);await expect(page.locator('#boardEmpty')).toBeVisible();
  const chooser=page.waitForEvent('filechooser');await page.getByRole('button',{name:'Adicionar mapa',exact:true}).click();
  await (await chooser).setFiles({name:'mapa.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=','base64')});
  await expect(page.locator('#map')).toHaveAttribute('src',/^data:image\/png;base64,/);await expect.poll(()=>page.locator('#map').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);await expect(page.locator('#boardEmpty')).toBeHidden();
@@ -666,7 +663,7 @@ test('Adicionar mapa abre seletor e carrega imagem sem iniciar gesto no quadro',
  await expect(page.locator('#export')).toBeVisible();await expect(page.locator('#leaveGame')).toBeVisible();await expect(page.locator('#campaignMenu')).toHaveCount(0);
 });
 test('cena inicia enquadrada e acompanha viewport, painel e dimensões',async({page})=>{
- await mockPeer(page);await page.setViewportSize({width:1280,height:720});await page.goto(url());await page.locator('#host').click();await expect(page.locator('#game')).toBeVisible();
+ await mockPeer(page);await page.setViewportSize({width:1280,height:720});await page.goto(url());await createHost(page);await expect(page.locator('#game')).toBeVisible();
  const fits=()=>page.evaluate(()=>{const b=board.getBoundingClientRect(),c=$('canvas').getBoundingClientRect();return c.left>=b.left-1&&c.right<=b.right+1&&c.top>=b.top-1&&c.bottom<=b.bottom+1});
  await expect.poll(fits).toBe(true);
  for(const id of ['invite','export','leaveGame'])await expect(page.locator('#'+id)).toBeInViewport({ratio:1});
@@ -679,7 +676,38 @@ test('identidade usa preto e vermelho e o controle do painel indica sua ação',
  await mockPeer(page);await page.goto(url());
  const colors=await page.evaluate(()=>({host:getComputedStyle($('host')).backgroundColor,join:getComputedStyle($('join')).backgroundColor,background:getComputedStyle(document.body).backgroundColor}));
  expect(colors.host).toBe(colors.join);const [red,green,blue]=colors.host.match(/\d+/g).map(Number);expect(red).toBeGreaterThan(green*2);expect(blue).toBeLessThan(red*.4);const bg=colors.background.match(/\d+/g).map(Number);expect(Math.max(...bg)-Math.min(...bg)).toBeLessThanOrEqual(1);
- await expect(page.getByRole('heading',{name:'Primeira vez por aqui?'})).toBeVisible();await expect(page.locator('.home-guide li')).toHaveCount(3);
- await page.locator('#host').click();const toggle=page.locator('#collapseSidebar');await expect(toggle).toHaveAttribute('aria-controls','tableSidebar');await expect(toggle).toHaveAccessibleName('Ocultar painel');await expect(toggle.locator('svg rect')).toHaveCount(1);const path=await toggle.locator('svg path').getAttribute('d');
+ await expect(page.locator('.home-guide summary')).toBeVisible();await expect(page.locator('.home-guide li')).toHaveCount(3);
+ await createHost(page);const toggle=page.locator('#collapseSidebar');await expect(toggle).toHaveAttribute('aria-controls','tableSidebar');await expect(toggle).toHaveAccessibleName('Ocultar painel');await expect(toggle.locator('svg rect')).toHaveCount(1);const path=await toggle.locator('svg path').getAttribute('d');
  await toggle.click();await expect(toggle).toHaveAccessibleName('Abrir painel');await expect(page.locator('#tableSidebar')).toBeHidden();expect(await toggle.locator('svg path').getAttribute('d')).not.toBe(path);await toggle.click();await expect(page.locator('#tableSidebar')).toBeVisible();
+});
+
+
+test('terminal alterna papéis por teclado sem perder os campos',async({page})=>{
+ await mockPeer(page);await page.goto(url());await page.locator('#guestName').fill('Lyra');
+ await page.locator('#entryTabJoin').focus();await page.keyboard.press('ArrowRight');
+ await expect(page.locator('#entryTabHost')).toBeFocused();await expect(page.locator('#entryTabHost')).toHaveAttribute('aria-selected','true');
+ await page.locator('#campaignName').fill('Valdren');await page.locator('#entryTabHost').focus();await page.keyboard.press('Home');
+ await expect(page.locator('#entryTabJoin')).toBeFocused();await expect(page.locator('#guestName')).toHaveValue('Lyra');
+ await page.keyboard.press('End');await expect(page.locator('#campaignName')).toHaveValue('Valdren');
+});
+
+test('efeito CRT sincroniza entre home e mesa e conserva preferência',async({page})=>{
+ await mockPeer(page);await page.goto(url());await expect(page.locator('#scanlinesHome')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#scanlinesHome').click();await expect(page.locator('body')).not.toHaveClass(/scanlines/);
+ await createHost(page);await expect(page.locator('#scanlinesGame')).toHaveAttribute('aria-pressed','false');
+ await page.locator('#scanlinesGame').click();await expect(page.locator('#scanlinesHome')).toHaveAttribute('aria-pressed','true');
+ await page.locator('#scanlinesGame').click();await page.reload();await expect(page.locator('#scanlinesHome')).toHaveAttribute('aria-pressed','false');
+});
+
+test('terminal cabe no desktop e permite rolagem natural em telas curtas',async({page})=>{
+ await mockPeer(page);await page.setViewportSize({width:1280,height:720});await page.goto(url());await page.evaluate(()=>document.fonts.ready);
+ expect(await page.evaluate(()=>document.documentElement.scrollHeight)).toBeLessThanOrEqual(720);
+ await expect(page.locator('#join')).toBeInViewport();
+ for(const size of [{width:320,height:640},{width:640,height:360}]){
+  await page.setViewportSize(size);await page.locator('.home-guide summary').click();
+  await page.locator('.terminal-footer').scrollIntoViewIfNeeded();await expect(page.locator('.terminal-footer')).toBeInViewport();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(size.width);
+  await page.locator('#entryTabHost').click();await page.locator('#host').scrollIntoViewIfNeeded();await expect(page.locator('#host')).toBeInViewport();
+  await page.locator('#entryTabJoin').click();await page.locator('.home-guide summary').click();
+ }
 });

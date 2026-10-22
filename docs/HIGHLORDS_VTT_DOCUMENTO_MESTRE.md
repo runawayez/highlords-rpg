@@ -332,3 +332,8 @@ Após o feedback da interface, a home foi reduzida aos formulários de jogador/m
 ### Identidade Highlordiana
 
 Por orientação explícita, a paleta da interface deve permanecer em preto neutro e vermelho (#d6222a), com branco/cinza para legibilidade. Não usar tons terrosos, laranja ou marfim como identidade. As ações principais de mestre e jogador têm o mesmo destaque vermelho. A home inclui uma apresentação breve e instruções iniciais sem deslocar a entrada do jogador para fora da primeira tela. O controle da lateral mostra painel e seta direcional, com estado e nome acessíveis.
+
+
+## Refinamento visual 1.1 — terminal Highlords
+
+Por decisão do projeto, a home e a mesa adotam a mesma linguagem de terminal preto/vermelho, com Orbitron e JetBrains Mono hospedadas localmente. As scanlines CRT permanecem ativas por padrão, com controle em ambas as áreas e preferência persistida no navegador. A home usa abas Jogador/Mestre, botões principais equivalentes e instruções iniciais recolhíveis. Campos, criação, importação e recuperação continuam conectados aos fluxos reais; nenhum comportamento simulado da referência substitui o motor. O layout permite rolagem natural em telas curtas e trata a mesa em retrato e paisagem. Veja [DIRECAO_VISUAL.md](DIRECAO_VISUAL.md).
